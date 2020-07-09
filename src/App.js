@@ -1,10 +1,10 @@
-import React from 'react';
-import './App.scss'
-import 'semantic-ui-css/semantic.min.css'
-import NavMenu from './components/modules/NavMenu';
-import { BrowserRouter as Router, Switch } from 'react-router-dom'
-import BucketViewer from './components/modules/BucketViewer';
-
+import React from "react";
+import "./App.scss";
+import "semantic-ui-css/semantic.min.css";
+import NavMenu from "./components/modules/NavMenu";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import BucketViewer from "./components/modules/BucketViewer";
+import ConnectToS3Bucket from "./components/pages/ConnectToS3Bucket";
 
 function App() {
   return (
@@ -12,7 +12,8 @@ function App() {
       <Router>
         <NavMenu />
         <Switch>
-          <BucketViewer/>
+          <Route exact path="/" component={ConnectToS3Bucket} />
+          <Route exact path="/bucket-viewer" component={BucketViewer} />
         </Switch>
       </Router>
     </div>
