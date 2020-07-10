@@ -1,0 +1,16 @@
+.form-container {
+  display: flex;
+  padding: 3em;
+}
+
+.s3-form {
+  width: 50%;
+  margin: auto;
+}
+
+@media (max-width: 479px) {
+  .s3-form {
+    width: 100%;
+    margin: auto;
+  }
+}

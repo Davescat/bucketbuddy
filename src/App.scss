@@ -1,6 +1,6 @@
-#root{
+#root {
   height: 100%;
-  > div{
+  > div {
     height: 100%;
   }
 }
@@ -13,12 +13,11 @@
     div {
       margin: 10px;
     }
-    
+
     border-right: 1px solid rgba(204, 204, 204, 0.541);
   }
-  span:last-child{
-    border-right: none
-
+  span:last-child {
+    border-right: none;
   }
   border-bottom: 1px solid rgba(204, 204, 204, 0.425);
 }
@@ -26,14 +25,13 @@
   margin-bottom: 0 !important;
 }
 
-.bucket-path{
+.bucket-path {
   display: flex;
   background-color: #f7f7f7a9;
   padding: 10px;
   border-bottom: 1px solid rgba(204, 204, 204, 0.541);
 }
 
-.file-container{
+.file-container {
   padding: 10px;
-  
 }
