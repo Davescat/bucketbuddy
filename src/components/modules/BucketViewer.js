@@ -3,7 +3,7 @@ import BucketPath from "./BucketPath";
 import FileContainer from "./FileContainer";
 import BucketSettings from "./BucketSettings";
 
-export class BucketViewer extends Component {
+class BucketViewer extends Component {
   constructor() {
     super();
     this.state = {
@@ -31,6 +31,7 @@ export class BucketViewer extends Component {
 
   render() {
     console.log(this.state);
+    console.log("PROPS " + this.props);
     return (
       <div className="bucket-viewer">
         <BucketPath pathInfo={this.state.pathInfo} />

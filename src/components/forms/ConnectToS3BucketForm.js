@@ -1,11 +1,17 @@
 import React, { Component } from "react";
-import { Form, Input, Button, Select, FormGroup } from "semantic-ui-react";
+import { Form, Button } from "semantic-ui-react";
 import "../../ConnectToS3Bucket.scss";
+import { withRouter } from "react-router-dom";
 
 class ConnectToS3BucketForm extends Component {
   constructor() {
     super();
     this.state = {
+      bucketName: "",
+      accessKeyId: "",
+      secretAccessKey: "",
+      selectedRegion: "",
+
       regions: [
         { key: "us-east-2", text: "US East (Ohio)", value: "us-east-2" },
         { key: "us-east-1", text: "US East (N. Virginia)", value: "us-east-1" },
@@ -74,38 +80,104 @@ class ConnectToS3BucketForm extends Component {
         },
       ],
     };
+
+    this.connectToS3Bucket = this.connectToS3Bucket.bind(this);
+    this.handleS3BucketSubmit = this.handleS3BucketSubmit.bind(this);
+    this.handleFieldChange = this.handleFieldChange.bind(this);
   }
 
-  connectToS3Bucket(bucketName, accessKeyId, secretAccessKey, region) {}
+  connectToS3Bucket(bucketName, accessKeyId, secretAccessKey, region) {
+    const AWS = require("aws-sdk");
+    const { history } = this.props;
+
+    try {
+      AWS.config.setPromisesDependency();
+      AWS.config.update({
+        accessKeyId: accessKeyId,
+        secretAccessKey: secretAccessKey,
+        region: region,
+      });
+
+      const s3 = new AWS.S3();
+      //TODO Figure out how to intialized so it throws exception if incorrect and if good pass to next page
+      s3.listObjectsV2({
+        Bucket: bucketName,
+        Prefix: "",
+      })
+        .promise()
+        .then((response) => {
+          return response;
+        });
+      // history.push({
+      //   pathname: "/bucket-viewer",
+      //   state: { s3Instance: s3, bucketName: bucketName },
+      // });
+    } catch (e) {
+      //Error connection
+      console.log("Error connecting", e);
+    }
+  }
+
+  handleS3BucketSubmit(event) {
+    console.log("Submit");
+    event.preventDefault();
+    this.connectToS3Bucket(
+      this.state.bucketName,
+      this.state.accessKeyId,
+      this.state.secretAccessKey,
+      this.state.selectedRegion
+    );
+  }
+
+  handleFieldChange = (e, { name, value }) => this.setState({ [name]: value });
 
   render() {
+    const {
+      bucketName,
+      accessKeyId,
+      secretAccessKey,
+      selectedRegion,
+    } = this.state;
+    console.log(this.state);
     return (
-      <Form className="s3-form">
-        <Form.Field
+      <Form className="s3-form" onSubmit={this.handleS3BucketSubmit}>
+        <Form.Input
           id="form-input-s3-bucket-name"
-          control={Input}
+          name="bucketName"
           label="S3 Bucket Name"
           placeholder="my-really-cool-s3-bucket-name"
+          value={bucketName}
+          onChange={this.handleFieldChange}
         />
-        <Form.Field
+        <Form.Input
           id="form-control-access-key-id"
-          control={Input}
+          name="accessKeyId"
           label="Access Key ID"
           placeholder="12345ABCDEFG"
+          value={accessKeyId}
+          onChange={this.handleFieldChange}
         />
-        <Form.Field
-          id="form-control-access-key-id"
-          control={Input}
+        <Form.Input
+          id="form-control-secret-access-key-id"
+          name="secretAccessKey"
           label="Secret Access Key"
           placeholder="12345ABCDEFG/B123232"
+          value={secretAccessKey}
+          onChange={this.handleFieldChange}
         />
-        <Form.Field
-          control={Select}
+        <Form.Select
+          name="selectedRegion"
           options={this.state.regions}
-          label={{ children: "Region", htmlFor: "form-select-control-region" }}
+          label={{
+            children: "Region",
+            htmlFor: "form-select-control-region",
+          }}
           placeholder="Region"
           search
-          searchInput={{ id: "form-select-control-region" }}
+          searchInput={{
+            id: "form-select-control-region",
+          }}
+          onChange={this.handleFieldChange}
         />
         <Button type="submit" primary>
           Connect
@@ -115,4 +187,4 @@ class ConnectToS3BucketForm extends Component {
   }
 }
 
-export default ConnectToS3BucketForm;
+export default withRouter(ConnectToS3BucketForm);
