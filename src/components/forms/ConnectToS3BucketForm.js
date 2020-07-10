@@ -76,6 +76,8 @@ class ConnectToS3BucketForm extends Component {
     };
   }
 
+  connectToS3Bucket(bucketName, accessKeyId, secretAccessKey, region) {}
+
   render() {
     return (
       <Form className="s3-form">
@@ -105,14 +107,9 @@ class ConnectToS3BucketForm extends Component {
           search
           searchInput={{ id: "form-select-control-region" }}
         />
-        <FormGroup>
-          <Button type="submit" primary>
-            Connect
-          </Button>
-          <Button type="submit" secondary>
-            Test Connection
-          </Button>
-        </FormGroup>
+        <Button type="submit" primary>
+          Connect
+        </Button>
       </Form>
     );
   }
