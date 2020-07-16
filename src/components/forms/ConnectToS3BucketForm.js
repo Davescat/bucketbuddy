@@ -90,32 +90,28 @@ class ConnectToS3BucketForm extends Component {
     const AWS = require("aws-sdk");
     const { history } = this.props;
 
-    try {
-      AWS.config.setPromisesDependency();
-      AWS.config.update({
-        accessKeyId: accessKeyId,
-        secretAccessKey: secretAccessKey,
-        region: region,
-      });
+    AWS.config.setPromisesDependency();
+    AWS.config.update({
+      accessKeyId: accessKeyId,
+      secretAccessKey: secretAccessKey,
+      region: region,
+    });
+    const s3 = new AWS.S3();
 
-      const s3 = new AWS.S3();
-      //TODO Figure out how to intialized so it throws exception if incorrect and if good pass to next page
-      s3.listObjectsV2({
-        Bucket: bucketName,
-        Prefix: "",
-      })
-        .promise()
-        .then((response) => {
-          return response;
+    const params = {
+      Bucket: bucketName,
+    };
+    s3.headBucket(params, function (err, data) {
+      // TODO how to display in form correctly
+      if (err) console.log(err, err.stack);
+      else {
+        console.log(data);
+        history.push({
+          pathname: "/bucket-viewer",
+          state: { s3Instance: s3, bucketName: bucketName },
         });
-      // history.push({
-      //   pathname: "/bucket-viewer",
-      //   state: { s3Instance: s3, bucketName: bucketName },
-      // });
-    } catch (e) {
-      //Error connection
-      console.log("Error connecting", e);
-    }
+      }
+    });
   }
 
   handleS3BucketSubmit(event) {
@@ -132,12 +128,7 @@ class ConnectToS3BucketForm extends Component {
   handleFieldChange = (e, { name, value }) => this.setState({ [name]: value });
 
   render() {
-    const {
-      bucketName,
-      accessKeyId,
-      secretAccessKey,
-      selectedRegion,
-    } = this.state;
+    const { bucketName, accessKeyId, secretAccessKey } = this.state;
     console.log(this.state);
     return (
       <Form className="s3-form" onSubmit={this.handleS3BucketSubmit}>
