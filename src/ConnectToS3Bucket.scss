@@ -1,11 +1,22 @@
 .form-container {
-  display: flex;
   padding: 3em;
 }
 
 .s3-form {
   width: 50%;
   margin: auto;
+}
+
+.s3-message {
+  width: fit-content;
+  height: fit-content;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center;
+}
+
+.error-message {
+  color: red;
 }
 
 @media (max-width: 479px) {

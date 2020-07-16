@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Form, Button } from "semantic-ui-react";
+import { Form, Button, Message } from "semantic-ui-react";
 import "../../ConnectToS3Bucket.scss";
 import { withRouter } from "react-router-dom";
 
@@ -11,6 +11,10 @@ class ConnectToS3BucketForm extends Component {
       accessKeyId: "",
       secretAccessKey: "",
       selectedRegion: "",
+      formError: false,
+      errorMessage:
+        //TODO make message more specific
+        "Hmm.. We were unable to connect to the S3 bucket with the credentials you provided please try again.",
 
       regions: [
         { key: "us-east-2", text: "US East (Ohio)", value: "us-east-2" },
@@ -103,8 +107,9 @@ class ConnectToS3BucketForm extends Component {
     };
     s3.headBucket(params, function (err, data) {
       // TODO how to display in form correctly
-      if (err) console.log(err, err.stack);
-      else {
+      if (err) {
+        console.log(err, err.stack);
+      } else {
         console.log(data);
         history.push({
           pathname: "/bucket-viewer",
@@ -112,10 +117,12 @@ class ConnectToS3BucketForm extends Component {
         });
       }
     });
+
+    //Error must have occured if not redirected
+    this.setState({ formError: true });
   }
 
   handleS3BucketSubmit(event) {
-    console.log("Submit");
     event.preventDefault();
     this.connectToS3Bucket(
       this.state.bucketName,
@@ -128,52 +135,74 @@ class ConnectToS3BucketForm extends Component {
   handleFieldChange = (e, { name, value }) => this.setState({ [name]: value });
 
   render() {
-    const { bucketName, accessKeyId, secretAccessKey } = this.state;
-    console.log(this.state);
+    const {
+      bucketName,
+      accessKeyId,
+      secretAccessKey,
+      formError,
+      errorMessage,
+    } = this.state;
+
     return (
-      <Form className="s3-form" onSubmit={this.handleS3BucketSubmit}>
-        <Form.Input
-          id="form-input-s3-bucket-name"
-          name="bucketName"
-          label="S3 Bucket Name"
-          placeholder="my-really-cool-s3-bucket-name"
-          value={bucketName}
-          onChange={this.handleFieldChange}
-        />
-        <Form.Input
-          id="form-control-access-key-id"
-          name="accessKeyId"
-          label="Access Key ID"
-          placeholder="12345ABCDEFG"
-          value={accessKeyId}
-          onChange={this.handleFieldChange}
-        />
-        <Form.Input
-          id="form-control-secret-access-key-id"
-          name="secretAccessKey"
-          label="Secret Access Key"
-          placeholder="12345ABCDEFG/B123232"
-          value={secretAccessKey}
-          onChange={this.handleFieldChange}
-        />
-        <Form.Select
-          name="selectedRegion"
-          options={this.state.regions}
-          label={{
-            children: "Region",
-            htmlFor: "form-select-control-region",
-          }}
-          placeholder="Region"
-          search
-          searchInput={{
-            id: "form-select-control-region",
-          }}
-          onChange={this.handleFieldChange}
-        />
-        <Button type="submit" primary>
-          Connect
-        </Button>
-      </Form>
+      <>
+        <Message className="s3-message">
+          <Message.Header>Connect to S3 Bucket</Message.Header>
+          {formError ? (
+            <p className="error-message">{errorMessage}</p>
+          ) : (
+            <p>Enter your S3 connection credentials below</p>
+          )}
+        </Message>
+        <Form
+          className="s3-form"
+          onSubmit={this.handleS3BucketSubmit}
+          error={this.state.formError}
+        >
+          <Form.Input
+            id="form-input-s3-bucket-name"
+            name="bucketName"
+            label="S3 Bucket Name"
+            placeholder="my-really-cool-s3-bucket-name"
+            value={bucketName}
+            onChange={this.handleFieldChange}
+          />
+          <Form.Input
+            id="form-control-access-key-id"
+            name="accessKeyId"
+            label="Access Key ID"
+            placeholder="12345ABCDEFG"
+            value={accessKeyId}
+            type="password"
+            onChange={this.handleFieldChange}
+          />
+          <Form.Input
+            id="form-control-secret-access-key-id"
+            name="secretAccessKey"
+            label="Secret Access Key"
+            placeholder="12345ABCDEFG/B123232"
+            value={secretAccessKey}
+            type="password"
+            onChange={this.handleFieldChange}
+          />
+          <Form.Select
+            name="selectedRegion"
+            options={this.state.regions}
+            label={{
+              children: "Region",
+              htmlFor: "form-select-control-region",
+            }}
+            placeholder="Region"
+            search
+            searchInput={{
+              id: "form-select-control-region",
+            }}
+            onChange={this.handleFieldChange}
+          />
+          <Button type="submit" primary>
+            Connect
+          </Button>
+        </Form>
+      </>
     );
   }
 }
