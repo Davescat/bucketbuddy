@@ -13,10 +13,10 @@ class NavMenu extends Component {
             className="folder open icon"
           ></i>
         </Menu.Item>
-        <Menu.Item name="Home" as={Link} to="/home">
+        <Menu.Item name="Create Connection" as={Link} to="/">
           Home
         </Menu.Item>
-        <Menu.Item name="Buckets" as={Link} to="/buckets">
+        <Menu.Item name="Bucket" as={Link} to="/bucket-viewer">
           Buckets
         </Menu.Item>
       </Menu>
