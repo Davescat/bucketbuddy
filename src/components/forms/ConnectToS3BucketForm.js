@@ -93,6 +93,7 @@ class ConnectToS3BucketForm extends Component {
   connectToS3Bucket(bucketName, accessKeyId, secretAccessKey, region) {
     const AWS = require("aws-sdk");
     const { history } = this.props;
+    const { setState } = this;
 
     AWS.config.setPromisesDependency();
     AWS.config.update({
@@ -100,26 +101,28 @@ class ConnectToS3BucketForm extends Component {
       secretAccessKey: secretAccessKey,
       region: region,
     });
-    const s3 = new AWS.S3();
+    const s3Instance = new AWS.S3();
 
     const params = {
       Bucket: bucketName,
     };
-    s3.headBucket(params, function (err, data) {
-      // TODO how to display in form correctly
-      if (err) {
-        console.log(err, err.stack);
+    //TODO instead of passing the variable pass the instance but currently throws error
+    const state = {
+      accessKeyId: accessKeyId,
+      secretAccessKey: secretAccessKey,
+      region: region,
+      bucketName: bucketName,
+    };
+    s3Instance.headBucket(params, function (error, data) {
+      if (error) {
+        setState({ formError: true });
       } else {
-        console.log(data);
         history.push({
           pathname: "/bucket-viewer",
-          state: { s3Instance: s3, bucketName: bucketName },
+          state,
         });
       }
     });
-
-    //Error must have occured if not redirected
-    this.setState({ formError: true });
   }
 
   handleS3BucketSubmit(event) {

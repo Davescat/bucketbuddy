@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import BucketPath from "./BucketPath";
 import FileContainer from "./FileContainer";
 import BucketSettings from "./BucketSettings";
+import { useLocation } from "react-router-dom";
 
 class BucketViewer extends Component {
   constructor() {
@@ -30,8 +31,6 @@ class BucketViewer extends Component {
   }
 
   render() {
-    console.log(this.state);
-    console.log("PROPS " + this.props);
     return (
       <div className="bucket-viewer">
         <BucketPath pathInfo={this.state.pathInfo} />
