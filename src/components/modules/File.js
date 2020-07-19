@@ -9,24 +9,26 @@ export class File extends Component {
       imageLoaded: false,
       src: ''
     };
-    this.getData = this.getData.bind(this);
-    this.encode = this.encode.bind(this);
-    this.handleFileClick = this.handleFileClick.bind(this);
   }
 
-  getData() {
+  getData = () => {
+    const {
+      file: { Key },
+      bucket: { accessKeyId, secretAccessKey, region, name }
+    } = this.props;
+
     return (async function (key) {
       try {
         AWS.config.setPromisesDependency();
         AWS.config.update({
-          accessKeyId: process.env.REACT_APP_AWS_ACCESSKEYID,
-          secretAccessKey: process.env.REACT_APP_AWS_SECRETACCESSKEY,
-          region: process.env.REACT_APP_AWS_REGION
+          accessKeyId,
+          secretAccessKey,
+          region
         });
         const s3 = new AWS.S3();
         const res = await s3
           .getObject({
-            Bucket: process.env.REACT_APP_AWS_BUCKET,
+            Bucket: name,
             Key: key
           })
           .promise()
@@ -38,22 +40,22 @@ export class File extends Component {
       } catch (e) {
         console.log('My error', e);
       }
-    })(this.props.file.Key);
-  }
+    })(Key);
+  };
 
   /**
    * Turns the UInt8Aray into a base64 encoded string as the source for the displayable image
    * @param {S3.GetObjectOutput} data
    */
-  encode(data) {
+  encode = (data) => {
     var str = data.Body.reduce(function (a, b) {
       return a + String.fromCharCode(b);
     }, '');
     return btoa(str).replace(/.{76}(?=.)/g, '$&\n');
-  }
+  };
 
   componentDidMount() {
-    if (this.props.file.type === 'file') {
+    if (this.props?.file?.type === 'file') {
       this.getData().then((data) => {
         this.setState({
           imageLoaded: true,
@@ -105,7 +107,7 @@ export class File extends Component {
     }
   }
 
-  handleFileClick() {
+  handleFileClick = () => {
     if (this.props.file.type === 'folder') {
       let newDepth = this.props.file.Key.split('/').length - 1;
       let newPathInfo = {
@@ -114,7 +116,7 @@ export class File extends Component {
       };
       this.props.customClickEvent(newPathInfo);
     }
-  }
+  };
 
   render() {
     return (

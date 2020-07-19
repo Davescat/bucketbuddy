@@ -1,32 +1,34 @@
+import AWS from 'aws-sdk';
 import React, { Component } from 'react';
 import { Card } from 'semantic-ui-react';
 import File from './File';
 
 export class FileContainer extends Component {
-  constructor() {
-    super();
-    this.state = {
-      folders: [],
-      files: []
-    };
-    this.listObjects = this.listObjects.bind(this);
-  }
-  listObjects() {
-    var AWS = require('aws-sdk');
+  state = {
+    folders: [],
+    files: []
+  };
+
+  listObjects = () => {
+    const {
+      pathInfo: { path },
+      bucket: { accessKeyId, secretAccessKey, region, name }
+    } = this.props;
+
     return (async function (path) {
       try {
         console.log(path);
 
         AWS.config.setPromisesDependency();
         AWS.config.update({
-          accessKeyId: process.env.REACT_APP_AWS_ACCESSKEYID,
-          secretAccessKey: process.env.REACT_APP_AWS_SECRETACCESSKEY,
-          region: process.env.REACT_APP_AWS_REGION
+          accessKeyId,
+          secretAccessKey,
+          region
         });
         const s3 = new AWS.S3();
         const res = await s3
           .listObjectsV2({
-            Bucket: process.env.REACT_APP_AWS_BUCKET,
+            Bucket: name,
             Prefix: path
           })
           .promise()
@@ -37,12 +39,12 @@ export class FileContainer extends Component {
       } catch (e) {
         console.log('My error', e);
       }
-    })(this.props.pathInfo.path);
-  }
+    })(path);
+  };
 
   componentDidMount() {
     this.listObjects().then((response) => {
-      console.log(response);
+      console.log({ response });
       let depth = this.props.pathInfo.depth + 1;
       let newFolders = response.Contents.filter(
         (x) =>
@@ -94,11 +96,14 @@ export class FileContainer extends Component {
     }
   }
   render() {
-    let displayFiles = this.state.folders.concat(this.state.files);
+    const { bucket } = this.props;
+
+    const displayFiles = this.state.folders.concat(this.state.files);
     return (
       <Card.Group className="file-container">
         {displayFiles.map((x, i) => (
           <File
+            bucket={bucket}
             key={`file${i}`}
             file={x}
             settings={this.props.settings}
