@@ -4,7 +4,7 @@ import 'semantic-ui-css/semantic.min.css';
 import './App.scss';
 import BucketViewer from './components/modules/BucketViewer';
 import NavMenu from './components/modules/NavMenu';
-import ConnectToS3Bucket from './components/pages/ConnectToS3Bucket';
+import ConnectToS3Bucket from './pages/ConnectToS3Bucket';
 
 function App() {
   return (

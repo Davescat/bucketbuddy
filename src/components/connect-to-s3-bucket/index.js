@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { Button, Form, Message } from 'semantic-ui-react';
-import '../../ConnectToS3Bucket.scss';
+import './ConnectToS3Bucket.scss';
 
 class ConnectToS3BucketForm extends Component {
   constructor() {
