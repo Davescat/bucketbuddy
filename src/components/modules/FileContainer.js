@@ -1,18 +1,18 @@
-import React, { Component } from "react";
-import File from "./File";
-import { Card } from "semantic-ui-react";
+import React, { Component } from 'react';
+import { Card } from 'semantic-ui-react';
+import File from './File';
 
 export class FileContainer extends Component {
   constructor() {
     super();
     this.state = {
       folders: [],
-      files: [],
+      files: []
     };
     this.listObjects = this.listObjects.bind(this);
   }
   listObjects() {
-    var AWS = require("aws-sdk");
+    var AWS = require('aws-sdk');
     return (async function (path) {
       try {
         console.log(path);
@@ -21,13 +21,13 @@ export class FileContainer extends Component {
         AWS.config.update({
           accessKeyId: process.env.REACT_APP_AWS_ACCESSKEYID,
           secretAccessKey: process.env.REACT_APP_AWS_SECRETACCESSKEY,
-          region: process.env.REACT_APP_AWS_REGION,
+          region: process.env.REACT_APP_AWS_REGION
         });
         const s3 = new AWS.S3();
         const res = await s3
           .listObjectsV2({
             Bucket: process.env.REACT_APP_AWS_BUCKET,
-            Prefix: path,
+            Prefix: path
           })
           .promise()
           .then((response) => {
@@ -35,7 +35,7 @@ export class FileContainer extends Component {
           });
         return res;
       } catch (e) {
-        console.log("My error", e);
+        console.log('My error', e);
       }
     })(this.props.pathInfo.path);
   }
@@ -46,22 +46,22 @@ export class FileContainer extends Component {
       let depth = this.props.pathInfo.depth + 1;
       let newFolders = response.Contents.filter(
         (x) =>
-          x.Key.split("/").length === depth + 1 &&
-          x.Key[x.Key.length - 1] === "/"
+          x.Key.split('/').length === depth + 1 &&
+          x.Key[x.Key.length - 1] === '/'
       ).map((folder) => {
-        folder.type = "folder";
+        folder.type = 'folder';
         return folder;
       });
       let newFiles = response.Contents.filter(
         (x) =>
-          x.Key.split("/").length === depth && x.Key[x.Key.length - 1] !== "/"
+          x.Key.split('/').length === depth && x.Key[x.Key.length - 1] !== '/'
       ).map((file) => {
-        file.type = "file";
+        file.type = 'file';
         return file;
       });
       this.setState({
         folders: newFolders,
-        files: newFiles,
+        files: newFiles
       });
     });
   }
@@ -73,22 +73,22 @@ export class FileContainer extends Component {
         let depth = this.props.pathInfo.depth + 1;
         let newFolders = response.Contents.filter(
           (x) =>
-            x.Key.split("/").length === depth + 1 &&
-            x.Key[x.Key.length - 1] === "/"
+            x.Key.split('/').length === depth + 1 &&
+            x.Key[x.Key.length - 1] === '/'
         ).map((folder) => {
-          folder.type = "folder";
+          folder.type = 'folder';
           return folder;
         });
         let newFiles = response.Contents.filter(
           (x) =>
-            x.Key.split("/").length === depth && x.Key[x.Key.length - 1] !== "/"
+            x.Key.split('/').length === depth && x.Key[x.Key.length - 1] !== '/'
         ).map((file) => {
-          file.type = "file";
+          file.type = 'file';
           return file;
         });
         this.setState({
           folders: newFolders,
-          files: newFiles,
+          files: newFiles
         });
       });
     }

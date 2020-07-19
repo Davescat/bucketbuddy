@@ -1,13 +1,13 @@
-import React, { Component } from "react";
-import { Card, Image, Placeholder } from "semantic-ui-react";
-import { S3 } from "aws-sdk";
+import AWS from 'aws-sdk';
+import React, { Component } from 'react';
+import { Card, Image, Placeholder } from 'semantic-ui-react';
 
 export class File extends Component {
   constructor() {
     super();
     this.state = {
       imageLoaded: false,
-      src: "",
+      src: ''
     };
     this.getData = this.getData.bind(this);
     this.encode = this.encode.bind(this);
@@ -15,20 +15,19 @@ export class File extends Component {
   }
 
   getData() {
-    var AWS = require("aws-sdk");
     return (async function (key) {
       try {
         AWS.config.setPromisesDependency();
         AWS.config.update({
           accessKeyId: process.env.REACT_APP_AWS_ACCESSKEYID,
           secretAccessKey: process.env.REACT_APP_AWS_SECRETACCESSKEY,
-          region: process.env.REACT_APP_AWS_REGION,
+          region: process.env.REACT_APP_AWS_REGION
         });
         const s3 = new AWS.S3();
         const res = await s3
           .getObject({
             Bucket: process.env.REACT_APP_AWS_BUCKET,
-            Key: key,
+            Key: key
           })
           .promise()
           .then((response) => {
@@ -37,7 +36,7 @@ export class File extends Component {
 
         return res;
       } catch (e) {
-        console.log("My error", e);
+        console.log('My error', e);
       }
     })(this.props.file.Key);
   }
@@ -49,16 +48,16 @@ export class File extends Component {
   encode(data) {
     var str = data.Body.reduce(function (a, b) {
       return a + String.fromCharCode(b);
-    }, "");
-    return btoa(str).replace(/.{76}(?=.)/g, "$&\n");
+    }, '');
+    return btoa(str).replace(/.{76}(?=.)/g, '$&\n');
   }
 
   componentDidMount() {
-    if (this.props.file.type === "file") {
+    if (this.props.file.type === 'file') {
       this.getData().then((data) => {
         this.setState({
           imageLoaded: true,
-          src: `data:image/jpg;base64, ${this.encode(data)}`,
+          src: `data:image/jpg;base64, ${this.encode(data)}`
         });
       });
     }
@@ -66,11 +65,11 @@ export class File extends Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.file.Key !== this.props.file.Key) {
-      if (this.props.file.type === "file") {
+      if (this.props.file.type === 'file') {
         this.getData().then((data) => {
           this.setState({
             imageLoaded: true,
-            src: `data:image/jpg;base64, ${this.encode(data.Body)}`,
+            src: `data:image/jpg;base64, ${this.encode(data.Body)}`
           });
         });
       }
@@ -82,7 +81,7 @@ export class File extends Component {
    */
   getImage() {
     if (this.props.settings.loadImages) {
-      if (this.props.file.type === "file") {
+      if (this.props.file.type === 'file') {
         if (this.state.imageLoaded) {
           return <Image src={this.state.src} wrapped ui={false} />;
         } else {
@@ -94,7 +93,7 @@ export class File extends Component {
         }
       }
     } else {
-      if (this.props.file.type === "file") {
+      if (this.props.file.type === 'file') {
         return (
           <Image
             src="https://react.semantic-ui.com/images/wireframe/square-image.png"
@@ -107,11 +106,11 @@ export class File extends Component {
   }
 
   handleFileClick() {
-    if (this.props.file.type == "folder") {
-      let newDepth = this.props.file.Key.split("/").length - 1;
+    if (this.props.file.type === 'folder') {
+      let newDepth = this.props.file.Key.split('/').length - 1;
       let newPathInfo = {
         path: this.props.file.Key,
-        depth: newDepth,
+        depth: newDepth
       };
       this.props.customClickEvent(newPathInfo);
     }
@@ -119,7 +118,7 @@ export class File extends Component {
 
   render() {
     return (
-      <Card style={{ cursor: "pointer" }} onClick={this.handleFileClick}>
+      <Card style={{ cursor: 'pointer' }} onClick={this.handleFileClick}>
         {this.getImage()}
         <Card.Content>
           <Card.Header>{this.props.file.Key}</Card.Header>

@@ -1,8 +1,7 @@
-import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
-import "../../ConnectToS3Bucket.scss";
-
-import ConnectToS3BucketForm from "../forms/ConnectToS3BucketForm";
+import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import '../../ConnectToS3Bucket.scss';
+import ConnectToS3BucketForm from '../forms/ConnectToS3BucketForm';
 
 class ConnectToS3Bucket extends Component {
   render() {
