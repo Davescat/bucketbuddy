@@ -1,22 +1,23 @@
-import React, { Component } from "react";
-import BucketPath from "./BucketPath";
-import FileContainer from "./FileContainer";
-import BucketSettings from "./BucketSettings";
-import { useLocation } from "react-router-dom";
+import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import BucketPath from './BucketPath';
+import BucketSettings from './BucketSettings';
+import FileContainer from './FileContainer';
 
 class BucketViewer extends Component {
-  constructor() {
+  constructor(props) {
     super();
+
     this.state = {
       pathInfo: {
-        path: "",
-        depth: 0,
+        path: '',
+        depth: 0
       },
       settings: {
         loadMetadata: true,
         loadTags: false,
-        loadImages: true,
-      },
+        loadImages: true
+      }
     };
     this.updatePath = this.updatePath.bind(this);
     this.handleSettingsChange = this.handleSettingsChange.bind(this);
@@ -31,14 +32,18 @@ class BucketViewer extends Component {
   }
 
   render() {
+    const { bucket } = this.props.location.state;
+
     return (
       <div className="bucket-viewer">
-        <BucketPath pathInfo={this.state.pathInfo} />
+        <BucketPath bucket={bucket} pathInfo={this.state.pathInfo} />
         <BucketSettings
+          bucket={bucket}
           settings={this.state.settings}
           settingsChange={this.handleSettingsChange}
         />
         <FileContainer
+          bucket={bucket}
           pathInfo={this.state.pathInfo}
           settings={this.state.settings}
           pathChange={this.updatePath}
@@ -48,4 +53,4 @@ class BucketViewer extends Component {
   }
 }
 
-export default BucketViewer;
+export default withRouter(BucketViewer);

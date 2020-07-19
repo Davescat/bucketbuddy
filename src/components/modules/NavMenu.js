@@ -1,6 +1,6 @@
-import React, { Component } from "react";
-import { Menu } from "semantic-ui-react";
-import { Link } from "react-router-dom";
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+import { Menu } from 'semantic-ui-react';
 
 class NavMenu extends Component {
   render() {
@@ -9,7 +9,7 @@ class NavMenu extends Component {
         <Menu.Item name="Icon">
           <i
             aria-hidden="true"
-            style={{ fontSize: "1.5em" }}
+            style={{ fontSize: '1.5em' }}
             className="folder open icon"
           ></i>
         </Menu.Item>
