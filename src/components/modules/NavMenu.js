@@ -14,10 +14,7 @@ class NavMenu extends Component {
           ></i>
         </Menu.Item>
         <Menu.Item name="Create Connection" as={Link} to="/">
-          Home
-        </Menu.Item>
-        <Menu.Item name="Bucket" as={Link} to="/bucket-viewer">
-          Buckets
+          Create Connection
         </Menu.Item>
       </Menu>
     );
