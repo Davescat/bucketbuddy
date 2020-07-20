@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import File from "./File"
 import { Card } from 'semantic-ui-react';
-
-export class FileContainer extends Component {
+import { S3Control } from 'aws-sdk'
+class FileContainer extends Component {
     constructor() {
         super()
         this.state = {
@@ -16,8 +16,7 @@ export class FileContainer extends Component {
         var AWS = require('aws-sdk');
         return (async function (path) {
             try {
-                console.log(path);
-
+                console.log( process.env);
                 AWS.config.setPromisesDependency();
                 AWS.config.update({
                     accessKeyId: process.env.REACT_APP_AWS_ACCESSKEYID,
@@ -43,23 +42,45 @@ export class FileContainer extends Component {
 
     componentDidMount() {
         this.listObjects().then(response => {
-            console.log(response);
-            let depth = this.props.pathInfo.depth +1
-            let newFolders = response.Contents.filter(x => x.Key.split('/').length === depth + 1 && x.Key[x.Key.length - 1] === '/').map(folder => { folder.type = 'folder'; return folder })
-            let newFiles = response.Contents.filter(x => x.Key.split('/').length === depth && x.Key[x.Key.length - 1] !== '/').map(file => { file.type = 'file'; return file })
-            this.setState({
-                folders: newFolders,
-                files: newFiles
-            })
+            if (response) {
+                let depth = this.props.pathInfo.depth + 1
+                let newFolders = response.Contents.filter(x => x.Key.split('/').length === depth + 1 && x.Key[x.Key.length - 1] === '/').map(folder => { folder.type = 'folder'; return folder })
+                let newFiles = response.Contents.filter(x => x.Key.split('/').length === depth && x.Key[x.Key.length - 1] !== '/').map(file => { file.type = 'file'; return file })
+                this.setState({
+                    folders: newFolders,
+                    files: newFiles
+                })
+            }
         });
 
+
+        // var params = {
+        //     FunctionName: "arn:aws:lambda:us-east-1:081004888135:function:testFunc",
+        //     InvocationType: "RequestResponse",
+        //     Payload: "",
+        //     Qualifier: "1"
+        // };
+        // var AWS = require('aws-sdk');
+
+        // AWS.config.setPromisesDependency();
+
+        // AWS.config.update({
+        //     accessKeyId: process.env.REACT_APP_AWS_ACCESSKEYID,
+        //     secretAccessKey: process.env.REACT_APP_AWS_SECRETACCESSKEY,
+        //     region: process.env.REACT_APP_AWS_REGION,
+        // });
+        // var lambda = new AWS.Lambda();
+        // lambda.invoke(params, function (err, data) {
+        //     if (err) console.log(err, err.stack); // an error occurred
+        //     else console.log(data);           // successful response
+        // });
     }
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.pathInfo.path !== this.props.pathInfo.path) {
             this.listObjects().then(response => {
                 console.log(response);
-                let depth = this.props.pathInfo.depth +1
+                let depth = this.props.pathInfo.depth + 1
                 let newFolders = response.Contents.filter(x => x.Key.split('/').length === depth + 1 && x.Key[x.Key.length - 1] === '/').map(folder => { folder.type = 'folder'; return folder })
                 let newFiles = response.Contents.filter(x => x.Key.split('/').length === depth && x.Key[x.Key.length - 1] !== '/').map(file => { file.type = 'file'; return file })
                 this.setState({
@@ -81,28 +102,28 @@ export class FileContainer extends Component {
 }
 /*
   data = {
-   Contents: [
+                        Contents: [
       {
-     ETag: "\"70ee1738b6b21e2c8a43f3a5ab0eee71\"", 
-     Key: "happyface.jpg", 
-     LastModified: <Date Representation>, 
-     Size: 11, 
-     StorageClass: "STANDARD"
-    }, 
+                        ETag: "\"70ee1738b6b21e2c8a43f3a5ab0eee71\"",
+     Key: "happyface.jpg",
+     LastModified: <Date Representation>,
+                    Size: 11,
+                    StorageClass: "STANDARD"
+                    },
       {
-     ETag: "\"becf17f89c30367a9a44495d62ed521a-1\"", 
-     Key: "test.jpg", 
+                            ETag: "\"becf17f89c30367a9a44495d62ed521a-1\"",
+     Key: "test.jpg",
      LastModified: <Date Representation>, 
-     Size: 4192256, 
-     StorageClass: "STANDARD"
-    }
-   ], 
-   IsTruncated: true, 
-   KeyCount: 2, 
-   MaxKeys: 2, 
-   Name: "examplebucket", 
-   NextContinuationToken: "1w41l63U0xa8q7smH50vCxyTQqdxo69O3EmK28Bi5PcROI4wI/EyIJg==", 
-   Prefix: ""
-  }
-  */
+                        Size: 4192256, 
+                        StorageClass: "STANDARD"
+                        }
+                        ], 
+                        IsTruncated: true, 
+                        KeyCount: 2, 
+                        MaxKeys: 2, 
+                        Name: "examplebucket", 
+                        NextContinuationToken: "1w41l63U0xa8q7smH50vCxyTQqdxo69O3EmK28Bi5PcROI4wI/EyIJg==", 
+                        Prefix: ""
+                        }
+                        */
 export default FileContainer

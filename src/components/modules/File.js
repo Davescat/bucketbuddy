@@ -56,14 +56,32 @@ export class File extends Component {
         return btoa(str).replace(/.{76}(?=.)/g, "$&\n");
     }
 
+    getImageUrl() {
+        var AWS = require('aws-sdk');
+        return (async function (key) {
+            try {
+                AWS.config.setPromisesDependency();
+                AWS.config.update({
+                    accessKeyId: process.env.REACT_APP_AWS_ACCESSKEYID,
+                    secretAccessKey: process.env.REACT_APP_AWS_SECRETACCESSKEY,
+                    region: process.env.REACT_APP_AWS_REGION,
+                });
+                const s3 = new AWS.S3();
+                const url = await s3.getSignedUrlPromise('getObject', { Bucket: process.env.REACT_APP_AWS_BUCKET, Key: key });
+                return url
+            } catch (e) {
+                console.log("My error", e);
+            }
+        })(this.props.file.Key);
+    }
 
 
     componentDidMount() {
         if (this.props.file.type === 'file') {
-            this.getData().then(data => {
+            this.getImageUrl().then(data => {
                 this.setState({
                     imageLoaded: true,
-                    src: `data:image/jpg;base64, ${this.encode(data)}`
+                    src: data
                 })
             })
         }
@@ -71,14 +89,12 @@ export class File extends Component {
 
     componentDidUpdate(prevProps) {
         if (prevProps.file.Key !== this.props.file.Key) {
-            if (this.props.file.type === 'file') {
-                this.getData().then(data => {
-                    this.setState({
-                        imageLoaded: true,
-                        src: `data:image/jpg;base64, ${this.encode(data.Body)}`
-                    })
+            this.getImageUrl().then(data => {
+                this.setState({
+                    imageLoaded: true,
+                    src: data
                 })
-            }
+            })
         }
 
     }
@@ -90,7 +106,7 @@ export class File extends Component {
         if (this.props.settings.loadImages) {
             if (this.props.file.type === 'file') {
                 if (this.state.imageLoaded) {
-                    return <Image src={this.state.src} wrapped ui={false} />
+                    return <Image src={this.state.src} />
                 } else {
                     return (<Placeholder>
                         <Placeholder.Image square />
@@ -116,13 +132,18 @@ export class File extends Component {
     }
 
     render() {
+        let keys = this.props.file.Key.split('/')
+        let filename = ''
+        if (this.props.file.type === 'file') {
+            filename = (keys.length === 1) ? keys[0] : keys[keys.length - 1]
+        } else {
+            filename = (keys.length === 1) ? keys[0] : keys[keys.length - 2] + '/'
+        }
         return (
             <Card style={{ cursor: 'pointer' }} onClick={this.handleFileClick}>
-                {
-                    this.getImage()
-                }
+                {this.getImage()}
                 <Card.Content >
-                    <Card.Header>{this.props.file.Key}</Card.Header>
+                    <Card.Header>{filename}</Card.Header>
                     <Card.Meta>{`Last modified: ${this.props.file.LastModified}`}</Card.Meta>
                     <Card.Meta>{`Size: ${this.props.file.Size} bytes`}</Card.Meta>
 
@@ -131,25 +152,4 @@ export class File extends Component {
         )
     }
 }
-
-/*
-
-listObjectv2
-    ETag: "\"70ee1738b6b21e2c8a43f3a5ab0eee71\"", 
-    Key: "happyface.jpg", 
-    LastModified: <Date Representation>, 
-    Size: 11, 
-    StorageClass: "STANDARD"
-getObject
-    AcceptRanges: "bytes", 
-    ContentLength: 10, 
-    ContentRange: "bytes 0-9/43", 
-    ContentType: "text/plain", 
-    ETag: "\"0d94420ffd0bc68cd3d152506b97a9cc\"", 
-    LastModified: <Date Representation>, 
-    Metadata: {
-    }, 
-    VersionId: "null"
-    
-*/
 export default File

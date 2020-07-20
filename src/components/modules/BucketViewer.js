@@ -23,6 +23,7 @@ export class BucketViewer extends Component {
 
     }
 
+
     handleSettingsChange(newSettings) {
         this.setState({ settings: newSettings })
     }
@@ -35,7 +36,7 @@ export class BucketViewer extends Component {
         console.log(this.state)
         return (
             <div className='bucket-viewer'>
-                <BucketPath pathInfo={this.state.pathInfo} />
+                <BucketPath pathInfo={this.state.pathInfo} pathChange={this.updatePath} />
                 <BucketSettings settings={this.state.settings} settingsChange={this.handleSettingsChange} />
                 <FileContainer pathInfo={this.state.pathInfo} settings={this.state.settings} pathChange={this.updatePath}>
 
