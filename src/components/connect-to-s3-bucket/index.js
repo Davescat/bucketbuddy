@@ -1,7 +1,15 @@
 import AWS from 'aws-sdk';
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
-import { Button, Form, Message } from 'semantic-ui-react';
+import {
+  Button,
+  Form,
+  Message,
+  Dimmer,
+  Loader,
+  Image,
+  Segment
+} from 'semantic-ui-react';
 import './ConnectToS3Bucket.scss';
 
 const regions = [
@@ -104,25 +112,29 @@ class ConnectToS3BucketForm extends Component {
           if (error.code == null) {
             setState({
               formError: true,
-              errorMessage: genericError
+              errorMessage: genericError,
+              loading: false
             });
           } else {
             if (error.code == 'Forbidden') {
               setState({
                 formError: true,
                 errorMessage:
-                  'Forbidden: We are unable to establish a connection. Please validate your credentials and try again.'
+                  'Forbidden: We are unable to establish a connection. Please validate your credentials and try again.',
+                loading: false
               });
             } else if (error.code == 'NetworkError') {
               setState({
                 formError: true,
                 errorMessage:
-                  'Network Error: We are unable to establish a connection due to the network. Please validate your connection and try again.'
+                  'Network Error: We are unable to establish a connection due to the network. Please validate your connection and try again.',
+                loading: false
               });
             } else {
               setState({
                 formError: true,
-                errorMessage: genericError
+                errorMessage: genericError,
+                loading: false
               });
             }
           }
@@ -140,13 +152,15 @@ class ConnectToS3BucketForm extends Component {
     } catch (error) {
       setState({
         formError: true,
-        errorMessage: genericError
+        errorMessage: genericError,
+        loading: false
       });
     }
   };
 
   handleS3BucketSubmit = (event) => {
     event.preventDefault();
+    this.setState({ loading: true });
     this.connectToS3Bucket(
       this.state.bucketName,
       this.state.accessKeyId,
@@ -169,6 +183,9 @@ class ConnectToS3BucketForm extends Component {
 
     return (
       <>
+        <Dimmer active={this.state.loading}>
+          <Loader indeterminate>Trying to connect to your S3 Bucket</Loader>
+        </Dimmer>
         <Message className="s3-message">
           <Message.Header>Connect to S3 Bucket</Message.Header>
           {formError ? (
@@ -181,7 +198,6 @@ class ConnectToS3BucketForm extends Component {
           className="s3-form"
           onSubmit={this.handleS3BucketSubmit}
           error={this.state.formError}
-          loading
         >
           <Form.Input
             required
