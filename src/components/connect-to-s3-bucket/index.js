@@ -81,42 +81,68 @@ class ConnectToS3BucketForm extends Component {
       secretAccessKey: process.env.REACT_APP_SECRET_KEY,
       selectedRegion: process.env.REACT_APP_AWS_REGION,
       formError: false,
-      errorMessage:
-        //TODO make message more specific
-        'Hmm.. We were unable to connect to the S3 bucket with the credentials you provided please try again.'
+      errorMessage: ''
     };
   }
 
   connectToS3Bucket = (bucketName, accessKeyId, secretAccessKey, region) => {
     const { history } = this.props;
-    const { setState } = this;
+    const setState = this.setState.bind(this);
+    const genericError =
+      'Hmm... There appears to be an issue creating a connection to the bucket (however we are not sure why). Please try again.';
 
     AWS.config.setPromisesDependency();
-    // AWS.config.update({
-    //   accessKeyId: accessKeyId,
-    //   secretAccessKey: secretAccessKey,
-    //   region: region
-    // });
-    const s3 = new AWS.S3({
-      accessKeyId: accessKeyId,
-      secretAccessKey: secretAccessKey,
-      region: region
-    });
+    try {
+      const s3 = new AWS.S3({
+        accessKeyId: accessKeyId,
+        secretAccessKey: secretAccessKey,
+        region: region
+      });
 
-    s3.headBucket({ Bucket: bucketName }, function (error, data) {
-      if (error) {
-        setState({ formError: true });
-      } else {
-        history.push(
-          {
-            pathname: '/bucket-viewer'
-          },
-          {
-            bucket: { accessKeyId, secretAccessKey, region, name: bucketName }
+      s3.headBucket({ Bucket: bucketName }, function (error, data) {
+        if (error) {
+          if (error.code == null) {
+            setState({
+              formError: true,
+              errorMessage: genericError
+            });
+          } else {
+            if (error.code == 'Forbidden') {
+              setState({
+                formError: true,
+                errorMessage:
+                  'Forbidden: We are unable to establish a connection. Please validate your credentials and try again.'
+              });
+            } else if (error.code == 'NetworkError') {
+              setState({
+                formError: true,
+                errorMessage:
+                  'Network Error: We are unable to establish a connection due to the network. Please validate your connection and try again.'
+              });
+            } else {
+              setState({
+                formError: true,
+                errorMessage: genericError
+              });
+            }
           }
-        );
-      }
-    });
+        } else {
+          history.push(
+            {
+              pathname: '/bucket-viewer'
+            },
+            {
+              bucket: { accessKeyId, secretAccessKey, region, name: bucketName }
+            }
+          );
+        }
+      });
+    } catch (error) {
+      setState({
+        formError: true,
+        errorMessage: genericError
+      });
+    }
   };
 
   handleS3BucketSubmit = (event) => {
@@ -155,8 +181,10 @@ class ConnectToS3BucketForm extends Component {
           className="s3-form"
           onSubmit={this.handleS3BucketSubmit}
           error={this.state.formError}
+          loading
         >
           <Form.Input
+            required
             id="form-input-s3-bucket-name"
             name="bucketName"
             label="S3 Bucket Name"
@@ -165,6 +193,7 @@ class ConnectToS3BucketForm extends Component {
             onChange={this.handleFieldChange}
           />
           <Form.Input
+            required
             id="form-control-access-key-id"
             name="accessKeyId"
             label="Access Key ID"
@@ -174,6 +203,7 @@ class ConnectToS3BucketForm extends Component {
             onChange={this.handleFieldChange}
           />
           <Form.Input
+            required
             id="form-control-secret-access-key-id"
             name="secretAccessKey"
             label="Secret Access Key"
@@ -183,6 +213,7 @@ class ConnectToS3BucketForm extends Component {
             onChange={this.handleFieldChange}
           />
           <Form.Select
+            required
             name="selectedRegion"
             value={selectedRegion}
             options={regions}
