@@ -1,6 +1,6 @@
-import AWS from 'aws-sdk';
 import React, { useState } from 'react';
 import { withRouter, useHistory } from 'react-router-dom';
+import testConnectionS3Bucket from '../utils/amazon-s3-utils';
 import { Button, Form, Message, Dimmer, Loader } from 'semantic-ui-react';
 import './ConnectToS3Bucket.scss';
 
@@ -72,15 +72,13 @@ const regions = [
   }
 ];
 
-function ConnectToS3BucketForm() {
-  const [state, setState] = useState([
-    {
-      bucketName: process.env.REACT_APP_BUCKET,
-      accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
-      secretAccessKey: process.env.REACT_APP_ACCESS_KEY_ID,
-      selectedRegion: process.env.REACT_APP_AWS_REGION
-    }
-  ]);
+const ConnectToS3BucketForm = () => {
+  const [state, setState] = useState({
+    bucketName: process.env.REACT_APP_BUCKET,
+    accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
+    secretAccessKey: process.env.REACT_APP_ACCESS_KEY_ID,
+    selectedRegion: process.env.REACT_APP_AWS_REGION
+  });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
@@ -91,18 +89,13 @@ function ConnectToS3BucketForm() {
     secretAccessKey,
     region
   }) => {
-    const genericError =
-      'Hmm... There appears to be an issue creating a connection to the bucket (however we are not sure why). Please try again.';
-
-    AWS.config.setPromisesDependency();
-
     try {
-      const s3 = new AWS.S3({
-        accessKeyId: accessKeyId,
-        secretAccessKey: secretAccessKey,
-        region: region
+      await testConnectionS3Bucket({
+        bucketName,
+        accessKeyId,
+        secretAccessKey,
+        region
       });
-      await s3.headBucket({ Bucket: bucketName }).promise();
       history.push(
         {
           pathname: '/bucket-viewer'
@@ -112,26 +105,8 @@ function ConnectToS3BucketForm() {
         }
       );
     } catch (error) {
-      if (error.code == null) {
-        setError(genericError);
-        setLoading(false);
-      } else {
-        if (error.code === 'Forbidden') {
-          setError(
-            'Forbidden: We are unable to establish a connection. Please validate your credentials and try again.'
-          );
-          setLoading(false);
-        }
-        if (error.code === 'NetworkError') {
-          setError(
-            'Network Error: We are unable to establish a connection due to the network. Please validate your connection and try again.'
-          );
-          setLoading(false);
-        } else {
-          setError(genericError);
-          setLoading(false);
-        }
-      }
+      setError(error.message);
+      setLoading(false);
     }
   };
 
@@ -219,6 +194,5 @@ function ConnectToS3BucketForm() {
       </Form>
     </>
   );
-}
-
+};
 export default withRouter(ConnectToS3BucketForm);
