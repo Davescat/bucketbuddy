@@ -9,7 +9,7 @@ export class File extends Component {
     this.state = {
       imageLoaded: false,
       src: '',
-      modalOpen: false,
+      modalOpen: false
     };
   }
 
@@ -62,7 +62,7 @@ export class File extends Component {
       bucket: { accessKeyId, secretAccessKey, region, name }
     } = this.props;
 
-    return (async function (key) {
+    return (async function () {
       try {
         AWS.config.setPromisesDependency();
         AWS.config.update({
@@ -71,35 +71,37 @@ export class File extends Component {
           region
         });
         const s3 = new AWS.S3();
-        const url = await s3.getSignedUrlPromise('getObject', { Bucket: name, Key: key });
-        return url
+        const url = await s3.getSignedUrlPromise('getObject', {
+          Bucket: name,
+          Key: Key
+        });
+        return url;
       } catch (e) {
-        console.log("My error", e);
+        console.log('My error', e);
       }
-    })(this.props.file.Key);
-  }
+    })();
+  };
 
   componentDidMount() {
     if (this.props.file.type === 'file') {
-      this.getImageUrl().then(data => {
+      this.getImageUrl().then((data) => {
         this.setState({
           imageLoaded: true,
           src: data
-        })
-      })
+        });
+      });
     }
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.file.Key !== this.props.file.Key) {
-      this.getImageUrl().then(data => {
+      this.getImageUrl().then((data) => {
         this.setState({
           imageLoaded: true,
           src: data
-        })
-      })
+        });
+      });
     }
-
   }
 
   /**
@@ -131,31 +133,31 @@ export class File extends Component {
     }
   }
 
-
   handleFileClick = () => {
-    if (this.props.file.type === 'folder') {
-      let newDepth = this.props.file.Key.split('/').length - 1;
+    const { file, customClickEvent } = this.props;
+    if (file.type === 'folder') {
+      let newDepth = file.Key.split('/').length - 1;
       let newPathInfo = {
-        path: this.props.file.Key,
+        path: file.Key,
         depth: newDepth
       };
-      this.props.customClickEvent(newPathInfo);
-    } else if (this.props.file.type === 'file') {
-      this.setState({ modalOpen: true })
+      customClickEvent(newPathInfo);
+    } else if (file.type === 'file') {
+      this.setState({ modalOpen: true });
     }
   };
 
   render() {
-    const { file } = this.props
-    let keys = file.Key.split('/')
-    let filename = ''
+    const { file, bucket } = this.props;
+    let keys = file.Key.split('/');
+    let filename = '';
     if (file.type === 'file') {
-      filename = (keys.length === 1) ? keys[0] : keys[keys.length - 1]
+      filename = keys.length === 1 ? keys[0] : keys[keys.length - 1];
     } else {
-      filename = (keys.length === 1) ? keys[0] : keys[keys.length - 2] + '/'
+      filename = keys.length === 1 ? keys[0] : keys[keys.length - 2] + '/';
     }
-    return ([
-      <Card style={{ cursor: 'pointer' }} onClick={this.handleFileClick}>
+    return [
+      <Card className="file-card" onClick={this.handleFileClick}>
         {this.getImage()}
         <Card.Content>
           <Card.Header>{filename}</Card.Header>
@@ -163,23 +165,20 @@ export class File extends Component {
           <Card.Meta>{`Size: ${file.Size} bytes`}</Card.Meta>
         </Card.Content>
       </Card>,
-      file.type === 'file' &&
-      <FileDetailsModal
-        updateList={this.props.updateList}
-        bucket={this.props.bucket}
-        modalOpen={this.state.modalOpen}
-        handleClose={() => this.setState({ modalOpen: false })}
-        file={
-          {
+      file.type === 'file' && (
+        <FileDetailsModal
+          updateList={this.props.updateList}
+          bucket={bucket}
+          modalOpen={this.state.modalOpen}
+          handleClose={() => this.setState({ modalOpen: false })}
+          file={{
             ...file,
             filename: filename,
             src: this.state.src
-          }
-        }
-
-      />
-    ]
-    )
+          }}
+        />
+      )
+    ];
   }
 }
-export default File
+export default File;

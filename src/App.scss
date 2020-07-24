@@ -2,7 +2,7 @@
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid rgba(204, 204, 204, 0.425);
-  .bucket-buttons{
+  .bucket-buttons {
     margin: auto 0;
   }
   .bucket-settings {
@@ -34,13 +34,19 @@
 
 .file-container {
   padding: 10px;
+  .file-card {
+    cursor: pointer;
+    div {
+      object-fit: scale-down !important;
+    }
+  }
 }
 
-.modal-bold{
+.modal-bold {
   font-weight: bold;
 }
-.file-details{
-  .item{
+.file-details {
+  .item {
     margin-bottom: 8px;
   }
 }

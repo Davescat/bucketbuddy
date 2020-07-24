@@ -109,7 +109,7 @@ class ConnectToS3BucketForm extends Component {
       } else {
         history.push(
           {
-            pathname: '/bucket-viewer'
+            pathname: `/bucket-viewer/${bucketName}`
           },
           {
             bucket: { accessKeyId, secretAccessKey, region, name: bucketName }
