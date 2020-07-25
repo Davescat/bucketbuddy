@@ -55,13 +55,10 @@ export class FileDetailsModal extends Component {
    * @param {AWS.S3.GetObjectOutput} response
    */
   setData = (response) => {
-    this.setState(
-      {
-        dataLoaded: true,
-        objectData: response
-      },
-      () => console.log(this.state)
-    );
+    this.setState({
+      dataLoaded: true,
+      objectData: response
+    });
   };
 
   deleteObject = () => {

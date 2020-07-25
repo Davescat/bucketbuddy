@@ -8,7 +8,6 @@ import { Dimmer, Loader } from 'semantic-ui-react';
 
 export class BucketViewer extends Component {
   state = {
-    //Contains Bucket info and starting path information
     ...this.props.location.state,
     pathInfo: { path: '', depth: 0 },
     files: {
