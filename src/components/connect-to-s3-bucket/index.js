@@ -1,7 +1,7 @@
-import AWS from 'aws-sdk';
-import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
-import { Button, Form, Message } from 'semantic-ui-react';
+import React, { useState } from 'react';
+import { withRouter, useHistory } from 'react-router-dom';
+import testConnectionS3Bucket from '../utils/amazon-s3-utils';
+import { Button, Form, Message, Dimmer, Loader } from 'semantic-ui-react';
 import './ConnectToS3Bucket.scss';
 
 const regions = [
@@ -72,138 +72,127 @@ const regions = [
   }
 ];
 
-class ConnectToS3BucketForm extends Component {
-  constructor() {
-    super();
-    this.state = {
-      bucketName: process.env.REACT_APP_BUCKET,
-      accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
-      secretAccessKey: process.env.REACT_APP_SECRET_KEY,
-      selectedRegion: process.env.REACT_APP_AWS_REGION,
-      formError: false,
-      errorMessage:
-        //TODO make message more specific
-        'Hmm.. We were unable to connect to the S3 bucket with the credentials you provided please try again.'
-    };
-  }
+const ConnectToS3BucketForm = () => {
+  const [state, setState] = useState({
+    bucketName: process.env.REACT_APP_BUCKET,
+    accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
+    secretAccessKey: process.env.REACT_APP_ACCESS_KEY_ID,
+    selectedRegion: process.env.REACT_APP_AWS_REGION
+  });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const history = useHistory();
 
-  connectToS3Bucket = (bucketName, accessKeyId, secretAccessKey, region) => {
-    const { history } = this.props;
-    const { setState } = this;
-
-    AWS.config.setPromisesDependency();
-    // AWS.config.update({
-    //   accessKeyId: accessKeyId,
-    //   secretAccessKey: secretAccessKey,
-    //   region: region
-    // });
-    const s3 = new AWS.S3({
-      accessKeyId: accessKeyId,
-      secretAccessKey: secretAccessKey,
-      region: region
-    });
-
-    s3.headBucket({ Bucket: bucketName }, function (error, data) {
-      if (error) {
-        setState({ formError: true });
-      } else {
-        history.push(
-          {
-            pathname: `/bucket-viewer/${bucketName}`
-          },
-          {
-            bucket: { accessKeyId, secretAccessKey, region, name: bucketName }
-          }
-        );
-      }
-    });
+  const connectToS3Bucket = async ({
+    bucketName,
+    accessKeyId,
+    secretAccessKey,
+    region
+  }) => {
+    try {
+      await testConnectionS3Bucket({
+        bucketName,
+        accessKeyId,
+        secretAccessKey,
+        region
+      });
+      history.push(
+        {
+          pathname: '/bucket-viewer'
+        },
+        {
+          bucket: { accessKeyId, secretAccessKey, region, name: bucketName }
+        }
+      );
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+    }
   };
 
-  handleS3BucketSubmit = (event) => {
+  const handleS3BucketSubmit = (event) => {
     event.preventDefault();
-    this.connectToS3Bucket(
-      this.state.bucketName,
-      this.state.accessKeyId,
-      this.state.secretAccessKey,
-      this.state.selectedRegion
-    );
+    setLoading(true);
+    connectToS3Bucket({
+      bucketName: state.bucketName,
+      accessKeyId: state.accessKeyId,
+      secretAccessKey: state.secretAccessKey,
+      selectedRegion: state.selectedRegion
+    });
   };
 
-  handleFieldChange = (e, { name, value }) => this.setState({ [name]: value });
+  const handleFieldChange = (event, { name, value }) => {
+    setState((prevState) => ({ ...prevState, [name]: value }));
+  };
 
-  render() {
-    const {
-      bucketName,
-      accessKeyId,
-      secretAccessKey,
-      selectedRegion,
-      formError,
-      errorMessage
-    } = this.state;
-
-    return (
-      <>
-        <Message className="s3-message">
-          <Message.Header>Connect to S3 Bucket</Message.Header>
-          {formError ? (
-            <p className="error-message">{errorMessage}</p>
-          ) : (
-            <p>Enter your S3 connection credentials below</p>
-          )}
-        </Message>
-        <Form
-          className="s3-form"
-          onSubmit={this.handleS3BucketSubmit}
-          error={this.state.formError}
-        >
-          <Form.Input
-            id="form-input-s3-bucket-name"
-            name="bucketName"
-            label="S3 Bucket Name"
-            placeholder="my-really-cool-s3-bucket-name"
-            value={bucketName}
-            onChange={this.handleFieldChange}
-          />
-          <Form.Input
-            id="form-control-access-key-id"
-            name="accessKeyId"
-            label="Access Key ID"
-            placeholder="12345ABCDEFG"
-            value={accessKeyId}
-            type="password"
-            onChange={this.handleFieldChange}
-          />
-          <Form.Input
-            id="form-control-secret-access-key-id"
-            name="secretAccessKey"
-            label="Secret Access Key"
-            placeholder="12345ABCDEFG/B123232"
-            value={secretAccessKey}
-            type="password"
-            onChange={this.handleFieldChange}
-          />
-          <Form.Select
-            name="selectedRegion"
-            value={selectedRegion}
-            options={regions}
-            label={{
-              children: 'Region',
-              htmlFor: 'form-select-control-region'
-            }}
-            placeholder="Region"
-            search
-            searchInput={{
-              id: 'form-select-control-region'
-            }}
-            onChange={this.handleFieldChange}
-          />
-          <Button type="submit" primary>
-            Connect
-          </Button>
-        </Form>
-      </>
-    );
-  }
-}
-
+  return (
+    <>
+      <Dimmer active={loading}>
+        <Loader indeterminate>Trying to connect to your S3 Bucket</Loader>
+      </Dimmer>
+      <Message className="s3-message">
+        <Message.Header>Connect to S3 Bucket</Message.Header>
+        {error == null ? (
+          <p>Enter your S3 connection credentials below</p>
+        ) : (
+          <p className="error-message">{error}</p>
+        )}
+      </Message>
+      <Form
+        className="s3-form"
+        onSubmit={handleS3BucketSubmit}
+        error={error != null}
+      >
+        <Form.Input
+          required
+          id="form-input-s3-bucket-name"
+          name="bucketName"
+          label="S3 Bucket Name"
+          placeholder="my-really-cool-s3-bucket-name"
+          value={state.bucketName}
+          onChange={handleFieldChange}
+        />
+        <Form.Input
+          required
+          id="form-control-access-key-id"
+          name="accessKeyId"
+          label="Access Key ID"
+          placeholder="12345ABCDEFG"
+          value={state.accessKeyId}
+          type="password"
+          onChange={handleFieldChange}
+        />
+        <Form.Input
+          required
+          id="form-control-secret-access-key-id"
+          name="secretAccessKey"
+          label="Secret Access Key"
+          placeholder="12345ABCDEFG/B123232"
+          value={state.secretAccessKey}
+          type="password"
+          onChange={handleFieldChange}
+        />
+        <Form.Select
+          required
+          name="selectedRegion"
+          value={state.selectedRegion}
+          options={regions}
+          label={{
+            children: 'Region',
+            htmlFor: 'form-select-control-region'
+          }}
+          placeholder="Region"
+          search
+          searchInput={{
+            id: 'form-select-control-region'
+          }}
+          onChange={handleFieldChange}
+        />
+        <Button type="submit" primary>
+          Connect
+        </Button>
+      </Form>
+    </>
+  );
+};
 export default withRouter(ConnectToS3BucketForm);
