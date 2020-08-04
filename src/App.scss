@@ -1,23 +1,7 @@
 .bucket-bar {
-  display: flex;
-  justify-content: space-between;
   border-bottom: 1px solid rgba(204, 204, 204, 0.425);
+  padding: 6px;
   .bucket-buttons {
-    margin: auto 0;
-  }
-  .bucket-settings {
-    display: flex;
-    justify-content: left;
-    vertical-align: middle;
-    span {
-      div {
-        margin: 10px;
-      }
-      border-right: 1px solid rgba(204, 204, 204, 0.541);
-    }
-    span:last-child {
-      border-right: none;
-    }
   }
 }
 

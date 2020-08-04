@@ -2,7 +2,7 @@ import React from 'react';
 import { Card } from 'semantic-ui-react';
 import File from './File';
 
-export default function FileContainer(props) {
+const FileContainer = (props) => {
   const {
     bucket,
     files: { files, folders }
@@ -35,4 +35,5 @@ export default function FileContainer(props) {
         ))}
     </Card.Group>
   );
-}
+};
+export default FileContainer;

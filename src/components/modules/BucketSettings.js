@@ -1,15 +1,22 @@
 import React from 'react';
 import { Button } from 'semantic-ui-react';
 import FileUploadModal from '../modals/FileUploadModal';
+import FolderUploadModal from '../modals/FolderUploadModal';
 
 /**
  * This component controls how much info you want to load in from the api
  */
-export default function BucketSettings({ updateList, bucket, pathInfo }) {
+const BucketSettings = ({ updateList, bucket, pathInfo }) => {
   return (
     <div className="bucket-bar">
       <span className="bucket-settings"></span>
       <span className="bucket-buttons">
+        <FolderUploadModal
+          updateList={updateList}
+          bucket={bucket}
+          pathInfo={pathInfo}
+          trigger={<Button size="medium">New Folder</Button>}
+        />
         <FileUploadModal
           updateList={updateList}
           bucket={bucket}
@@ -19,4 +26,5 @@ export default function BucketSettings({ updateList, bucket, pathInfo }) {
       </span>
     </div>
   );
-}
+};
+export default BucketSettings;

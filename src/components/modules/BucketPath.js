@@ -4,8 +4,9 @@ import {
   BreadcrumbDivider,
   BreadcrumbSection
 } from 'semantic-ui-react';
+import { deleteObject } from '../utils/amazon-s3-utils';
 
-export default function BucketPath(props) {
+const BucketPath = (props) => {
   const changePath = (event, attributes) => {
     let newPathInfo =
       attributes.depth === 0
@@ -71,4 +72,5 @@ export default function BucketPath(props) {
       </Breadcrumb>
     </div>
   );
-}
+};
+export default BucketPath;

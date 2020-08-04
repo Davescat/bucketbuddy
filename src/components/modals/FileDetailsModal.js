@@ -11,40 +11,14 @@ import {
   Button
 } from 'semantic-ui-react';
 import AWS from 'aws-sdk';
+import { getObject, deleteObject } from '../utils/amazon-s3-utils';
 
-export default function FileDetailsModal(props) {
+const FileDetailsModal = (props) => {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [objectData, setObjectData] = useState({});
 
   const getData = () => {
-    const key = props.file.Key;
-    const {
-      bucket: { accessKeyId, secretAccessKey, region, name }
-    } = props;
-
-    return (async function () {
-      try {
-        AWS.config.update({
-          accessKeyId,
-          secretAccessKey,
-          region
-        });
-        const s3 = new AWS.S3();
-        const res = await s3
-          .getObject({
-            Bucket: name,
-            Key: key
-          })
-          .promise()
-          .then((response) => {
-            return response;
-          });
-
-        return res;
-      } catch (e) {
-        console.log('My error', e);
-      }
-    })();
+    return getObject(props.bucket, props.file.Key);
   };
 
   /**
@@ -53,42 +27,13 @@ export default function FileDetailsModal(props) {
    */
   const setData = (response) => {
     setDataLoaded(true);
-    setObjectData({ response });
+    setObjectData(response);
   };
 
-  const deleteObject = () => {
-    const key = props.file.Key;
-    const {
-      bucket: { accessKeyId, secretAccessKey, region, name },
-      handleClose,
-      updateList
-    } = props;
-
-    return (async function () {
-      try {
-        AWS.config.update({
-          accessKeyId,
-          secretAccessKey,
-          region
-        });
-        const s3 = new AWS.S3();
-        const res = await s3
-          .deleteObject({
-            Bucket: name,
-            Key: key
-          })
-          .promise()
-          .then((response) => {
-            handleClose();
-            updateList();
-            return response;
-          });
-
-        return res;
-      } catch (e) {
-        console.log('My error', e);
-      }
-    })();
+  const deleteFile = () => {
+    deleteObject(props.bucket, props.file.Key);
+    props.handleClose();
+    props.updateList();
   };
 
   useEffect(() => {
@@ -134,7 +79,7 @@ export default function FileDetailsModal(props) {
               </List.Item>
               <List.Item>
                 <ListContent>
-                  <Button onClick={deleteObject}>Delete File</Button>
+                  <Button onClick={deleteFile}>Delete File</Button>
                 </ListContent>
               </List.Item>
             </List>
@@ -147,4 +92,5 @@ export default function FileDetailsModal(props) {
       </Modal.Content>
     </Modal>
   );
-}
+};
+export default FileDetailsModal;

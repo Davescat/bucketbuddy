@@ -2,67 +2,14 @@ import AWS from 'aws-sdk';
 import React, { useEffect, useState } from 'react';
 import { Card, Image, Placeholder } from 'semantic-ui-react';
 import FileDetailsModal from '../modals/FileDetailsModal';
+import { getObjectURL } from '../utils/amazon-s3-utils';
 
-export default function File(props) {
+const File = (props) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [src, setSrc] = useState({});
 
-  const getData = () => {
-    const {
-      file: { Key },
-      bucket: { accessKeyId, secretAccessKey, region, name }
-    } = props;
-
-    return (async function () {
-      try {
-        AWS.config.update({
-          accessKeyId,
-          secretAccessKey,
-          region
-        });
-        const s3 = new AWS.S3();
-        const res = await s3
-          .getObject({
-            Bucket: name,
-            Key: Key
-          })
-          .promise()
-          .then((response) => {
-            return response;
-          });
-
-        return res;
-      } catch (e) {
-        console.log('My error', e);
-      }
-    })();
-  };
-
-  const getImageUrl = () => {
-    const {
-      file: { Key },
-      bucket: { accessKeyId, secretAccessKey, region, name }
-    } = props;
-
-    return (async function () {
-      try {
-        AWS.config.update({
-          accessKeyId,
-          secretAccessKey,
-          region
-        });
-        const s3 = new AWS.S3();
-        const url = await s3.getSignedUrlPromise('getObject', {
-          Bucket: name,
-          Key: Key
-        });
-        return url;
-      } catch (e) {
-        console.log('My error', e);
-      }
-    })();
-  };
+  const getImageUrl = () => getObjectURL(props.bucket, props.file.Key);
 
   useEffect(() => {
     if (props.file.type === 'file') {
@@ -147,4 +94,5 @@ export default function File(props) {
       />
     )
   ];
-}
+};
+export default File;

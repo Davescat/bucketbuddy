@@ -5,6 +5,7 @@ import BucketPath from './BucketPath';
 import BucketSettings from './BucketSettings';
 import FileContainer from './FileContainer';
 import { Dimmer, Loader } from 'semantic-ui-react';
+import { listObjects } from '../utils/amazon-s3-utils';
 
 const BucketViewer = (props) => {
   const [bucket, setBucket] = useState(props.location.state.bucket);
@@ -44,34 +45,11 @@ const BucketViewer = (props) => {
 
   const updateList = () => {
     setFilesLoading(true);
-    listObjects().then(filterList);
+    listFiles().then(filterList);
   };
 
-  const listObjects = () => {
-    const { accessKeyId, secretAccessKey, region, name } = bucket;
-    return (async function () {
-      try {
-        AWS.config.update({
-          accessKeyId,
-          secretAccessKey,
-          region
-        });
-        const s3 = new AWS.S3();
-        const res = await s3
-          .listObjectsV2({
-            Bucket: name,
-            Prefix: pathInfo.path
-          })
-          .promise()
-          .then((response) => {
-            console.log('Found Objects');
-            return response;
-          });
-        return res;
-      } catch (e) {
-        console.log('My error', e);
-      }
-    })();
+  const listFiles = () => {
+    return listObjects(bucket, pathInfo.path);
   };
 
   /**
