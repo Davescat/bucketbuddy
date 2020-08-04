@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { withRouter, useHistory } from 'react-router-dom';
-import { Button, Form, Message, Dimmer, Loader } from 'semantic-ui-react';
+import { Button, Form, Message, Dimmer, Loader, Icon } from 'semantic-ui-react';
 
 const SchemaForm = () => {
   const [state, setState] = useState({
@@ -65,13 +65,13 @@ const SchemaForm = () => {
       </Message>
       <Form onSubmit={handleSubmit} error={error != null}>
         {state.schemaValues.map((schemaValue, idx) => {
-          let key = 'key',
+          const key = 'key',
             value = 'value';
           return (
             <>
               <Form.Group widths="equal">
                 <Button name={idx} color="red" onClick={removeSchemaValue}>
-                  Remove
+                  <Icon name="cancel" />
                 </Button>
                 <Form.Input
                   fluid
