@@ -1,27 +1,21 @@
 import AWS from 'aws-sdk';
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Image, Placeholder } from 'semantic-ui-react';
 import FileDetailsModal from '../modals/FileDetailsModal';
 
-export class File extends Component {
-  constructor() {
-    super();
-    this.state = {
-      imageLoaded: false,
-      src: '',
-      modalOpen: false
-    };
-  }
+export default function File(props) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [src, setSrc] = useState({});
 
-  getData = () => {
+  const getData = () => {
     const {
       file: { Key },
       bucket: { accessKeyId, secretAccessKey, region, name }
-    } = this.props;
+    } = props;
 
-    return (async function (key) {
+    return (async function () {
       try {
-        AWS.config.setPromisesDependency();
         AWS.config.update({
           accessKeyId,
           secretAccessKey,
@@ -31,7 +25,7 @@ export class File extends Component {
         const res = await s3
           .getObject({
             Bucket: name,
-            Key: key
+            Key: Key
           })
           .promise()
           .then((response) => {
@@ -42,29 +36,17 @@ export class File extends Component {
       } catch (e) {
         console.log('My error', e);
       }
-    })(Key);
+    })();
   };
 
-  /**
-   * Turns the UInt8Aray into a base64 encoded string as the source for the displayable image
-   * @param {S3.GetObjectOutput} data
-   */
-  encode = (data) => {
-    var str = data.Body.reduce(function (a, b) {
-      return a + String.fromCharCode(b);
-    }, '');
-    return btoa(str).replace(/.{76}(?=.)/g, '$&\n');
-  };
-
-  getImageUrl = () => {
+  const getImageUrl = () => {
     const {
       file: { Key },
       bucket: { accessKeyId, secretAccessKey, region, name }
-    } = this.props;
+    } = props;
 
     return (async function () {
       try {
-        AWS.config.setPromisesDependency();
         AWS.config.update({
           accessKeyId,
           secretAccessKey,
@@ -82,36 +64,23 @@ export class File extends Component {
     })();
   };
 
-  componentDidMount() {
-    if (this.props.file.type === 'file') {
-      this.getImageUrl().then((data) => {
-        this.setState({
-          imageLoaded: true,
-          src: data
-        });
+  useEffect(() => {
+    if (props.file.type === 'file') {
+      getImageUrl().then((data) => {
+        setImageLoaded(true);
+        setSrc(data);
       });
     }
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.file.Key !== this.props.file.Key) {
-      this.getImageUrl().then((data) => {
-        this.setState({
-          imageLoaded: true,
-          src: data
-        });
-      });
-    }
-  }
+  }, [props.file.Key]);
 
   /**
    * Gets the appropriate tags for whatever type of file requested
    */
-  getImage() {
-    if (this.props.settings.loadImages) {
-      if (this.props.file.type === 'file') {
-        if (this.state.imageLoaded) {
-          return <Image src={this.state.src} wrapped ui={false} />;
+  const getImage = () => {
+    if (props.settings.loadImages) {
+      if (props.file.type === 'file') {
+        if (imageLoaded) {
+          return <Image src={src} wrapped ui={false} />;
         } else {
           return (
             <Placeholder>
@@ -121,7 +90,7 @@ export class File extends Component {
         }
       }
     } else {
-      if (this.props.file.type === 'file') {
+      if (props.file.type === 'file') {
         return (
           <Image
             src="https://react.semantic-ui.com/images/wireframe/square-image.png"
@@ -131,10 +100,10 @@ export class File extends Component {
         );
       }
     }
-  }
+  };
 
-  handleFileClick = () => {
-    const { file, customClickEvent } = this.props;
+  const handleFileClick = () => {
+    const { file, customClickEvent } = props;
     if (file.type === 'folder') {
       let newDepth = file.Key.split('/').length - 1;
       let newPathInfo = {
@@ -143,42 +112,39 @@ export class File extends Component {
       };
       customClickEvent(newPathInfo);
     } else if (file.type === 'file') {
-      this.setState({ modalOpen: true });
+      setModalOpen(true);
     }
   };
 
-  render() {
-    const { file, bucket } = this.props;
-    let keys = file.Key.split('/');
-    let filename = '';
-    if (file.type === 'file') {
-      filename = keys.length === 1 ? keys[0] : keys[keys.length - 1];
-    } else {
-      filename = keys.length === 1 ? keys[0] : keys[keys.length - 2] + '/';
-    }
-    return [
-      <Card className="file-card" onClick={this.handleFileClick}>
-        {this.getImage()}
-        <Card.Content>
-          <Card.Header>{filename}</Card.Header>
-          <Card.Meta>{`Last modified: ${file.LastModified}`}</Card.Meta>
-          <Card.Meta>{`Size: ${file.Size} bytes`}</Card.Meta>
-        </Card.Content>
-      </Card>,
-      file.type === 'file' && (
-        <FileDetailsModal
-          updateList={this.props.updateList}
-          bucket={bucket}
-          modalOpen={this.state.modalOpen}
-          handleClose={() => this.setState({ modalOpen: false })}
-          file={{
-            ...file,
-            filename: filename,
-            src: this.state.src
-          }}
-        />
-      )
-    ];
+  const { file, bucket } = props;
+  let keys = file.Key.split('/');
+  let filename = '';
+  if (file.type === 'file') {
+    filename = keys.length === 1 ? keys[0] : keys[keys.length - 1];
+  } else {
+    filename = keys.length === 1 ? keys[0] : keys[keys.length - 2] + '/';
   }
+  return [
+    <Card className="file-card" onClick={handleFileClick}>
+      {getImage()}
+      <Card.Content>
+        <Card.Header>{filename}</Card.Header>
+        <Card.Meta>{`Last modified: ${file.LastModified}`}</Card.Meta>
+        <Card.Meta>{`Size: ${file.Size} bytes`}</Card.Meta>
+      </Card.Content>
+    </Card>,
+    file.type === 'file' && (
+      <FileDetailsModal
+        updateList={props.updateList}
+        bucket={bucket}
+        modalOpen={modalOpen}
+        handleClose={() => setModalOpen(false)}
+        file={{
+          ...file,
+          filename: filename,
+          src: src
+        }}
+      />
+    )
+  ];
 }
-export default File;

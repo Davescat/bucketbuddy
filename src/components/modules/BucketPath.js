@@ -1,19 +1,12 @@
-import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+import React from 'react';
 import {
   Breadcrumb,
   BreadcrumbDivider,
   BreadcrumbSection
 } from 'semantic-ui-react';
 
-class BucketPath extends Component {
-  constructor() {
-    super();
-    this.state = {};
-    this.changePath = this.changePath.bind(this);
-  }
-
-  changePath(event, attributes) {
+export default function BucketPath(props) {
+  const changePath = (event, attributes) => {
     let newPathInfo =
       attributes.depth === 0
         ? {
@@ -21,67 +14,61 @@ class BucketPath extends Component {
             depth: 0
           }
         : {
-            path: `${this.props.pathInfo.path.split('/', attributes.depth)}/`,
+            path: `${props.pathInfo.path.split('/', attributes.depth)}/`,
             depth: attributes.depth
           };
-    this.props.pathChange(newPathInfo);
-  }
+    props.pathChange(newPathInfo);
+  };
 
-  render() {
-    let pathArr = this.props.pathInfo.path.split('/');
-    let arr = ['/'];
-    for (let i = 0; i < this.props.pathInfo.depth; i++) {
-      arr.push(pathArr.shift());
-      if (i !== this.props.pathInfo.depth - 1) arr.push('/');
-    }
-    return (
-      <div className="bucket-path">
-        <Breadcrumb>
-          Current Directory:&nbsp;
-          {this.props.pathInfo.depth === 0 && (
-            <BreadcrumbSection active>
-              {this.props.bucket.name}
-            </BreadcrumbSection>
-          )}
-          {this.props.pathInfo.depth !== 0 && (
-            <BreadcrumbSection
-              onClick={this.changePath}
-              depth={0}
-              active={this.props.pathInfo.depth === 0}
-            >
-              {this.props.bucket.name}
-            </BreadcrumbSection>
-          )}
-          {arr.map((file, index) => {
-            if (file === '/') {
-              return (
-                <BreadcrumbDivider key={`bread${index}`}>/</BreadcrumbDivider>
-              );
-            } else {
-              let sectionDepth = (index + 1) / 2;
-              return index !== this.props.pathInfo.depth * 2 - 1 ? (
-                <BreadcrumbSection
-                  key={`bread${index}`}
-                  onClick={this.changePath}
-                  depth={sectionDepth}
-                >
-                  {file}
-                </BreadcrumbSection>
-              ) : (
-                <BreadcrumbSection
-                  key={`bread${index}`}
-                  depth={sectionDepth}
-                  active
-                >
-                  {file}
-                </BreadcrumbSection>
-              );
-            }
-          })}
-        </Breadcrumb>
-      </div>
-    );
+  let pathArr = props.pathInfo.path.split('/');
+  let arr = ['/'];
+  for (let i = 0; i < props.pathInfo.depth; i++) {
+    arr.push(pathArr.shift());
+    if (i !== props.pathInfo.depth - 1) arr.push('/');
   }
+  return (
+    <div className="bucket-path">
+      <Breadcrumb>
+        Current Directory:&nbsp;
+        {props.pathInfo.depth === 0 && (
+          <BreadcrumbSection active>{props.bucket.name}</BreadcrumbSection>
+        )}
+        {props.pathInfo.depth !== 0 && (
+          <BreadcrumbSection
+            onClick={changePath}
+            depth={0}
+            active={props.pathInfo.depth === 0}
+          >
+            {props.bucket.name}
+          </BreadcrumbSection>
+        )}
+        {arr.map((file, index) => {
+          if (file === '/') {
+            return (
+              <BreadcrumbDivider key={`bread${index}`}>/</BreadcrumbDivider>
+            );
+          } else {
+            let sectionDepth = (index + 1) / 2;
+            return index !== props.pathInfo.depth * 2 - 1 ? (
+              <BreadcrumbSection
+                key={`bread${index}`}
+                onClick={changePath}
+                depth={sectionDepth}
+              >
+                {file}
+              </BreadcrumbSection>
+            ) : (
+              <BreadcrumbSection
+                key={`bread${index}`}
+                depth={sectionDepth}
+                active
+              >
+                {file}
+              </BreadcrumbSection>
+            );
+          }
+        })}
+      </Breadcrumb>
+    </div>
+  );
 }
-
-export default withRouter(BucketPath);

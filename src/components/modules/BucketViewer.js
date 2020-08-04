@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import AWS from 'aws-sdk';
 import { withRouter } from 'react-router-dom';
 import BucketPath from './BucketPath';
@@ -6,62 +6,51 @@ import BucketSettings from './BucketSettings';
 import FileContainer from './FileContainer';
 import { Dimmer, Loader } from 'semantic-ui-react';
 
-export class BucketViewer extends Component {
-  state = {
-    ...this.props.location.state,
-    pathInfo: { path: '', depth: 0 },
-    files: {
-      folders: [],
-      files: []
-    },
-    settings: {
-      loadMetadata: true,
-      loadTags: false,
-      loadImages: true
-    },
-    loading: true
-  };
+const BucketViewer = (props) => {
+  const [bucket, setBucket] = useState(props.location.state.bucket);
+  const [pathInfo, setPathInfo] = useState({ path: '', depth: 0 });
+  const [files, setFiles] = useState({ folders: [], files: [] });
+  const [loading, setLoading] = useState(true);
+  const [filesLoading, setFilesLoading] = useState(true);
+  const [settings, setSettings] = useState({
+    loadMetadata: true,
+    loadTags: false,
+    loadImages: true
+  });
 
-  componentDidMount() {
-    this.updateList();
-  }
+  useEffect(() => {
+    if (bucket && loading) {
+      updateList();
+      setLoading(false);
+    }
+  });
 
-  handleSettingsChange = (newSettings) => {
-    this.setState({ settings: newSettings });
-  };
+  useEffect(() => {
+    updateList();
+  }, [pathInfo]);
 
-  updatePath = (newPath) => {
-    const { history } = this.props;
-    const { bucket } = this.props.location.state;
-    this.setState(
-      (prevState) => ({ ...prevState, pathInfo: newPath }),
-      () => {
-        history.replace(
-          {
-            pathname: `/bucket-viewer/${bucket.name}/${newPath.path}`
-          },
-          {
-            bucket: bucket
-          }
-        );
-        this.updateList();
+  const updatePath = (newPath) => {
+    const { history } = props;
+    setPathInfo(newPath);
+    history.replace(
+      {
+        pathname: `/bucket-viewer/${bucket.name}/${newPath.path}`
+      },
+      {
+        bucket: bucket
       }
     );
   };
 
-  updateList = () => {
-    this.setState({ loading: true });
-    this.listObjects().then(this.filterList);
+  const updateList = () => {
+    setFilesLoading(true);
+    listObjects().then(filterList);
   };
 
-  listObjects = () => {
-    const {
-      pathInfo: { path },
-      bucket: { accessKeyId, secretAccessKey, region, name }
-    } = this.state;
+  const listObjects = () => {
+    const { accessKeyId, secretAccessKey, region, name } = bucket;
     return (async function () {
       try {
-        AWS.config.setPromisesDependency();
         AWS.config.update({
           accessKeyId,
           secretAccessKey,
@@ -71,7 +60,7 @@ export class BucketViewer extends Component {
         const res = await s3
           .listObjectsV2({
             Bucket: name,
-            Prefix: path
+            Prefix: pathInfo.path
           })
           .promise()
           .then((response) => {
@@ -89,8 +78,8 @@ export class BucketViewer extends Component {
    * Filters the response into files and folders
    * @param {AWS.S3.ListObjectsV2Output} response
    */
-  filterList = (response) => {
-    let depth = this.state.pathInfo.depth + 1;
+  const filterList = (response) => {
+    let depth = pathInfo.depth + 1;
     let newFolders = response.Contents.filter(
       (x) =>
         x.Key.split('/').length === depth + 1 && x.Key[x.Key.length - 1] === '/'
@@ -105,34 +94,35 @@ export class BucketViewer extends Component {
       file.type = 'file';
       return file;
     });
-    this.setState((prevState) => ({
-      ...prevState,
-      loading: false,
-      files: {
-        folders: newFolders,
-        files: newFiles
-      }
-    }));
+    setFilesLoading(false);
+    setFiles({
+      folders: newFolders,
+      files: newFiles
+    });
   };
 
-  render() {
-    const { bucket } = this.props.location.state;
-    const { pathInfo, settings, files, loading } = this.state;
+  if (loading) {
+    return (
+      <Dimmer>
+        <Loader indeterminate>Preparing Files</Loader>
+      </Dimmer>
+    );
+  } else {
     return (
       <div className="bucket-viewer">
         <BucketPath
           bucket={bucket}
           pathInfo={pathInfo}
-          pathChange={this.updatePath}
+          pathChange={updatePath}
         />
         <BucketSettings
           bucket={bucket}
           pathInfo={pathInfo}
           settings={settings}
-          updateList={this.updateList}
-          settingsChange={this.handleSettingsChange}
+          updateList={updateList}
+          settingsChange={setSettings}
         />
-        {loading ? (
+        {filesLoading ? (
           <Dimmer>
             <Loader indeterminate>Preparing Files</Loader>
           </Dimmer>
@@ -140,14 +130,14 @@ export class BucketViewer extends Component {
           <FileContainer
             bucket={bucket}
             files={files}
-            updateList={this.updateList}
+            updateList={updateList}
             pathInfo={pathInfo}
             settings={settings}
-            pathChange={this.updatePath}
+            pathChange={updatePath}
           />
         )}
       </div>
     );
   }
-}
+};
 export default withRouter(BucketViewer);
