@@ -1,91 +1,33 @@
 import AWS from 'aws-sdk';
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Image, Placeholder } from 'semantic-ui-react';
+import FileDetailsModal from '../modals/FileDetailsModal';
+import { getObjectURL } from '../utils/amazon-s3-utils';
 
-export class File extends Component {
-  constructor() {
-    super();
-    this.state = {
-      imageLoaded: false,
-      src: ''
-    };
-  }
+const File = (props) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [src, setSrc] = useState({});
 
-  getData = () => {
-    const {
-      file: { Key },
-      bucket: { accessKeyId, secretAccessKey, region, name }
-    } = this.props;
+  const getImageUrl = () => getObjectURL(props.bucket, props.file.Key);
 
-    return (async function (key) {
-      try {
-        AWS.config.setPromisesDependency();
-        AWS.config.update({
-          accessKeyId,
-          secretAccessKey,
-          region
-        });
-        const s3 = new AWS.S3();
-        const res = await s3
-          .getObject({
-            Bucket: name,
-            Key: key
-          })
-          .promise()
-          .then((response) => {
-            return response;
-          });
-
-        return res;
-      } catch (e) {
-        console.log('My error', e);
-      }
-    })(Key);
-  };
-
-  /**
-   * Turns the UInt8Aray into a base64 encoded string as the source for the displayable image
-   * @param {S3.GetObjectOutput} data
-   */
-  encode = (data) => {
-    var str = data.Body.reduce(function (a, b) {
-      return a + String.fromCharCode(b);
-    }, '');
-    return btoa(str).replace(/.{76}(?=.)/g, '$&\n');
-  };
-
-  componentDidMount() {
-    if (this.props?.file?.type === 'file') {
-      this.getData().then((data) => {
-        this.setState({
-          imageLoaded: true,
-          src: `data:image/jpg;base64, ${this.encode(data)}`
-        });
+  useEffect(() => {
+    if (props.file.type === 'file') {
+      getImageUrl().then((data) => {
+        setImageLoaded(true);
+        setSrc(data);
       });
     }
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.file.Key !== this.props.file.Key) {
-      if (this.props.file.type === 'file') {
-        this.getData().then((data) => {
-          this.setState({
-            imageLoaded: true,
-            src: `data:image/jpg;base64, ${this.encode(data.Body)}`
-          });
-        });
-      }
-    }
-  }
+  }, [props.file.Key]);
 
   /**
    * Gets the appropriate tags for whatever type of file requested
    */
-  getImage() {
-    if (this.props.settings.loadImages) {
-      if (this.props.file.type === 'file') {
-        if (this.state.imageLoaded) {
-          return <Image src={this.state.src} wrapped ui={false} />;
+  const getImage = () => {
+    if (props.settings.loadImages) {
+      if (props.file.type === 'file') {
+        if (imageLoaded) {
+          return <Image src={src} wrapped ui={false} />;
         } else {
           return (
             <Placeholder>
@@ -95,7 +37,7 @@ export class File extends Component {
         }
       }
     } else {
-      if (this.props.file.type === 'file') {
+      if (props.file.type === 'file') {
         return (
           <Image
             src="https://react.semantic-ui.com/images/wireframe/square-image.png"
@@ -105,51 +47,52 @@ export class File extends Component {
         );
       }
     }
-  }
+  };
 
-  handleFileClick = () => {
-    if (this.props.file.type === 'folder') {
-      let newDepth = this.props.file.Key.split('/').length - 1;
+  const handleFileClick = () => {
+    const { file, customClickEvent } = props;
+    if (file.type === 'folder') {
+      let newDepth = file.Key.split('/').length - 1;
       let newPathInfo = {
-        path: this.props.file.Key,
+        path: file.Key,
         depth: newDepth
       };
-      this.props.customClickEvent(newPathInfo);
+      customClickEvent(newPathInfo);
+    } else if (file.type === 'file') {
+      setModalOpen(true);
     }
   };
 
-  render() {
-    return (
-      <Card style={{ cursor: 'pointer' }} onClick={this.handleFileClick}>
-        {this.getImage()}
-        <Card.Content>
-          <Card.Header>{this.props.file.Key}</Card.Header>
-          <Card.Meta>{`Last modified: ${this.props.file.LastModified}`}</Card.Meta>
-          <Card.Meta>{`Size: ${this.props.file.Size} bytes`}</Card.Meta>
-        </Card.Content>
-      </Card>
-    );
+  const { file, bucket } = props;
+  let keys = file.Key.split('/');
+  let filename = '';
+  if (file.type === 'file') {
+    filename = keys.length === 1 ? keys[0] : keys[keys.length - 1];
+  } else {
+    filename = keys.length === 1 ? keys[0] : keys[keys.length - 2] + '/';
   }
-}
-
-/*
-
-listObjectv2
-    ETag: "\"70ee1738b6b21e2c8a43f3a5ab0eee71\"", 
-    Key: "happyface.jpg", 
-    LastModified: <Date Representation>, 
-    Size: 11, 
-    StorageClass: "STANDARD"
-getObject
-    AcceptRanges: "bytes", 
-    ContentLength: 10, 
-    ContentRange: "bytes 0-9/43", 
-    ContentType: "text/plain", 
-    ETag: "\"0d94420ffd0bc68cd3d152506b97a9cc\"", 
-    LastModified: <Date Representation>, 
-    Metadata: {
-    }, 
-    VersionId: "null"
-    
-*/
+  return [
+    <Card className="file-card" onClick={handleFileClick}>
+      {getImage()}
+      <Card.Content>
+        <Card.Header>{filename}</Card.Header>
+        <Card.Meta>{`Last modified: ${file.LastModified}`}</Card.Meta>
+        <Card.Meta>{`Size: ${file.Size} bytes`}</Card.Meta>
+      </Card.Content>
+    </Card>,
+    file.type === 'file' && (
+      <FileDetailsModal
+        updateList={props.updateList}
+        bucket={bucket}
+        modalOpen={modalOpen}
+        handleClose={() => setModalOpen(false)}
+        file={{
+          ...file,
+          filename: filename,
+          src: src
+        }}
+      />
+    )
+  ];
+};
 export default File;

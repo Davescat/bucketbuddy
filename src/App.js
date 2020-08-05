@@ -12,7 +12,7 @@ function App() {
       <NavMenu />
       <Switch>
         <Route exact path="/" component={ConnectToS3Bucket} />
-        <Route exact path="/bucket-viewer" component={BucketViewer} />
+        <Route path="/bucket-viewer" component={BucketViewer} />
       </Switch>
     </Router>
   );

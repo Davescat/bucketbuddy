@@ -1,143 +1,39 @@
-import AWS from 'aws-sdk';
-import React, { Component } from 'react';
+import React from 'react';
 import { Card } from 'semantic-ui-react';
 import File from './File';
 
-export class FileContainer extends Component {
-  state = {
-    folders: [],
-    files: []
-  };
-
-  listObjects = () => {
-    const {
-      pathInfo: { path },
-      bucket: { accessKeyId, secretAccessKey, region, name }
-    } = this.props;
-
-    return (async function (path) {
-      try {
-        console.log(path);
-
-        AWS.config.setPromisesDependency();
-        AWS.config.update({
-          accessKeyId,
-          secretAccessKey,
-          region
-        });
-        const s3 = new AWS.S3();
-        const res = await s3
-          .listObjectsV2({
-            Bucket: name,
-            Prefix: path
-          })
-          .promise()
-          .then((response) => {
-            return response;
-          });
-        return res;
-      } catch (e) {
-        console.log('My error', e);
-      }
-    })(path);
-  };
-
-  componentDidMount() {
-    this.listObjects().then((response) => {
-      console.log({ response });
-      let depth = this.props.pathInfo.depth + 1;
-      let newFolders = response.Contents.filter(
-        (x) =>
-          x.Key.split('/').length === depth + 1 &&
-          x.Key[x.Key.length - 1] === '/'
-      ).map((folder) => {
-        folder.type = 'folder';
-        return folder;
-      });
-      let newFiles = response.Contents.filter(
-        (x) =>
-          x.Key.split('/').length === depth && x.Key[x.Key.length - 1] !== '/'
-      ).map((file) => {
-        file.type = 'file';
-        return file;
-      });
-      this.setState({
-        folders: newFolders,
-        files: newFiles
-      });
-    });
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.pathInfo.path !== this.props.pathInfo.path) {
-      this.listObjects().then((response) => {
-        console.log(response);
-        let depth = this.props.pathInfo.depth + 1;
-        let newFolders = response.Contents.filter(
-          (x) =>
-            x.Key.split('/').length === depth + 1 &&
-            x.Key[x.Key.length - 1] === '/'
-        ).map((folder) => {
-          folder.type = 'folder';
-          return folder;
-        });
-        let newFiles = response.Contents.filter(
-          (x) =>
-            x.Key.split('/').length === depth && x.Key[x.Key.length - 1] !== '/'
-        ).map((file) => {
-          file.type = 'file';
-          return file;
-        });
-        this.setState({
-          folders: newFolders,
-          files: newFiles
-        });
-      });
-    }
-  }
-  render() {
-    const { bucket } = this.props;
-
-    const displayFiles = this.state.folders.concat(this.state.files);
-    return (
-      <Card.Group className="file-container">
-        {displayFiles.map((x, i) => (
+const FileContainer = (props) => {
+  const {
+    bucket,
+    files: { files, folders }
+  } = props;
+  return (
+    <Card.Group className="file-container">
+      {folders &&
+        folders.length > 0 &&
+        folders.map((x, i) => (
           <File
             bucket={bucket}
-            key={`file${i}`}
+            key={`${i}${x.ETag}`}
             file={x}
-            settings={this.props.settings}
-            customClickEvent={this.props.pathChange}
+            updateList={props.updateList}
+            settings={props.settings}
+            customClickEvent={props.pathChange}
           />
         ))}
-      </Card.Group>
-    );
-  }
-}
-/*
-  data = {
-   Contents: [
-      {
-     ETag: "\"70ee1738b6b21e2c8a43f3a5ab0eee71\"", 
-     Key: "happyface.jpg", 
-     LastModified: <Date Representation>, 
-     Size: 11, 
-     StorageClass: "STANDARD"
-    }, 
-      {
-     ETag: "\"becf17f89c30367a9a44495d62ed521a-1\"", 
-     Key: "test.jpg", 
-     LastModified: <Date Representation>, 
-     Size: 4192256, 
-     StorageClass: "STANDARD"
-    }
-   ], 
-   IsTruncated: true, 
-   KeyCount: 2, 
-   MaxKeys: 2, 
-   Name: "examplebucket", 
-   NextContinuationToken: "1w41l63U0xa8q7smH50vCxyTQqdxo69O3EmK28Bi5PcROI4wI/EyIJg==", 
-   Prefix: ""
-  }
-  */
+      {files &&
+        files.length > 0 &&
+        files.map((x, i) => (
+          <File
+            bucket={bucket}
+            key={`${i}${x.ETag}`}
+            file={x}
+            updateList={props.updateList}
+            settings={props.settings}
+            customClickEvent={props.pathChange}
+          />
+        ))}
+    </Card.Group>
+  );
+};
 export default FileContainer;
