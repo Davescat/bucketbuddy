@@ -13,7 +13,7 @@ function App() {
       <NavMenu />
       <Switch>
         <Route exact path="/" component={ConnectToS3Bucket} />
-        <Route exact path="/bucket-viewer" component={BucketViewer} />
+        <Route path="/bucket-viewer" component={BucketViewer} />
         {/* TODO this is to test the schema form and is to be removed */}
         <Route exact path="/test" component={SchemaForm} />
       </Switch>

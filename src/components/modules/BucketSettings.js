@@ -1,57 +1,30 @@
-import React, { Component } from 'react';
-import { Radio } from 'semantic-ui-react';
+import React from 'react';
+import { Button } from 'semantic-ui-react';
+import FileUploadModal from '../modals/FileUploadModal';
+import FolderUploadModal from '../modals/FolderUploadModal';
 
 /**
  * This component controls how much info you want to load in from the api
  */
-export class BucketSettings extends Component {
-  constructor(props) {
-    super(props);
-    this.state = this.props.settings;
-    this.changeSetting = this.changeSetting.bind(this);
-  }
-
-  changeSetting(setting) {
-    this.setState(
-      {
-        [setting]: !this.state[setting]
-      },
-      () => this.props.settingsChange(this.state)
-    );
-  }
-  render() {
-    return (
-      <div className="bucket-settings">
-        <span>
-          <Radio
-            toggle
-            name="loadTags"
-            checked={this.state.loadTags}
-            label="Load Tags"
-            onChange={() => this.changeSetting('loadTags')}
-          />
-        </span>
-        <span>
-          <Radio
-            toggle
-            name="loadImages"
-            checked={this.state.loadImages}
-            label="Load Images"
-            onChange={() => this.changeSetting('loadImages')}
-          />
-        </span>
-        <span>
-          <Radio
-            toggle
-            name="loadMetadata"
-            checked={this.state.loadMetadata}
-            label="Load Versions"
-            onChange={() => this.changeSetting('loadMetadata')}
-          />
-        </span>
-      </div>
-    );
-  }
-}
-
+const BucketSettings = ({ updateList, bucket, pathInfo }) => {
+  return (
+    <div className="bucket-bar">
+      <span className="bucket-settings"></span>
+      <span className="bucket-buttons">
+        <FolderUploadModal
+          updateList={updateList}
+          bucket={bucket}
+          pathInfo={pathInfo}
+          trigger={<Button size="medium">New Folder</Button>}
+        />
+        <FileUploadModal
+          updateList={updateList}
+          bucket={bucket}
+          pathInfo={pathInfo}
+          trigger={<Button size="medium">Upload</Button>}
+        />
+      </span>
+    </div>
+  );
+};
 export default BucketSettings;

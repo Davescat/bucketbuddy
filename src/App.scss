@@ -1,19 +1,10 @@
-.bucket-settings {
-  display: flex;
-  justify-content: left;
-  vertical-align: middle;
-  span {
-    div {
-      margin: 10px;
-    }
-
-    border-right: 1px solid rgba(204, 204, 204, 0.541);
-  }
-  span:last-child {
-    border-right: none;
-  }
+.bucket-bar {
   border-bottom: 1px solid rgba(204, 204, 204, 0.425);
+  padding: 6px;
+  .bucket-buttons {
+  }
 }
+
 .menu {
   margin-bottom: 0 !important;
 }
@@ -27,4 +18,19 @@
 
 .file-container {
   padding: 10px;
+  .file-card {
+    cursor: pointer;
+    div {
+      object-fit: scale-down !important;
+    }
+  }
+}
+
+.modal-bold {
+  font-weight: bold;
+}
+.file-details {
+  .item {
+    margin-bottom: 8px;
+  }
 }
