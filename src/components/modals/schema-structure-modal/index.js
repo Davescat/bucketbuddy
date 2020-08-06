@@ -30,9 +30,6 @@ const SchemaStructureModal = (props) => {
   };
 
   const createSchemaFile = (schemaValues) => {
-    //TODO actually create the bucket-buddy-schema.json with values
-    console.log('MODAL ' + schemaValues);
-
     const accessKeyId = props.bucket.accessKeyId;
     const secretAccessKey = props.bucket.secretAccessKey;
     const region = props.bucket.region;
@@ -80,17 +77,17 @@ const SchemaStructureModal = (props) => {
     >
       <Modal.Content>
         {dataLoaded ? (
-          isCreateSchema ? (
+          jsonSchemaValues ? (
             <SchemaForm
               actionOnSubmit={createSchemaFile}
               title="Create Schema"
-              editFieldName={isCreateSchema}
+              editFieldName={true}
             />
           ) : (
             <SchemaForm
               actionOnSubmit={createSchemaFile}
               title="Edit Schema"
-              editFieldName={isCreateSchema}
+              editFieldName={true}
               schemaValues={jsonSchemaValues}
             />
           )

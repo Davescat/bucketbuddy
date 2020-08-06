@@ -53,6 +53,7 @@ const SchemaForm = (props) => {
       setError(duplicateError);
     } else {
       try {
+        console.log(state.schemaValues);
         props.actionOnSubmit(state.schemaValues);
       } catch (e) {
         setError(issueSubmittingError);
