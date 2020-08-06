@@ -28,7 +28,11 @@ const BucketSettings = ({ updateList, bucket, pathInfo }) => {
           updateList={updateList}
           bucket={bucket}
           pathInfo={pathInfo}
-          trigger={<Button size="medium">Add Schema Structure</Button>}
+          trigger={
+            <Button size="medium">
+              Folder's File Schema Structure Settings
+            </Button>
+          }
         />
       </span>
     </div>
