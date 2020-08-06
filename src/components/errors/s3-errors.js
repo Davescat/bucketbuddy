@@ -25,4 +25,11 @@ class GenericS3Error extends Error {
   }
 }
 
-export { GenericS3Error, ForbiddenError, NetworkError };
+class NoSuchKeyError extends Error {
+  constructor() {
+    super('Hmm... It appears the key you are looking for does not exist!');
+    this.name = 'NoSuchKeyError';
+  }
+}
+
+export { GenericS3Error, ForbiddenError, NetworkError, NoSuchKeyError };

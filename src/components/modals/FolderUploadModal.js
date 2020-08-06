@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import AWS from 'aws-sdk';
 import { Button, Radio, Modal, Form, Input } from 'semantic-ui-react';
-import { deleteObject } from '../utils/amazon-s3-utils';
 
 const FolderUploadModal = (props) => {
   const [modalOpen, setModalOpen] = useState(false);

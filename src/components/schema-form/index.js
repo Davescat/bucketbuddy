@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { withRouter, useHistory } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import {
   Button,
   Form,
@@ -26,18 +26,20 @@ const SchemaForm = (props) => {
   });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const history = useHistory();
 
   const checkIfDuplicateKeys = (schemaValues) => {
-    for (let field in schemaValues) {
-      let count = 1;
+    for (let i = 0; i < schemaValues.length; i++) {
+      let count = 0;
+      const field = schemaValues[i];
 
-      for (let innerField in schemaValues) {
+      for (let j = i + 1; j < schemaValues.length; j++) {
+        const innerField = schemaValues[j];
+
         if (innerField['key'] === field['key']) {
           count++;
         }
       }
-      if (count >= 2) {
+      if (count >= 1) {
         return true;
       }
     }
@@ -58,9 +60,6 @@ const SchemaForm = (props) => {
     }
 
     setLoading(false);
-    history.push({
-      pathname: '/bucket-viewer'
-    });
   };
 
   const addNewSchemaValue = (event) => {
@@ -76,7 +75,6 @@ const SchemaForm = (props) => {
     const schemaValues = state.schemaValues;
     const index = parseInt(name);
     schemaValues.splice(index, 1);
-    console.log(schemaValues);
     setState((prevState) => ({ schemaValues }));
   };
 
@@ -120,7 +118,7 @@ const SchemaForm = (props) => {
                     fluid
                     name={key}
                     label="Field Name"
-                    id={idx}
+                    id={'' + idx}
                     required
                     placeholder="Enter field name here"
                     value={schemaValue[key]}
@@ -133,7 +131,7 @@ const SchemaForm = (props) => {
                   fluid
                   name={value}
                   label="Field Input"
-                  id={idx}
+                  id={'' + idx}
                   required
                   placeholder="Enter field input here"
                   value={schemaValue[value]}

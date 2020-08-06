@@ -2,7 +2,8 @@ import AWS from 'aws-sdk';
 import {
   NetworkError,
   ForbiddenError,
-  GenericS3Error
+  GenericS3Error,
+  NoSuchKeyError
 } from '../errors/s3-errors';
 
 const testConnectionS3Bucket = async ({
@@ -51,11 +52,15 @@ export const getObject = async (
       })
       .promise();
   } catch (error) {
+    console.log(error);
     if (!error.code) {
       throw new GenericS3Error();
     } else {
       if (error.code === 'Forbidden') {
         throw new ForbiddenError();
+      }
+      if (error.code === 'NoSuchKey') {
+        throw new NoSuchKeyError();
       }
       if (error.code === 'NetworkError') {
         throw NetworkError();

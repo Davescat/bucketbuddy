@@ -4,7 +4,6 @@ import {
   BreadcrumbDivider,
   BreadcrumbSection
 } from 'semantic-ui-react';
-import { deleteObject } from '../utils/amazon-s3-utils';
 
 const BucketPath = (props) => {
   const changePath = (event, attributes) => {
