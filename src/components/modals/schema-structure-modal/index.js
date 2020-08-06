@@ -33,8 +33,36 @@ const SchemaStructureModal = (props) => {
     //TODO actually create the bucket-buddy-schema.json with values
     console.log('MODAL ' + schemaValues);
 
-    setModalOpen(false);
-    props.updateList();
+    const accessKeyId = props.bucket.accessKeyId;
+    const secretAccessKey = props.bucket.secretAccessKey;
+    const region = props.bucket.region;
+    const name = props.bucket.name;
+
+    AWS.config.update({
+      accessKeyId,
+      secretAccessKey,
+      region
+    });
+    new AWS.S3.ManagedUpload({
+      params: {
+        Body: JSON.stringify(schemaValues),
+        Bucket: name,
+        Key: `${props.pathInfo.path}${bucketBuddySchemaFileName}`
+      }
+    })
+      .promise()
+      .then(
+        (data) => {
+          setModalOpen(false);
+          props.updateList();
+        },
+        (err) => {
+          return alert(
+            'There was an error uploading the json file',
+            err.message
+          );
+        }
+      );
   };
 
   useEffect(() => {
