@@ -9,7 +9,7 @@ const SchemaStructureModal = (props) => {
 
   const [dataLoaded, setDataLoaded] = useState(false);
   const [isCreateSchema, setIsCreateSchema] = useState(true);
-  const [jsonSchemaValues, setJsonSchemaValues] = useState({});
+  const [jsonSchemaValues, setJsonSchemaValues] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   const getData = () => {
@@ -52,6 +52,7 @@ const SchemaStructureModal = (props) => {
         (data) => {
           setModalOpen(false);
           props.updateList();
+          window.location.reload();
         },
         (err) => {
           return alert(
