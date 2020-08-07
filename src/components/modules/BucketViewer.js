@@ -100,12 +100,16 @@ const BucketViewer = (props) => {
           updateList={updateList}
           settingsChange={setSettings}
         />
-        {filesLoading ? (
-          <Dimmer>
+        {files.folders.length === 0 &&
+        files.files.length === 0 &&
+        filesLoading ? (
+          <Dimmer active>
             <Loader indeterminate>Preparing Files</Loader>
           </Dimmer>
         ) : (
           <FileContainer
+            card
+            isLoading={filesLoading}
             bucket={bucket}
             files={files}
             updateList={updateList}

@@ -17,12 +17,20 @@
 }
 
 .file-container {
+  display: flex;
   padding: 10px;
   .file-card {
     cursor: pointer;
     div {
       object-fit: scale-down !important;
     }
+  }
+}
+
+.file-list {
+  .file-list-item {
+    font-size: 1.4rem;
+    margin-left: 6px;
   }
 }
 
