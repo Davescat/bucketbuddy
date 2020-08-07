@@ -22,11 +22,11 @@ const SchemaStructureModal = (props) => {
   };
 
   const setData = (response) => {
-    setDataLoaded(true);
-    //TODO HERE GET JSON DATA
+    const schemaValues = JSON.parse(response.Body.toString());
+
+    setJsonSchemaValues(schemaValues);
     setIsCreateSchema(false);
-    console.log(response);
-    setJsonSchemaValues('');
+    setDataLoaded(true);
   };
 
   const createSchemaFile = (schemaValues) => {
@@ -80,15 +80,15 @@ const SchemaStructureModal = (props) => {
           jsonSchemaValues ? (
             <SchemaForm
               actionOnSubmit={createSchemaFile}
-              title="Create Schema"
+              title="Edit Schema"
               editFieldName={true}
+              schemaValues={jsonSchemaValues}
             />
           ) : (
             <SchemaForm
               actionOnSubmit={createSchemaFile}
-              title="Edit Schema"
+              title="Create Schema"
               editFieldName={true}
-              schemaValues={jsonSchemaValues}
             />
           )
         ) : (
