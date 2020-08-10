@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import AWS from 'aws-sdk';
-import { Button, Modal, Form, Input } from 'semantic-ui-react';
+import { Button, Modal, Form, Input, Icon, Label } from 'semantic-ui-react';
 
 const FileUploadModal = (props) => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -62,8 +62,40 @@ const FileUploadModal = (props) => {
       <Modal.Header>Select an Image to Uploads</Modal.Header>
       <Modal.Content>
         <Form onSubmit={upload}>
-          <Input ref={fileInput} id="fileupload" type="file" />
-          <Button type="submit">Upload</Button>
+          {props.schemaInfo.avaliable &&
+            props.schemaInfo.tagset.map((schemaValue, idx) => {
+              const key = 'key',
+                value = 'value';
+              return (
+                <Form.Group widths="equal" className="field-row">
+                  {props.editFieldName ? (
+                    <Form.Input
+                      fluid
+                      name={key}
+                      label="Field Name"
+                      id={'' + idx}
+                      required
+                      placeholder="Enter field name here"
+                      value={schemaValue[key]}
+                    />
+                  ) : (
+                    <Label>{schemaValue[key]}</Label>
+                  )}
+                  <Form.Input
+                    fluid
+                    name={value}
+                    id={'' + idx}
+                    required
+                    placeholder="Enter field input here"
+                    value={schemaValue[value]}
+                  />
+                </Form.Group>
+              );
+            })}
+          <Form.Field>
+            <Input ref={fileInput} id="fileupload" type="file" />
+            <Button type="submit">Upload</Button>
+          </Form.Field>
         </Form>
       </Modal.Content>
     </Modal>

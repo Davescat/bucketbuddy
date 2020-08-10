@@ -38,13 +38,7 @@ const File = (props) => {
       }
     } else {
       if (props.file.type === 'file') {
-        return (
-          <Image
-            src="https://react.semantic-ui.com/images/wireframe/square-image.png"
-            wrapped
-            ui={false}
-          />
-        );
+        return <Image wrapped ui={false} />;
       }
     }
   };
