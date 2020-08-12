@@ -1,6 +1,5 @@
-import AWS from 'aws-sdk';
 import React, { useEffect, useState } from 'react';
-import { Card, Image, Placeholder } from 'semantic-ui-react';
+import { Card, Image, Placeholder, Icon } from 'semantic-ui-react';
 import FileDetailsModal from '../modals/FileDetailsModal';
 import { getObjectURL } from '../utils/amazon-s3-utils';
 
@@ -10,6 +9,15 @@ const File = (props) => {
   const [src, setSrc] = useState({});
 
   const getImageUrl = () => getObjectURL(props.bucket, props.file.Key);
+  const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
+
+  const keys = props.file.Key.split('/');
+  let filename = '';
+  if (props.file.type === 'file') {
+    filename = keys.length === 1 ? keys[0] : keys[keys.length - 1];
+  } else {
+    filename = keys.length === 1 ? keys[0] : keys[keys.length - 2] + '/';
+  }
 
   useEffect(() => {
     if (props.file.type === 'file') {
@@ -27,7 +35,11 @@ const File = (props) => {
     if (props.settings.loadImages) {
       if (props.file.type === 'file') {
         if (imageLoaded) {
-          return <Image src={src} wrapped ui={false} />;
+          if (fileTest.test(filename)) {
+            return <Image src={src} className="card-file-image" />;
+          } else {
+            return <Icon name="file" className="card-file-icon" />;
+          }
         } else {
           return (
             <Placeholder>
@@ -57,31 +69,24 @@ const File = (props) => {
     }
   };
 
-  const { file, bucket } = props;
-  let keys = file.Key.split('/');
-  let filename = '';
-  if (file.type === 'file') {
-    filename = keys.length === 1 ? keys[0] : keys[keys.length - 1];
-  } else {
-    filename = keys.length === 1 ? keys[0] : keys[keys.length - 2] + '/';
-  }
   return [
     <Card className="file-card" onClick={handleFileClick}>
       {getImage()}
       <Card.Content>
         <Card.Header>{filename}</Card.Header>
-        <Card.Meta>{`Last modified: ${file.LastModified}`}</Card.Meta>
-        <Card.Meta>{`Size: ${file.Size} bytes`}</Card.Meta>
+        <Card.Meta>{`Last modified: ${props.file.LastModified}`}</Card.Meta>
+        <Card.Meta>{`Size: ${props.file.Size} bytes`}</Card.Meta>
       </Card.Content>
     </Card>,
-    file.type === 'file' && (
+    props.file.type === 'file' && (
       <FileDetailsModal
         updateList={props.updateList}
-        bucket={bucket}
+        bucket={props.bucket}
         modalOpen={modalOpen}
+        schemaInfo={props.schemaInfo}
         handleClose={() => setModalOpen(false)}
         file={{
-          ...file,
+          ...props.file,
           filename: filename,
           src: src
         }}

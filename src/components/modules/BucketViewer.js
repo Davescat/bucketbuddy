@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import AWS from 'aws-sdk';
 import { withRouter } from 'react-router-dom';
 import BucketPath from './BucketPath';
 import BucketSettings from './BucketSettings';
@@ -8,12 +7,12 @@ import { Dimmer, Loader } from 'semantic-ui-react';
 import { listObjects, getFolderSchema } from '../utils/amazon-s3-utils';
 
 const BucketViewer = (props) => {
-  const [bucket, setBucket] = useState(props.location.state.bucket);
+  const [bucket] = useState(props.location.state.bucket);
   const [pathInfo, setPathInfo] = useState({ path: '', depth: 0 });
   const [files, setFiles] = useState({ folders: [], files: [] });
   const [loading, setLoading] = useState(true);
   const [schemaInfo, setSchemaInfo] = useState({
-    avaliable: false,
+    available: false,
     tagset: []
   });
   const [filesLoading, setFilesLoading] = useState(true);
@@ -37,23 +36,16 @@ const BucketViewer = (props) => {
   }, [pathInfo]);
 
   useEffect(() => {
-    console.log(
-      files.files.some(
-        ({ Key }) => Key.split('/')[pathInfo.depth] === schemaFileName
-      ),
-      pathInfo.depth,
-      files.files
-    );
     if (
       files.files.some(
         ({ Key }) => Key.split('/')[pathInfo.depth] === schemaFileName
       )
     ) {
       getFolderSchema(bucket, pathInfo.path).then((response) =>
-        setSchemaInfo({ avaliable: true, tagset: response })
+        setSchemaInfo({ available: true, tagset: response })
       );
     } else {
-      setSchemaInfo({ avaliable: false, tagset: [] });
+      setSchemaInfo({ available: false, tagset: [] });
     }
   }, [files]);
 
@@ -138,6 +130,7 @@ const BucketViewer = (props) => {
             files={files}
             updateList={updateList}
             pathInfo={pathInfo}
+            schemaInfo={schemaInfo}
             settings={settings}
             pathChange={updatePath}
           />

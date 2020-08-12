@@ -28,6 +28,7 @@ const FileContainer = (props) => {
             bucket={bucket}
             key={`${i}${x.ETag}`}
             file={x}
+            schemaInfo={props.schemaInfo}
             updateList={props.updateList}
             settings={props.settings}
             customClickEvent={props.pathChange}

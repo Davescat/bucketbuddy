@@ -161,17 +161,51 @@ export const deleteObject = async (
     }
   }
 };
-export const uploadObject = async ({
-  name,
-  accessKeyId,
-  secretAccessKey,
-  region
-}) => {
-  const s3 = new AWS.S3({
-    accessKeyId,
-    secretAccessKey,
-    region
-  });
+
+/**
+ *
+ * @param {*} BucketData
+ * @param {*} path
+ * @param {*} file
+ * @param {*} tags in URL encoded format ex: Key1=Val1&Key2=Val2
+ */
+export const uploadObject = async (
+  { name, accessKeyId, secretAccessKey, region },
+  path,
+  file,
+  tags
+) => {
+  try {
+    const s3 = new AWS.S3({
+      accessKeyId,
+      secretAccessKey,
+      region
+    });
+    var params = {
+      Bucket: name,
+      Key: `${path}${file.name}`,
+      Body: file,
+      Tagging: tags ? tags : ''
+    };
+    s3.upload(params).promise();
+  } catch (error) {
+    console.log(error);
+    if (!error.code) {
+      throw new GenericS3Error();
+    } else {
+      if (error.code === 'Forbidden') {
+        throw new ForbiddenError();
+      }
+      if (error.code === 'NoSuchKey') {
+        throw new NoSuchKeyError();
+      }
+      if (error.code === 'NetworkError') {
+        throw NetworkError();
+      } else {
+        throw new GenericS3Error();
+      }
+    }
+  }
 };
 
 export const getFolderSchema = async (
