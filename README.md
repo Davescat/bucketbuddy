@@ -86,10 +86,22 @@ npm start
 
 Bucket Buddy follows the ideology that a user can connect to their bucket by entering the bucket's name, the user's access key and secret access key, and the bucket's region. By going to the main page you will be created with the connection screen above where you can enter all the details to connect to your bucket. If you are unsure ask you AWS adminstrator for the needed details.
 
+![Image of Bucket Buddy connect screen](./public/connect-to-bucket.gif)
+
 ### Navigating through the bucket
+
+Navigating through the bucket is similar to a file explorer (folders and files are group together). You can always go back by simply selecting the folder you wish to view in the breadcrumb path above the men buttons
+
+![Image of Bucket Buddy connect screen](./public/navigating-in-bucket.gif)
 
 ### Creating/Editing a schema for your objects' tags
 
+Coming soon ...
+
 ### Viewing an object and editing an object's tags
 
+Coming soon ...
+
 ### Uploading objects to your bucket
+
+Coming soon ...
