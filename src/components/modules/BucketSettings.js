@@ -7,7 +7,7 @@ import SchemaStructureModal from '../modals/schema-structure-modal';
 /**
  * This component controls how much info you want to load in from the api
  */
-const BucketSettings = ({ updateList, bucket, pathInfo }) => {
+const BucketSettings = ({ updateList, bucket, pathInfo, schemaInfo }) => {
   return (
     <div className="bucket-bar">
       <span className="bucket-settings"></span>
@@ -21,6 +21,7 @@ const BucketSettings = ({ updateList, bucket, pathInfo }) => {
         <FileUploadModal
           updateList={updateList}
           bucket={bucket}
+          schemaInfo={schemaInfo}
           pathInfo={pathInfo}
           trigger={<Button size="medium">Upload</Button>}
         />

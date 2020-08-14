@@ -13,7 +13,7 @@ const FolderUploadModal = (props) => {
       bucket: { accessKeyId, secretAccessKey, region, name }
     } = props;
     // TODO: validate text for creating folder
-    if (textInput && textInput.current.inputRef.current.value != '') {
+    if (textInput && textInput.current.inputRef.current.value !== '') {
       const folderName = `${pathInfo.path}${textInput.current.inputRef.current.value}/`;
       return (async function () {
         try {

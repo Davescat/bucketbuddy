@@ -1,23 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import AWS from 'aws-sdk';
 import { withRouter } from 'react-router-dom';
 import BucketPath from './BucketPath';
 import BucketSettings from './BucketSettings';
 import FileContainer from './FileContainer';
 import { Dimmer, Loader } from 'semantic-ui-react';
-import { listObjects } from '../utils/amazon-s3-utils';
+import { listObjects, getFolderSchema } from '../utils/amazon-s3-utils';
 
 const BucketViewer = (props) => {
-  const [bucket, setBucket] = useState(props.location.state.bucket);
+  const [bucket] = useState(props.location.state.bucket);
   const [pathInfo, setPathInfo] = useState({ path: '', depth: 0 });
   const [files, setFiles] = useState({ folders: [], files: [] });
   const [loading, setLoading] = useState(true);
+  const [schemaInfo, setSchemaInfo] = useState({
+    available: false,
+    tagset: []
+  });
   const [filesLoading, setFilesLoading] = useState(true);
   const [settings, setSettings] = useState({
     loadMetadata: true,
     loadTags: false,
     loadImages: true
   });
+
+  const schemaFileName = 'bucket-buddy-schema.json';
 
   useEffect(() => {
     if (bucket && loading) {
@@ -29,6 +34,20 @@ const BucketViewer = (props) => {
   useEffect(() => {
     updateList();
   }, [pathInfo]);
+
+  useEffect(() => {
+    if (
+      files.files.some(
+        ({ Key }) => Key.split('/')[pathInfo.depth] === schemaFileName
+      )
+    ) {
+      getFolderSchema(bucket, pathInfo.path).then((response) =>
+        setSchemaInfo({ available: true, tagset: response })
+      );
+    } else {
+      setSchemaInfo({ available: false, tagset: [] });
+    }
+  }, [files]);
 
   const updatePath = (newPath) => {
     const { history } = props;
@@ -97,6 +116,7 @@ const BucketViewer = (props) => {
           bucket={bucket}
           pathInfo={pathInfo}
           settings={settings}
+          schemaInfo={schemaInfo}
           updateList={updateList}
           settingsChange={setSettings}
         />
@@ -110,6 +130,7 @@ const BucketViewer = (props) => {
             files={files}
             updateList={updateList}
             pathInfo={pathInfo}
+            schemaInfo={schemaInfo}
             settings={settings}
             pathChange={updatePath}
           />
