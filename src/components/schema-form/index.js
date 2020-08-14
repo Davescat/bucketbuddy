@@ -53,7 +53,6 @@ const SchemaForm = (props) => {
       setError(duplicateError);
     } else {
       try {
-        console.log(state.schemaValues);
         props.actionOnSubmit(state.schemaValues);
       } catch (e) {
         setError(issueSubmittingError);
@@ -93,7 +92,11 @@ const SchemaForm = (props) => {
       <Message>
         <Message.Header>{props.title}</Message.Header>
         {error == null ? (
-          <p>Enter your field names and field inputs to be applied </p>
+          <p>
+            {props.description
+              ? props.description
+              : 'Enter your field names and field inputs to be applied'}
+          </p>
         ) : (
           <p className="error-message">{error}</p>
         )}

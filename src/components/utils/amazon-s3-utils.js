@@ -6,7 +6,7 @@ import {
   NoSuchKeyError
 } from '../errors/s3-errors';
 
-const testConnectionS3Bucket = async ({
+export const testConnectionS3Bucket = async ({
   bucketName,
   accessKeyId,
   secretAccessKey,
@@ -286,6 +286,7 @@ export const putObjectTags = async (
   key,
   tagset
 ) => {
+  console.log(key);
   const s3 = new AWS.S3({
     accessKeyId,
     secretAccessKey,
