@@ -11,13 +11,16 @@ import {
   Button,
   Label,
   Icon,
-  Placeholder
+  Placeholder,
+  Message
 } from 'semantic-ui-react';
 import {
   getObjectTags,
   putObjectTags,
   deleteObject
 } from '../../utils/amazon-s3-utils';
+
+import { schemaFileName } from '../../modules/BucketViewer';
 
 import EditObjectTagsModal from '../edit-tags-modal';
 
@@ -110,10 +113,21 @@ const FileDetailsModal = (props) => {
         <Modal.Description>
           {dataLoaded ? (
             <List className="file-details" divided>
-              {!conformsToSchema && (
+              {!conformsToSchema && file.filename != schemaFileName && (
                 <Label color="red" ribbon>
                   Does not conform to Schema
                 </Label>
+              )}
+              {file.filename == schemaFileName && (
+                <Message className="s3-message">
+                  <Message.Header>Bucket Buddy Schema</Message.Header>
+                  <p>
+                    This file is so we know what values you want to set to your
+                    objects' tags.
+                    <br />
+                    You can delete this but you will have to make another one
+                  </p>
+                </Message>
               )}
               <List.Item>
                 <ListContent>
@@ -151,21 +165,23 @@ const FileDetailsModal = (props) => {
               </List.Item>
               <List.Item>
                 <ListContent>
-                  <EditObjectTagsModal
-                    bucket={props.bucket}
-                    keyValue={file.Key}
-                    tagset={cleanTagSetValuesForForm(
-                      conformsToSchema
-                        ? fileTags.TagSet
-                        : Object.assign(
-                            [],
-                            fileTags.TagSet,
-                            props.schemaInfo.tagset
-                          )
-                    )}
-                    setfileTags={setfileTags}
-                    trigger={<Button size="medium">Edit Tags</Button>}
-                  />
+                  {file.filename != schemaFileName && (
+                    <EditObjectTagsModal
+                      bucket={props.bucket}
+                      keyValue={file.Key}
+                      tagset={cleanTagSetValuesForForm(
+                        conformsToSchema
+                          ? fileTags.TagSet
+                          : Object.assign(
+                              [],
+                              fileTags.TagSet,
+                              props.schemaInfo.tagset
+                            )
+                      )}
+                      setfileTags={setfileTags}
+                      trigger={<Button size="medium">Edit Tags</Button>}
+                    />
+                  )}
                   <Button color="red" onClick={deleteFile}>
                     Delete File
                   </Button>

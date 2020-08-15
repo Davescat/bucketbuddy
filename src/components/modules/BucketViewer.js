@@ -6,6 +6,8 @@ import FileContainer from './FileContainer';
 import { Dimmer, Loader } from 'semantic-ui-react';
 import { listObjects, getFolderSchema } from '../utils/amazon-s3-utils';
 
+export const schemaFileName = 'bucket-buddy-schema.json';
+
 const BucketViewer = (props) => {
   const [bucket] = useState(props.location.state.bucket);
   const [pathInfo, setPathInfo] = useState(null);
@@ -21,8 +23,6 @@ const BucketViewer = (props) => {
     loadTags: false,
     loadImages: true
   });
-
-  const schemaFileName = 'bucket-buddy-schema.json';
 
   //This checks the url and tries to navigate to the folders directly if refreshed
   if (!pathInfo) {
