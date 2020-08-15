@@ -8,7 +8,7 @@ import { listObjects, getFolderSchema } from '../utils/amazon-s3-utils';
 
 const BucketViewer = (props) => {
   const [bucket] = useState(props.location.state.bucket);
-  const [pathInfo, setPathInfo] = useState({ path: '', depth: 0 });
+  const [pathInfo, setPathInfo] = useState(null);
   const [files, setFiles] = useState({ folders: [], files: [] });
   const [loading, setLoading] = useState(true);
   const [schemaInfo, setSchemaInfo] = useState({
@@ -23,6 +23,23 @@ const BucketViewer = (props) => {
   });
 
   const schemaFileName = 'bucket-buddy-schema.json';
+
+  //This checks the url and tries to navigate to the folders directly if refreshed
+  if (!pathInfo) {
+    const urlPathInfo = props.location.pathname.split('/');
+    if (urlPathInfo.length === 2) {
+      setPathInfo({
+        path: '',
+        depth: 0
+      });
+    } else {
+      setPathInfo({
+        path: urlPathInfo.slice(urlPathInfo.indexOf(bucket.name) + 1).join('/'),
+        depth:
+          urlPathInfo.slice(urlPathInfo.indexOf(bucket.name) + 1).length - 1
+      });
+    }
+  }
 
   useEffect(() => {
     if (bucket && loading) {
@@ -128,8 +145,6 @@ const BucketViewer = (props) => {
           <FileContainer
             bucket={bucket}
             files={files}
-            updateList={updateList}
-            pathInfo={pathInfo}
             schemaInfo={schemaInfo}
             settings={settings}
             pathChange={updatePath}
