@@ -13,7 +13,13 @@ import {
   Icon,
   Placeholder
 } from 'semantic-ui-react';
-import { getObjectTags, deleteObject } from '../utils/amazon-s3-utils';
+import {
+  getObjectTags,
+  putObjectTags,
+  deleteObject
+} from '../utils/amazon-s3-utils';
+
+import EditObjectTagsModal from '../modals/edit-tags-modal';
 
 const FileDetailsModal = (props) => {
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -78,11 +84,25 @@ const FileDetailsModal = (props) => {
     }
   };
 
+  const cleanTagSetValuesForForm = (tagset) => {
+    const newTagset = [];
+
+    tagset.map((set, i) =>
+      newTagset.push({
+        key: set.Key ? set.Key : set.key,
+        value: set.Value ? set.Value : set.value
+      })
+    );
+
+    return newTagset;
+  };
+
   return (
     <Modal
       open={props.modalOpen}
       onClose={props.handleClose}
       className="details-modal"
+      closeIcon
     >
       <Modal.Header>{file.filename}</Modal.Header>
       <Modal.Content image>
@@ -131,7 +151,26 @@ const FileDetailsModal = (props) => {
               </List.Item>
               <List.Item>
                 <ListContent>
-                  <Button onClick={deleteFile}>Delete File</Button>
+                  <EditObjectTagsModal
+                    bucket={props.bucket}
+                    keyValue={file.Key}
+                    tagset={cleanTagSetValuesForForm(
+                      conformsToSchema
+                        ? fileTags.TagSet
+                        : Object.assign(
+                            [],
+                            fileTags.TagSet,
+                            props.schemaInfo.tagset
+                          )
+                    )}
+                    setfileTags={setfileTags}
+                    trigger={<Button size="medium">Edit Tags</Button>}
+                  />
+                </ListContent>
+                <ListContent>
+                  <Button color="red" onClick={deleteFile}>
+                    Delete File
+                  </Button>
                 </ListContent>
               </List.Item>
             </List>

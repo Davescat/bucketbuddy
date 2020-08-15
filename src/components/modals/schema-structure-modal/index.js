@@ -75,6 +75,7 @@ const SchemaStructureModal = (props) => {
       onClose={() => setModalOpen(false)}
       open={modalOpen}
       trigger={props.trigger}
+      closeIcon
     >
       <Modal.Content>
         {dataLoaded ? (
