@@ -55,6 +55,7 @@ const FolderUploadModal = (props) => {
       onClose={() => setModalOpen(false)}
       open={modalOpen}
       trigger={props.trigger}
+      closeIcon
     >
       <Modal.Header>Create New Folder</Modal.Header>
       <Modal.Content>

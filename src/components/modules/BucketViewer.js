@@ -88,6 +88,16 @@ const BucketViewer = (props) => {
     return listObjects(bucket, pathInfo.path);
   };
 
+  const sortObjectsAlphabetically = (objects) => {
+    objects.sort(function (fileOne, fileTwo) {
+      return fileOne.Key.toLowerCase() < fileTwo.Key.toLowerCase()
+        ? -1
+        : fileOne.Key.toLowerCase() > fileTwo.Key.toLowerCase()
+        ? 1
+        : 0;
+    });
+  };
+
   /**
    * Filters the response into files and folders
    * @param {AWS.S3.ListObjectsV2Output} response
@@ -108,13 +118,16 @@ const BucketViewer = (props) => {
       file.type = 'file';
       return file;
     });
+
+    sortObjectsAlphabetically(newFiles);
+    sortObjectsAlphabetically(newFolders);
+
     setFilesLoading(false);
     setFiles({
       folders: newFolders,
       files: newFiles
     });
   };
-
   if (loading) {
     return (
       <Dimmer>
