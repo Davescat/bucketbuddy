@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Button, Modal, Form, Input } from 'semantic-ui-react';
-import { uploadObject } from '../utils/amazon-s3-utils';
+import { uploadObject } from '../../utils/amazon-s3-utils';
 
 const FileUploadModal = (props) => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -20,10 +20,12 @@ const FileUploadModal = (props) => {
       const tags =
         tagInput.tagset.length > 0 &&
         tagInput.tagset.reduce((previousValue, currentValue, i) => {
+          const key = 'key',
+            value = 'value';
           if (i === 1) {
-            return `${previousValue['key']}=${previousValue['value']}&${currentValue['key']}=${currentValue['value']}`;
+            return `${previousValue[key]}=${previousValue[value]}&${currentValue[key]}=${currentValue[value]}`;
           } else {
-            return `${previousValue}&${currentValue['key']}=${currentValue['value']}`;
+            return `${previousValue}&${currentValue[key]}=${currentValue[value]}`;
           }
         });
       uploadObject(props.bucket, props.pathInfo.path, file, tags).then(

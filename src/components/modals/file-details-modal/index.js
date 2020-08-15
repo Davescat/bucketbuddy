@@ -17,9 +17,9 @@ import {
   getObjectTags,
   putObjectTags,
   deleteObject
-} from '../utils/amazon-s3-utils';
+} from '../../utils/amazon-s3-utils';
 
-import EditObjectTagsModal from '../modals/edit-tags-modal';
+import EditObjectTagsModal from '../edit-tags-modal';
 
 const FileDetailsModal = (props) => {
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -166,8 +166,6 @@ const FileDetailsModal = (props) => {
                     setfileTags={setfileTags}
                     trigger={<Button size="medium">Edit Tags</Button>}
                   />
-                </ListContent>
-                <ListContent>
                   <Button color="red" onClick={deleteFile}>
                     Delete File
                   </Button>

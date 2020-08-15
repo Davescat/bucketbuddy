@@ -7,26 +7,15 @@ import SchemaForm from '../../schema-form';
 const SchemaStructureModal = (props) => {
   const bucketBuddySchemaFileName = 'bucket-buddy-schema.json';
 
+  const [schemaPath, setSchemaPath] = useState(props.pathInfo.path);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [isCreateSchema, setIsCreateSchema] = useState(true);
   const [jsonSchemaValues, setJsonSchemaValues] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const getData = () => {
-    return getObject(props.bucket, bucketBuddySchemaFileName);
-  };
-
   const setToCreateSchema = () => {
     setDataLoaded(true);
     setIsCreateSchema(true);
-  };
-
-  const setData = (response) => {
-    const schemaValues = JSON.parse(response.Body.toString());
-
-    setJsonSchemaValues(schemaValues);
-    setIsCreateSchema(false);
-    setDataLoaded(true);
   };
 
   const createSchemaFile = (schemaValues) => {
@@ -64,8 +53,18 @@ const SchemaStructureModal = (props) => {
   };
 
   useEffect(() => {
+    if (schemaPath !== props.pathInfo.path) {
+      setDataLoaded(false);
+      setSchemaPath(props.pathInfo.path);
+      setJsonSchemaValues(null);
+    }
     if (modalOpen && !dataLoaded) {
-      getData().then(setData, setToCreateSchema);
+      if (props.schemaInfo.available) {
+        setJsonSchemaValues(props.schemaInfo.tagset);
+        setDataLoaded(true);
+      } else {
+        setToCreateSchema();
+      }
     }
   });
 
