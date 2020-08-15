@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from 'semantic-ui-react';
-import FileUploadModal from '../modals/FileUploadModal';
-import FolderUploadModal from '../modals/FolderUploadModal';
+import FileUploadModal from '../modals/file-upload-modal';
+import FolderUploadModal from '../modals/folder-upload-modal';
 import SchemaStructureModal from '../modals/schema-structure-modal';
 
 /**
@@ -27,13 +27,10 @@ const BucketSettings = ({ updateList, bucket, pathInfo, schemaInfo }) => {
         />
         <SchemaStructureModal
           updateList={updateList}
+          schemaInfo={schemaInfo}
           bucket={bucket}
           pathInfo={pathInfo}
-          trigger={
-            <Button size="medium">
-              Folder's File Schema Structure Settings
-            </Button>
-          }
+          trigger={<Button size="medium">Tags in folder Schema</Button>}
         />
       </span>
     </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Image, Placeholder, Icon } from 'semantic-ui-react';
-import FileDetailsModal from '../modals/FileDetailsModal';
+import FileDetailsModal from '../modals/file-details-modal';
 import { getObjectURL } from '../utils/amazon-s3-utils';
 
 const File = (props) => {

@@ -43,6 +43,7 @@ const EditObjectTagsModal = (props) => {
       open={modalOpen}
       trigger={props.trigger}
       closeIcon
+      dimmer={false}
     >
       <Modal.Content>
         <SchemaForm
