@@ -12,44 +12,42 @@ const FileContainer = (props) => {
 
   if (props.card)
     return (
-      <Transition visible={!isLoading} animation={'fly left'} duration={2000}>
-        <span>
-          <Card.Group className="file-container">
-            {folders &&
-              folders.length > 0 &&
-              folders.map((x, i) => (
-                <File
-                  bucket={bucket}
-                  key={`${i}${x.ETag}`}
-                  file={x}
-                  updateList={props.updateList}
-                  settings={props.settings}
-                  customClickEvent={props.pathChange}
-                />
-              ))}
-            {files &&
-              files.length > 0 &&
-              files.map((x, i) => (
-                <File
-                  bucket={bucket}
-                  key={`${i}${x.ETag}`}
-                  file={x}
-                  updateList={props.updateList}
-                  settings={props.settings}
-                  customClickEvent={props.pathChange}
-                />
-              ))}
-          </Card.Group>
-        </span>
-      </Transition>
+      <span>
+        <Card.Group className="file-container">
+          {folders &&
+            folders.length > 0 &&
+            folders.map((x, i) => (
+              <File
+                bucket={bucket}
+                key={`${i}${x.ETag}`}
+                file={x}
+                updateList={props.updateList}
+                settings={props.settings}
+                customClickEvent={props.pathChange}
+              />
+            ))}
+          {files &&
+            files.length > 0 &&
+            files.map((x, i) => (
+              <File
+                bucket={bucket}
+                key={`${i}${x.ETag}`}
+                file={x}
+                updateList={props.updateList}
+                settings={props.settings}
+                customClickEvent={props.pathChange}
+              />
+            ))}
+        </Card.Group>
+      </span>
     );
   else
     return (
-      <List className="file-list" animated verticalAlign="middle">
+      <Card.Group className="file-container">
         {folders &&
           folders.length > 0 &&
           folders.map((x, i) => (
-            <ListFile
+            <File
               bucket={bucket}
               key={`${i}${x.ETag}`}
               file={x}
@@ -61,16 +59,17 @@ const FileContainer = (props) => {
         {files &&
           files.length > 0 &&
           files.map((x, i) => (
-            <ListFile
+            <File
               bucket={bucket}
               key={`${i}${x.ETag}`}
               file={x}
+              schemaInfo={props.schemaInfo}
               updateList={props.updateList}
               settings={props.settings}
               customClickEvent={props.pathChange}
             />
           ))}
-      </List>
+      </Card.Group>
     );
 };
 export default FileContainer;

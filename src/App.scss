@@ -20,6 +20,21 @@
   display: flex;
   padding: 10px;
   .file-card {
+    max-height: 430px;
+    .card-file-image {
+      object-fit: contain;
+      max-height: 300px !important;
+    }
+    .card-file-icon {
+      display: flex;
+      align-self: center;
+      text-align: center;
+      padding: 2em;
+      color: #919191;
+      height: 100%;
+      vertical-align: middle;
+      font-size: 3em;
+    }
     cursor: pointer;
     div {
       object-fit: scale-down !important;
@@ -40,5 +55,20 @@
 .file-details {
   .item {
     margin-bottom: 8px;
+  }
+  .card-file-icon {
+    display: flex;
+    align-self: center;
+    text-align: center;
+    padding: 2em;
+    color: #919191;
+    height: 100%;
+    vertical-align: middle;
+    font-size: 3em;
+  }
+}
+.details-modal {
+  .description {
+    width: inherit !important;
   }
 }

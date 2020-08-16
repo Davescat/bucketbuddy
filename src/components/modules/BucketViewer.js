@@ -1,23 +1,48 @@
 import React, { useState, useEffect } from 'react';
-import AWS from 'aws-sdk';
 import { withRouter } from 'react-router-dom';
 import BucketPath from './BucketPath';
 import BucketSettings from './BucketSettings';
 import FileContainer from './FileContainer';
-import { Dimmer, Loader } from 'semantic-ui-react';
-import { listObjects } from '../utils/amazon-s3-utils';
+import { Dimmer, Loader, Transition } from 'semantic-ui-react';
+import { listObjects, getFolderSchema } from '../utils/amazon-s3-utils';
 
 const BucketViewer = (props) => {
-  const [bucket, setBucket] = useState(props.location.state.bucket);
-  const [pathInfo, setPathInfo] = useState({ path: '', depth: 0 });
+  const [bucket] = useState(props.location.state.bucket);
+  const [pathInfo, setPathInfo] = useState(null);
   const [files, setFiles] = useState({ folders: [], files: [] });
   const [loading, setLoading] = useState(true);
+  const [transitions, setTransitions] = useState(['fly right', 'fly left']);
+  const [schemaInfo, setSchemaInfo] = useState({
+    available: false,
+    tagset: []
+  });
   const [filesLoading, setFilesLoading] = useState(true);
+  const [filesMoving, setFilesMoving] = useState(false);
   const [settings, setSettings] = useState({
     loadMetadata: true,
     loadTags: false,
     loadImages: true
   });
+
+  const schemaFileName = 'bucket-buddy-schema.json';
+  // const transitions = ['fly right', 'fly up']
+
+  //This checks the url and tries to navigate to the folders directly if refreshed
+  if (!pathInfo) {
+    const urlPathInfo = props.location.pathname.split('/');
+    if (urlPathInfo.length === 2) {
+      setPathInfo({
+        path: '',
+        depth: 0
+      });
+    } else {
+      setPathInfo({
+        path: urlPathInfo.slice(urlPathInfo.indexOf(bucket.name) + 1).join('/'),
+        depth:
+          urlPathInfo.slice(urlPathInfo.indexOf(bucket.name) + 1).length - 1
+      });
+    }
+  }
 
   useEffect(() => {
     if (bucket && loading) {
@@ -29,6 +54,20 @@ const BucketViewer = (props) => {
   useEffect(() => {
     updateList();
   }, [pathInfo]);
+
+  useEffect(() => {
+    if (
+      files.files.some(
+        ({ Key }) => Key.split('/')[pathInfo.depth] === schemaFileName
+      )
+    ) {
+      getFolderSchema(bucket, pathInfo.path).then((response) =>
+        setSchemaInfo({ available: true, tagset: response })
+      );
+    } else {
+      setSchemaInfo({ available: false, tagset: [] });
+    }
+  }, [files]);
 
   const updatePath = (newPath) => {
     const { history } = props;
@@ -44,6 +83,8 @@ const BucketViewer = (props) => {
   };
 
   const updateList = () => {
+    // setFiles({ folders: [], files: [] })
+    setFilesMoving(true);
     setFilesLoading(true);
     listFiles().then(filterList);
   };
@@ -78,7 +119,7 @@ const BucketViewer = (props) => {
       files: newFiles
     });
   };
-
+  console.log(transitions[0]);
   if (loading) {
     return (
       <Dimmer>
@@ -97,27 +138,35 @@ const BucketViewer = (props) => {
           bucket={bucket}
           pathInfo={pathInfo}
           settings={settings}
+          schemaInfo={schemaInfo}
           updateList={updateList}
           settingsChange={setSettings}
         />
-        {files.folders.length === 0 &&
-        files.files.length === 0 &&
-        filesLoading ? (
-          <Dimmer active>
-            <Loader indeterminate>Preparing Files</Loader>
-          </Dimmer>
-        ) : (
-          <FileContainer
-            card
-            isLoading={filesLoading}
-            bucket={bucket}
-            files={files}
-            updateList={updateList}
-            pathInfo={pathInfo}
-            settings={settings}
-            pathChange={updatePath}
-          />
-        )}
+        <Transition
+          visible={!filesLoading === true}
+          animation={transitions[0]}
+          duration={500}
+        >
+          <span>
+            {files.folders.length === 0 &&
+            files.files.length === 0 &&
+            filesLoading ? (
+              <Dimmer active>
+                <Loader indeterminate>Preparing Files</Loader>
+              </Dimmer>
+            ) : (
+              <FileContainer
+                card
+                isLoading={filesLoading}
+                bucket={bucket}
+                files={files}
+                schemaInfo={schemaInfo}
+                settings={settings}
+                pathChange={updatePath}
+              />
+            )}
+          </span>
+        </Transition>
       </div>
     );
   }

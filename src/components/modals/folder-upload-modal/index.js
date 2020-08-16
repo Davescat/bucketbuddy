@@ -1,23 +1,20 @@
 import React, { useRef, useState } from 'react';
 import AWS from 'aws-sdk';
-import { Button, Modal, Form, Input } from 'semantic-ui-react';
+import { Button, Radio, Modal, Form, Input } from 'semantic-ui-react';
 
-const FileUploadModal = (props) => {
+const FolderUploadModal = (props) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const fileInput = useRef(null);
+  const textInput = useRef(null);
 
-  /**
-   *
-   * @param {Event} event
-   */
   const upload = () => {
     const {
       updateList,
       pathInfo,
       bucket: { accessKeyId, secretAccessKey, region, name }
     } = props;
-    if (fileInput && fileInput.current.inputRef.current.files.length === 1) {
-      let file = fileInput.current.inputRef.current.files[0];
+    // TODO: validate text for creating folder
+    if (textInput && textInput.current.inputRef.current.value !== '') {
+      const folderName = `${pathInfo.path}${textInput.current.inputRef.current.value}/`;
       return (async function () {
         try {
           AWS.config.update({
@@ -27,9 +24,9 @@ const FileUploadModal = (props) => {
           });
           new AWS.S3.ManagedUpload({
             params: {
-              Body: file,
+              Body: '',
               Bucket: name,
-              Key: `${pathInfo.path}${file.name}`
+              Key: folderName
             }
           })
             .promise()
@@ -40,7 +37,7 @@ const FileUploadModal = (props) => {
               },
               (err) => {
                 return alert(
-                  'There was an error uploading your photo: ',
+                  'There was an error creating the folder ',
                   err.message
                 );
               }
@@ -59,14 +56,26 @@ const FileUploadModal = (props) => {
       open={modalOpen}
       trigger={props.trigger}
     >
-      <Modal.Header>Select an Image to Uploads</Modal.Header>
+      <Modal.Header>Create New Folder</Modal.Header>
       <Modal.Content>
         <Form onSubmit={upload}>
-          <Input ref={fileInput} id="fileupload" type="file" />
-          <Button type="submit">Upload</Button>
+          <Form.Field>
+            <Radio label="Inherit Schema" toggle name="loadTags" />
+          </Form.Field>
+          <Form.Field>
+            <Input
+              label="Folder Name"
+              ref={textInput}
+              id="foldername"
+              type="text"
+            />
+          </Form.Field>
+          <Form.Field>
+            <Button type="submit">Create</Button>
+          </Form.Field>
         </Form>
       </Modal.Content>
     </Modal>
   );
 };
-export default FileUploadModal;
+export default FolderUploadModal;
