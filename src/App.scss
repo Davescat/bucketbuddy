@@ -19,8 +19,11 @@
 .file-container {
   display: flex;
   padding: 10px;
+  flex-wrap: wrap;
+  justify-content: start;
   .file-card {
     max-height: 430px;
+    cursor: pointer;
     .card-file-image {
       object-fit: contain;
       max-height: 300px !important;
@@ -35,7 +38,6 @@
       vertical-align: middle;
       font-size: 3em;
     }
-    cursor: pointer;
     div {
       object-fit: scale-down !important;
     }
@@ -71,4 +73,11 @@
   .description {
     width: inherit !important;
   }
+}
+
+.files-folders {
+  display: flex;
+}
+.folder-menu {
+  z-index: 2;
 }

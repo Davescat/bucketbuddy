@@ -64,9 +64,11 @@ const FileDetailsModal = (props) => {
         schemaKeys.every((schemaKey) => fileKeys.includes(schemaKey))
       );
     } else {
-      setConformsToSchema(
-        props.schemaInfo && props.schemaInfo.available === false
-      );
+      if (props.schemaInfo) {
+        setConformsToSchema(props.schemaInfo.available === false);
+      } else {
+        setConformsToSchema(false);
+      }
     }
   });
 
