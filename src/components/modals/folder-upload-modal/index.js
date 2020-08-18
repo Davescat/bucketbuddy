@@ -60,9 +60,10 @@ const FolderUploadModal = (props) => {
       <Modal.Header>Create New Folder</Modal.Header>
       <Modal.Content>
         <Form onSubmit={upload}>
-          <Form.Field>
+          {/* TODO have folder inherit an existing schema */}
+          {/* <Form.Field>
             <Radio label="Inherit Schema" toggle name="loadTags" />
-          </Form.Field>
+          </Form.Field> */}
           <Form.Field>
             <Input
               label="Folder Name"
@@ -72,7 +73,7 @@ const FolderUploadModal = (props) => {
             />
           </Form.Field>
           <Form.Field>
-            <Button type="submit">Create</Button>
+            <Button type="submit">Add folder</Button>
           </Form.Field>
         </Form>
       </Modal.Content>
