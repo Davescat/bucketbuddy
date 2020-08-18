@@ -126,8 +126,8 @@ Like most file systems S3 supports folders too! Creating a folder in bucket budd
 
 Please be careful because if you write a name of a folder that already exists it will replace the other one!
 
-![Image of Bucket Buddy adding a folder](./public/upload-object.gif)
+![Image of Bucket Buddy adding a folder](./public/add-folder.gif)
 
 ## Special thanks
 
-This
+This project developed by the team at [Rasion d'Art]("https://www.raisondart.org/") a non-profit organization and is made available for anyone who will find use in making managing their S3 bucket easier.
