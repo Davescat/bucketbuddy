@@ -128,10 +128,16 @@ Please be careful because if you write a name of a folder that already exists it
 
 ![Image of Bucket Buddy adding a folder](./public/add-folder.gif)
 
-## Special thanks
+## Deleting folders
 
-This project developed by the team at [Rasion d'Art]("https://www.raisondart.org/") a non-profit organization and is made available for anyone who will find use in making managing their S3 bucket easier.
+You can delete any folder except the root folder. Simply navigate to the folder you wish to delete and select the red "Delete Folder" button to delete it. Be very careful doing this since this action cannot be undone!
+
+![Image of Bucket Buddy deleting a folder](./public/delete-folder.gif)
+
+# Special thanks
+
+This project developed by the team at [Rasion d'Art](https://www.raisondart.org/) a non-profit organization and is made available for anyone who will find use in making managing their S3 bucket easier.
 
 ## Having issues?
 
-We would love to know if you are having any issues using the app or have any suggestions. Please enter a ticket [here]("https://github.com/js-montreal/bucketbuddy/issues") with details about the issue.
+We would love to know if you are having any issues using the app or have any suggestions. Please enter a ticket [here](https://github.com/js-montreal/bucketbuddy/issues) with details about the issue.
