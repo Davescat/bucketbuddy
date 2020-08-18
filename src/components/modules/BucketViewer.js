@@ -5,6 +5,7 @@ import BucketSettings from './BucketSettings';
 import FileContainer from './FileContainer';
 import { Dimmer, Loader } from 'semantic-ui-react';
 import { listObjects, getFolderSchema } from '../utils/amazon-s3-utils';
+import NavMenu from '../modules/NavMenu';
 
 export const schemaFileName = 'bucket-buddy-schema.json';
 
@@ -137,6 +138,7 @@ const BucketViewer = (props) => {
   } else {
     return (
       <div className="bucket-viewer">
+        <NavMenu />
         <BucketPath
           bucket={bucket}
           pathInfo={pathInfo}
