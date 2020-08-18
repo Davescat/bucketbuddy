@@ -13,7 +13,7 @@ const NavMenu = () => {
         ></i>
       </Menu.Item>
       <Menu.Item name="Create Connection" as={Link} to="/">
-        Create Connection
+        Connect to another bucket
       </Menu.Item>
     </Menu>
   );
