@@ -160,6 +160,7 @@ const BucketViewer = (props) => {
             files={files}
             schemaInfo={schemaInfo}
             settings={settings}
+            updateList={updateList}
             pathChange={updatePath}
           />
         )}

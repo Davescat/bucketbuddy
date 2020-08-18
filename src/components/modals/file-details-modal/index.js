@@ -53,6 +53,7 @@ const FileDetailsModal = (props) => {
   const deleteFile = () => {
     deleteObject(props.bucket, props.file.Key);
     props.handleClose();
+    console.log(props);
     props.updateList();
   };
 
@@ -63,9 +64,11 @@ const FileDetailsModal = (props) => {
     if (fileTags.TagSet.length > 0) {
       let schemaKeys = getKeys(props.schemaInfo.tagset, 'key');
       let fileKeys = getKeys(fileTags.TagSet, 'Key');
-      setConformsToSchema(
-        schemaKeys.every((schemaKey) => fileKeys.includes(schemaKey))
-      );
+      if (schemaKeys) {
+        setConformsToSchema(
+          schemaKeys.every((schemaKey) => fileKeys.includes(schemaKey))
+        );
+      }
     } else {
       setConformsToSchema(props.schemaInfo.available === false);
     }
