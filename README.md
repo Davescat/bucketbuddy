@@ -131,3 +131,7 @@ Please be careful because if you write a name of a folder that already exists it
 ## Special thanks
 
 This project developed by the team at [Rasion d'Art]("https://www.raisondart.org/") a non-profit organization and is made available for anyone who will find use in making managing their S3 bucket easier.
+
+## Having issues?
+
+We would love to know if you are having any issues using the app or have any suggestions. Please enter a ticket [here]("https://github.com/js-montreal/bucketbuddy/issues") with details about the issue.
