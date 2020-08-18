@@ -53,7 +53,6 @@ const FileDetailsModal = (props) => {
   const deleteFile = () => {
     deleteObject(props.bucket, props.file.Key);
     props.handleClose();
-    console.log(props);
     props.updateList();
   };
 

@@ -69,7 +69,9 @@ const BucketViewer = (props) => {
 
   const updatePath = (newPath) => {
     const { history } = props;
+
     setPathInfo(newPath);
+    console.log(newPath);
     history.replace(
       {
         pathname: `/bucket-viewer/${bucket.name}/${newPath.path}`
@@ -143,6 +145,7 @@ const BucketViewer = (props) => {
           bucket={bucket}
           pathInfo={pathInfo}
           pathChange={updatePath}
+          updateList={updateList}
         />
         <BucketSettings
           bucket={bucket}
@@ -151,6 +154,7 @@ const BucketViewer = (props) => {
           schemaInfo={schemaInfo}
           updateList={updateList}
           settingsChange={setSettings}
+          pathChange={updatePath}
         />
         {filesLoading ? (
           <Dimmer>
