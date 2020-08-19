@@ -6,6 +6,9 @@ import FileContainer from './FileContainer';
 import { Dimmer, Loader, Transition, Button } from 'semantic-ui-react';
 import { listObjects, getFolderSchema } from '../utils/amazon-s3-utils';
 import FolderMenu from './FolderMenu';
+import NavMenu from '../modules/NavMenu';
+
+export const schemaFileName = 'bucket-buddy-schema.json';
 
 const BucketViewer = (props) => {
   const [bucket] = useState(props.location.state.bucket);
@@ -24,9 +27,6 @@ const BucketViewer = (props) => {
     loadTags: false,
     loadImages: true
   });
-
-  const schemaFileName = 'bucket-buddy-schema.json';
-  // const transitions = ['fly right', 'fly up']
 
   //This checks the url and tries to navigate to the folders directly if refreshed
   if (!pathInfo) {
@@ -77,6 +77,7 @@ const BucketViewer = (props) => {
       setTransitions(['fly left', 'fly right']);
     }
     const { history } = props;
+
     setPathInfo(newPath);
     history.replace(
       {
@@ -95,6 +96,16 @@ const BucketViewer = (props) => {
 
   const listFiles = () => {
     return listObjects(bucket, pathInfo.path);
+  };
+
+  const sortObjectsAlphabetically = (objects) => {
+    objects.sort(function (fileOne, fileTwo) {
+      return fileOne.Key.toLowerCase() < fileTwo.Key.toLowerCase()
+        ? -1
+        : fileOne.Key.toLowerCase() > fileTwo.Key.toLowerCase()
+        ? 1
+        : 0;
+    });
   };
 
   /**
@@ -117,6 +128,10 @@ const BucketViewer = (props) => {
       file.type = 'file';
       return file;
     });
+
+    sortObjectsAlphabetically(newFiles);
+    sortObjectsAlphabetically(newFolders);
+
     setFilesLoading(false);
     if (files2) {
       setFiles2({
@@ -138,7 +153,6 @@ const BucketViewer = (props) => {
   const transition = () => {
     files2 ? setFiles(files2) : setFiles2(null);
   };
-
   if (loading) {
     return (
       <Dimmer>
@@ -148,10 +162,12 @@ const BucketViewer = (props) => {
   } else {
     return (
       <div className="bucket-viewer">
+        <NavMenu />
         <BucketPath
           bucket={bucket}
           pathInfo={pathInfo}
           pathChange={updatePath}
+          updateList={updateList}
         />
         <BucketSettings
           bucket={bucket}
@@ -160,6 +176,7 @@ const BucketViewer = (props) => {
           schemaInfo={schemaInfo}
           updateList={updateList}
           settingsChange={setSettings}
+          pathChange={updatePath}
         />
         <div className="files-folders">
           <FolderMenu

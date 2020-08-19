@@ -27,7 +27,9 @@ const FolderMenu = (props) => {
   const handleFieldChange = (event, { value }) => {
     setSearchText(value);
     setvisibleFolders(
-      props.folders.filter((x) => x.filename.toLowerCase().search(value) !== -1)
+      props.folders.filter(
+        (x) => x.filename.toLowerCase().search(value.toLowerCase()) !== -1
+      )
     );
   };
 
