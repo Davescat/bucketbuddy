@@ -1,7 +1,11 @@
 .bucket-bar {
   border-bottom: 1px solid rgba(204, 204, 204, 0.425);
   padding: 6px;
-  .bucket-buttons {
+  display: flex;
+  justify-content: space-between;
+  .bucket-buttons-left {
+  }
+  .bucket-buttons-right {
   }
 }
 
@@ -85,4 +89,8 @@
 }
 .folder-menu {
   z-index: 2;
+}
+
+body {
+  overflow: hidden;
 }

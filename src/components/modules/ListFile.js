@@ -3,7 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { Card, Image, Placeholder, List } from 'semantic-ui-react';
 import FileDetailsModal from '../modals/file-details-modal';
 import { getObjectURL } from '../utils/amazon-s3-utils';
-
+/**
+ * This component is for viewing the files in a list format.
+ * STILL A WIP
+ * @param {*} props
+ */
 const ListFile = (props) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);

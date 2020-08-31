@@ -39,22 +39,10 @@ const FileContainer = (props) => {
   else
     return (
       <Card.Group className="file-container">
-        {folders &&
-          folders.length > 0 &&
-          folders.map((x, i) => (
-            <File
-              bucket={bucket}
-              key={`${i}${x.ETag}`}
-              file={x}
-              updateList={props.updateList}
-              settings={props.settings}
-              customClickEvent={props.pathChange}
-            />
-          ))}
         {files &&
           files.length > 0 &&
           files.map((x, i) => (
-            <File
+            <ListFile
               bucket={bucket}
               key={`${i}${x.ETag}`}
               file={x}

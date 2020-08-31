@@ -14,8 +14,9 @@ const BucketViewer = (props) => {
   const [bucket] = useState(props.location.state.bucket);
   const [pathInfo, setPathInfo] = useState(null);
   const [files, setFiles] = useState({ folders: [], files: [] });
-  const [files2, setFiles2] = useState(null);
+  const [visibleFiles, setVisibleFiles] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchText, setSearchText] = useState('');
   const [transitions, setTransitions] = useState(['fly right', 'fly left']);
   const [schemaInfo, setSchemaInfo] = useState({
     available: false,
@@ -133,13 +134,13 @@ const BucketViewer = (props) => {
     sortObjectsAlphabetically(newFolders);
 
     setFilesLoading(false);
-    if (files2) {
-      setFiles2({
+    if (visibleFiles) {
+      setVisibleFiles({
         folders: newFolders,
         files: newFiles
       });
     } else {
-      setFiles2({
+      setVisibleFiles({
         folders: newFolders,
         files: newFiles
       });
@@ -151,8 +152,9 @@ const BucketViewer = (props) => {
   };
 
   const transition = () => {
-    files2 ? setFiles(files2) : setFiles2(null);
+    visibleFiles ? setFiles(visibleFiles) : setVisibleFiles(null);
   };
+
   if (loading) {
     return (
       <Dimmer>
@@ -193,39 +195,43 @@ const BucketViewer = (props) => {
             updateList={updateList}
             pathInfo={pathInfo}
             customClickEvent={updatePath}
+            search={{ text: searchText, setSearchText: setSearchText }}
           />
-          <Transition
-            visible={!filesLoading}
-            onStart={() => transition()}
-            onComplete={() => transitions.reverse()}
-            onShow={() => {
-              if (!filesLoading && files !== files2) {
-                setFiles(files2);
-              }
-            }}
-            animation={transitions[0]}
-            duration={250}
-          >
-            <span>
-              {files.folders.length === 0 &&
-              files.files.length === 0 &&
-              filesLoading ? (
-                <Dimmer active>
-                  <Loader indeterminate>Preparing Files</Loader>
-                </Dimmer>
-              ) : (
-                <FileContainer
-                  card
-                  isLoading={filesLoading}
-                  bucket={bucket}
-                  files={files}
-                  schemaInfo={schemaInfo}
-                  settings={settings}
-                  pathChange={updatePath}
-                />
-              )}
-            </span>
-          </Transition>
+          <div>
+            <Transition
+              visible={!filesLoading}
+              onStart={() => transition()}
+              onComplete={() => transitions.reverse()}
+              onShow={() => {
+                if (!filesLoading && files !== visibleFiles) {
+                  setFiles(visibleFiles);
+                }
+              }}
+              unmountOnHide
+              animation={transitions[0]}
+              duration={250}
+            >
+              <span>
+                {files.folders.length === 0 &&
+                files.files.length === 0 &&
+                filesLoading ? (
+                  <Dimmer active>
+                    <Loader indeterminate>Preparing Files</Loader>
+                  </Dimmer>
+                ) : (
+                  <FileContainer
+                    card
+                    isLoading={filesLoading}
+                    bucket={bucket}
+                    files={files}
+                    schemaInfo={schemaInfo}
+                    settings={settings}
+                    pathChange={updatePath}
+                  />
+                )}
+              </span>
+            </Transition>
+          </div>
         </div>
       </div>
     );

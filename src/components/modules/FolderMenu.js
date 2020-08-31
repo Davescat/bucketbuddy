@@ -9,9 +9,9 @@ const FolderMenu = (props) => {
   useEffect(() => {
     if (currentPath !== props.pathInfo) {
       setCurrentPath(props.pathInfo);
-      setSearchText('');
+      props.search.setSearchText('');
     }
-    if (visibleFolders !== props.folders && searchText == '') {
+    if (visibleFolders !== props.folders && props.search.text == '') {
       setvisibleFolders(props.folders);
     }
   });
@@ -25,7 +25,7 @@ const FolderMenu = (props) => {
   };
 
   const handleFieldChange = (event, { value }) => {
-    setSearchText(value);
+    props.search.setSearchText(value);
     setvisibleFolders(
       props.folders.filter(
         (x) => x.filename.toLowerCase().search(value.toLowerCase()) !== -1
@@ -37,7 +37,7 @@ const FolderMenu = (props) => {
     <Menu vertical stackable borderless className="folder-menu">
       <Menu.Item>
         <FormInput
-          value={searchText}
+          value={props.search.text}
           onChange={handleFieldChange}
           placeholder="Search..."
           type={'text'}
