@@ -3,8 +3,9 @@ import { withRouter } from 'react-router-dom';
 import BucketPath from './BucketPath';
 import BucketSettings from './BucketSettings';
 import FileContainer from './FileContainer';
-import { Dimmer, Loader } from 'semantic-ui-react';
+import { Dimmer, Loader, Transition, Button } from 'semantic-ui-react';
 import { listObjects, getFolderSchema } from '../utils/amazon-s3-utils';
+import FolderMenu from './FolderMenu';
 import NavMenu from '../modules/NavMenu';
 
 export const schemaFileName = 'bucket-buddy-schema.json';
@@ -13,7 +14,10 @@ const BucketViewer = (props) => {
   const [bucket] = useState(props.location.state.bucket);
   const [pathInfo, setPathInfo] = useState(null);
   const [files, setFiles] = useState({ folders: [], files: [] });
+  const [visibleFiles, setVisibleFiles] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchText, setSearchText] = useState('');
+  const [transitions, setTransitions] = useState(['fly right', 'fly left']);
   const [schemaInfo, setSchemaInfo] = useState({
     available: false,
     tagset: []
@@ -68,10 +72,14 @@ const BucketViewer = (props) => {
   }, [files]);
 
   const updatePath = (newPath) => {
+    if (newPath.depth > pathInfo.depth) {
+      setTransitions(['fly right', 'fly left']);
+    } else {
+      setTransitions(['fly left', 'fly right']);
+    }
     const { history } = props;
 
     setPathInfo(newPath);
-    console.log(newPath);
     history.replace(
       {
         pathname: `/bucket-viewer/${bucket.name}/${newPath.path}`
@@ -126,11 +134,27 @@ const BucketViewer = (props) => {
     sortObjectsAlphabetically(newFolders);
 
     setFilesLoading(false);
-    setFiles({
-      folders: newFolders,
-      files: newFiles
-    });
+    if (visibleFiles) {
+      setVisibleFiles({
+        folders: newFolders,
+        files: newFiles
+      });
+    } else {
+      setVisibleFiles({
+        folders: newFolders,
+        files: newFiles
+      });
+      setFiles({
+        folders: newFolders,
+        files: newFiles
+      });
+    }
   };
+
+  const transition = () => {
+    visibleFiles ? setFiles(visibleFiles) : setVisibleFiles(null);
+  };
+
   if (loading) {
     return (
       <Dimmer>
@@ -156,20 +180,59 @@ const BucketViewer = (props) => {
           settingsChange={setSettings}
           pathChange={updatePath}
         />
-        {filesLoading ? (
-          <Dimmer>
-            <Loader indeterminate>Preparing Files</Loader>
-          </Dimmer>
-        ) : (
-          <FileContainer
+        <div className="files-folders">
+          <FolderMenu
             bucket={bucket}
-            files={files}
-            schemaInfo={schemaInfo}
-            settings={settings}
+            folders={files.folders.map((x) => {
+              const keys = x.Key.split('/');
+              const filename =
+                keys.length === 1 ? keys[0] : keys[keys.length - 2] + '/';
+              return {
+                ...x,
+                filename: filename
+              };
+            })}
             updateList={updateList}
-            pathChange={updatePath}
+            pathInfo={pathInfo}
+            customClickEvent={updatePath}
+            search={{ text: searchText, setSearchText: setSearchText }}
           />
-        )}
+          <div>
+            <Transition
+              visible={!filesLoading}
+              onStart={() => transition()}
+              onComplete={() => transitions.reverse()}
+              onShow={() => {
+                if (!filesLoading && files !== visibleFiles) {
+                  setFiles(visibleFiles);
+                }
+              }}
+              unmountOnHide
+              animation={transitions[0]}
+              duration={250}
+            >
+              <span>
+                {files.folders.length === 0 &&
+                files.files.length === 0 &&
+                filesLoading ? (
+                  <Dimmer active>
+                    <Loader indeterminate>Preparing Files</Loader>
+                  </Dimmer>
+                ) : (
+                  <FileContainer
+                    card
+                    isLoading={filesLoading}
+                    bucket={bucket}
+                    files={files}
+                    schemaInfo={schemaInfo}
+                    settings={settings}
+                    pathChange={updatePath}
+                  />
+                )}
+              </span>
+            </Transition>
+          </div>
+        </div>
       </div>
     );
   }

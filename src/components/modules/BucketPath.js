@@ -7,25 +7,7 @@ import {
   Segment
 } from 'semantic-ui-react';
 
-import { deleteObject } from '../utils/amazon-s3-utils';
-
 const BucketPath = (props) => {
-  const deleteCurrentFolder = () => {
-    if (props.pathInfo.depth >= 1) {
-      let pathValues = props.pathInfo.path.split('/');
-
-      deleteObject(props.bucket, props.pathInfo.path);
-
-      pathValues.pop();
-      pathValues.pop();
-
-      const newPath = pathValues.join('/');
-
-      changePath(null, { path: newPath, depth: pathValues.length });
-      props.updateList();
-    }
-  };
-
   const changePath = (event, attributes) => {
     let newPathInfo =
       attributes.depth === 0
@@ -91,15 +73,6 @@ const BucketPath = (props) => {
           })}
         </Breadcrumb>
       </Segment>
-      {props.pathInfo.depth >= 1 ? (
-        <Segment basic textAlign="right">
-          <Button size="small" color="red" onClick={deleteCurrentFolder}>
-            Delete Current Folder
-          </Button>
-        </Segment>
-      ) : (
-        ''
-      )}
     </div>
   );
 };

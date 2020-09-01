@@ -1,7 +1,11 @@
 .bucket-bar {
   border-bottom: 1px solid rgba(204, 204, 204, 0.425);
   padding: 6px;
-  .bucket-buttons {
+  display: flex;
+  justify-content: space-between;
+  .bucket-buttons-left {
+  }
+  .bucket-buttons-right {
   }
 }
 
@@ -12,14 +16,23 @@
 .bucket-path {
   display: flex;
   background-color: #f7f7f7a9;
-  padding: 10px;
+  // padding: 10px;
+  justify-content: space-between;
   border-bottom: 1px solid rgba(204, 204, 204, 0.541);
+  div {
+    display: flex;
+    margin: 0 !important;
+  }
 }
 
 .file-container {
+  display: flex;
   padding: 10px;
+  flex-wrap: wrap;
+  justify-content: start;
   .file-card {
     max-height: 430px;
+    cursor: pointer;
     .card-file-image {
       object-fit: contain;
       max-height: 300px !important;
@@ -34,10 +47,16 @@
       vertical-align: middle;
       font-size: 3em;
     }
-    cursor: pointer;
     div {
       object-fit: scale-down !important;
     }
+  }
+}
+
+.file-list {
+  .file-list-item {
+    font-size: 1.4rem;
+    margin-left: 6px;
   }
 }
 
@@ -63,4 +82,15 @@
   .description {
     width: inherit !important;
   }
+}
+
+.files-folders {
+  display: flex;
+}
+.folder-menu {
+  z-index: 2;
+}
+
+body {
+  overflow: hidden;
 }

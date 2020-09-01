@@ -69,7 +69,11 @@ const FileDetailsModal = (props) => {
         );
       }
     } else {
-      setConformsToSchema(props.schemaInfo.available === false);
+      if (props.schemaInfo) {
+        setConformsToSchema(props.schemaInfo.available === false);
+      } else {
+        setConformsToSchema(false);
+      }
     }
   });
 
