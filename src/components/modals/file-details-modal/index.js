@@ -12,7 +12,8 @@ import {
   Label,
   Icon,
   Placeholder,
-  Message
+  Message,
+  Confirm
 } from 'semantic-ui-react';
 import {
   getObjectTags,
@@ -26,6 +27,7 @@ import EditObjectTagsModal from '../edit-tags-modal';
 
 const FileDetailsModal = (props) => {
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [conformsToSchema, setConformsToSchema] = useState(true);
   const [fileTags, setfileTags] = useState({ TagSet: [] });
   const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
@@ -33,6 +35,14 @@ const FileDetailsModal = (props) => {
 
   const getData = () => {
     return getObjectTags(props.bucket, props.file.Key);
+  };
+
+  const showConfirmDelete = () => {
+    setShowConfirm(true);
+  };
+
+  const closeConfirmDelete = () => {
+    setShowConfirm(false);
   };
 
   /**
@@ -188,9 +198,16 @@ const FileDetailsModal = (props) => {
                       trigger={<Button size="medium">Edit Tags</Button>}
                     />
                   )}
-                  <Button color="red" onClick={deleteFile}>
+                  <Button color="red" onClick={showConfirmDelete}>
                     Delete File
                   </Button>
+                  <Confirm
+                    open={showConfirm}
+                    cancelButton="Cancel"
+                    confirmButton="Delete"
+                    onCancel={closeConfirmDelete}
+                    onConfirm={deleteFile}
+                  />
                 </ListContent>
               </List.Item>
             </List>
