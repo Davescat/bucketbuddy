@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from 'semantic-ui-react';
+import { Button, Dropdown } from 'semantic-ui-react';
 import FileUploadModal from '../modals/file-upload-modal';
 import FolderUploadModal from '../modals/folder-upload-modal';
 import SchemaStructureModal from '../modals/schema-structure-modal';
@@ -32,6 +32,31 @@ const BucketSettings = ({
   return (
     <div className="bucket-bar">
       <span className="bucket-buttons">
+        <Dropdown button text="File">
+          <Dropdown.Menu>
+            <FileUploadModal
+              updateList={updateList}
+              bucket={bucket}
+              schemaInfo={schemaInfo}
+              pathInfo={pathInfo}
+              trigger={<Dropdown.Item text="New File" />}
+            />
+            <FolderUploadModal
+              updateList={updateList}
+              bucket={bucket}
+              pathInfo={pathInfo}
+              trigger={<Dropdown.Item text="New Folder" />}
+            />
+            <Dropdown.Divider />
+            <SchemaStructureModal
+              updateList={updateList}
+              schemaInfo={schemaInfo}
+              bucket={bucket}
+              pathInfo={pathInfo}
+              trigger={<Dropdown.Item text="Folder Schema" />}
+            />
+          </Dropdown.Menu>
+        </Dropdown>
         <FolderUploadModal
           updateList={updateList}
           bucket={bucket}

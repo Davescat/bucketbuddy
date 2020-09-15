@@ -14,27 +14,22 @@ import {
   Placeholder,
   Message
 } from 'semantic-ui-react';
-import {
-  getObjectTags,
-  putObjectTags,
-  deleteObject
-} from '../../utils/amazon-s3-utils';
-
+import { deleteObject, getSignedURL } from '../../utils/amazon-s3-utils';
 import { schemaFileName } from '../../modules/BucketViewer';
-
 import EditObjectTagsModal from '../edit-tags-modal';
+import { withRouter } from 'react-router-dom';
 
 const FileDetailsModal = (props) => {
-  const [dataLoaded, setDataLoaded] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(props.tagInfo.tagsLoaded);
   const [conformsToSchema, setConformsToSchema] = useState(true);
-  const [fileTags, setfileTags] = useState({ TagSet: [] });
+  const [downloadLink, setDownloadLink] = useState('');
   const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
-  const { file } = props;
-
-  const getData = () => {
-    return getObjectTags(props.bucket, props.file.Key);
-  };
-
+  const {
+    file,
+    bucket,
+    schemaInfo,
+    tagInfo: { fileTags, setFileTags }
+  } = props;
   /**
    *
    * @param {AWS.S3.GetObjectOutput} response
@@ -45,23 +40,21 @@ const FileDetailsModal = (props) => {
     }
   };
 
-  const setData = (response) => {
-    setDataLoaded(true);
-    setfileTags(response);
-  };
-
   const deleteFile = () => {
-    deleteObject(props.bucket, props.file.Key);
+    deleteObject(bucket, file.Key);
     props.handleClose();
     props.updateList();
   };
 
   useEffect(() => {
-    if (props.modalOpen && !dataLoaded) {
-      getData().then(setData);
+    if (downloadLink === '') {
+      getSignedURL(bucket, file.Key).then(setDownloadLink);
     }
-    if (fileTags.TagSet.length > 0) {
-      let schemaKeys = getKeys(props.schemaInfo.tagset, 'key');
+    if (props.tagInfo.tagsLoaded != dataLoaded) {
+      setDataLoaded(props.tagInfo.tagsLoaded);
+    }
+    if (fileTags && fileTags.TagSet.length > 0) {
+      let schemaKeys = getKeys(schemaInfo.tagset, 'key');
       let fileKeys = getKeys(fileTags.TagSet, 'Key');
       if (schemaKeys) {
         setConformsToSchema(
@@ -69,8 +62,8 @@ const FileDetailsModal = (props) => {
         );
       }
     } else {
-      if (props.schemaInfo) {
-        setConformsToSchema(props.schemaInfo.available === false);
+      if (schemaInfo) {
+        setConformsToSchema(schemaInfo.available === false);
       } else {
         setConformsToSchema(false);
       }
@@ -119,12 +112,12 @@ const FileDetailsModal = (props) => {
         <Modal.Description>
           {dataLoaded ? (
             <List className="file-details" divided>
-              {!conformsToSchema && file.filename != schemaFileName && (
+              {!conformsToSchema && file.filename !== schemaFileName && (
                 <Label color="red" ribbon>
                   Does not conform to Schema
                 </Label>
               )}
-              {file.filename == schemaFileName && (
+              {file.filename === schemaFileName && (
                 <Message className="s3-message">
                   <Message.Header>Bucket Buddy Schema</Message.Header>
                   <p>
@@ -141,14 +134,15 @@ const FileDetailsModal = (props) => {
                   <ListDescription>{file.Key}</ListDescription>
                 </ListContent>
               </List.Item>
-              {fileTags.TagSet.map((set, i) => (
-                <List.Item>
-                  <ListContent>
-                    <ListHeader>{set.Key}</ListHeader>
-                    <ListDescription>{set.Value}</ListDescription>
-                  </ListContent>
-                </List.Item>
-              ))}
+              {fileTags &&
+                fileTags.TagSet.map((set, i) => (
+                  <List.Item>
+                    <ListContent>
+                      <ListHeader>{set.Key}</ListHeader>
+                      <ListDescription>{set.Value}</ListDescription>
+                    </ListContent>
+                  </List.Item>
+                ))}
               <List.Item>
                 <ListContent>
                   <ListHeader>LastModified</ListHeader>
@@ -171,9 +165,9 @@ const FileDetailsModal = (props) => {
               </List.Item>
               <List.Item>
                 <ListContent>
-                  {file.filename != schemaFileName && (
+                  {file.filename !== schemaFileName && (
                     <EditObjectTagsModal
-                      bucket={props.bucket}
+                      bucket={bucket}
                       keyValue={file.Key}
                       tagset={cleanTagSetValuesForForm(
                         conformsToSchema
@@ -181,12 +175,23 @@ const FileDetailsModal = (props) => {
                           : Object.assign(
                               [],
                               fileTags.TagSet,
-                              props.schemaInfo.tagset
+                              schemaInfo.tagset
                             )
                       )}
-                      setfileTags={setfileTags}
+                      setFileTags={setFileTags}
                       trigger={<Button size="medium">Edit Tags</Button>}
                     />
+                  )}
+                  {downloadLink !== '' && (
+                    <a
+                      download=""
+                      href={downloadLink}
+                      target="_blank"
+                      class="ui button"
+                      role="button"
+                    >
+                      Download
+                    </a>
                   )}
                   <Button color="red" onClick={deleteFile}>
                     Delete File
@@ -204,4 +209,4 @@ const FileDetailsModal = (props) => {
     </Modal>
   );
 };
-export default FileDetailsModal;
+export default withRouter(FileDetailsModal);

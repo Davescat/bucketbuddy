@@ -1,8 +1,7 @@
-import React, { Component, useState, useEffect } from 'react';
-import { Input, Menu, FormInput } from 'semantic-ui-react';
+import React, { useState, useEffect } from 'react';
+import { Menu, FormInput } from 'semantic-ui-react';
 
 const FolderMenu = (props) => {
-  const [searchText, setSearchText] = useState('');
   const [visibleFolders, setvisibleFolders] = useState(props.folders);
   const [currentPath, setCurrentPath] = useState(props.pathInfo);
 
@@ -11,7 +10,7 @@ const FolderMenu = (props) => {
       setCurrentPath(props.pathInfo);
       props.search.setSearchText('');
     }
-    if (visibleFolders !== props.folders && props.search.text == '') {
+    if (visibleFolders !== props.folders && props.search.text === '') {
       setvisibleFolders(props.folders);
     }
   });
@@ -32,7 +31,6 @@ const FolderMenu = (props) => {
       )
     );
   };
-
   return (
     <Menu vertical stackable borderless className="folder-menu">
       <Menu.Item>
@@ -44,7 +42,10 @@ const FolderMenu = (props) => {
         />
       </Menu.Item>
       {visibleFolders.map((x, i) => (
-        <Menu.Item onClick={() => handleFileClick(x.Key)}>
+        <Menu.Item
+          onClick={() => handleFileClick(x.Key)}
+          key={`${i}${x.filename}`}
+        >
           {x.filename}
         </Menu.Item>
       ))}

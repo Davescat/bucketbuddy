@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Modal } from 'semantic-ui-react';
-import AWS from 'aws-sdk';
-import { getObject, putObjectTags } from '../../utils/amazon-s3-utils';
+import { putObjectTags } from '../../utils/amazon-s3-utils';
 import SchemaForm from '../../schema-form';
 
 const EditObjectTagsModal = (props) => {
@@ -23,7 +22,7 @@ const EditObjectTagsModal = (props) => {
       key,
       targetSetForCall
     );
-    props.setfileTags(targetSetForCall);
+    props.setFileTags(targetSetForCall);
 
     setModalOpen(false);
   };
