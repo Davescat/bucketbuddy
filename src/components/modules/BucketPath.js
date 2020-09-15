@@ -1,13 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Breadcrumb,
   BreadcrumbDivider,
   BreadcrumbSection,
-  Button,
-  Segment
+  Segment,
+  Input,
+  Dropdown
 } from 'semantic-ui-react';
 
 const BucketPath = (props) => {
+  const [schemaInfo, setSchemaInfo] = useState(props.schemaInfo);
+  const [dropdownValue, setDropdownValue] = useState('');
+
+  useEffect(() => {
+    if (props.schemaInfo !== schemaInfo) {
+      setDropdownValue('');
+      setSchemaInfo(props.schemaInfo);
+    }
+  });
+
   const changePath = (event, attributes) => {
     let newPathInfo =
       attributes.depth === 0
@@ -22,12 +33,21 @@ const BucketPath = (props) => {
     props.pathChange(newPathInfo);
   };
 
+  const handleFieldChange = (event, { value }) => {
+    props.search.setSearchText(value);
+  };
+  const handleTagChange = (event, { value }) => {
+    props.search.setChosenTag(value);
+    setDropdownValue(value);
+  };
+
   let pathArr = props.pathInfo.path.split('/');
   let arr = ['/'];
   for (let i = 0; i < props.pathInfo.depth; i++) {
     arr.push(pathArr.shift());
     if (i !== props.pathInfo.depth - 1) arr.push('/');
   }
+
   return (
     <div className="bucket-path">
       <Segment basic>
@@ -73,6 +93,27 @@ const BucketPath = (props) => {
           })}
         </Breadcrumb>
       </Segment>
+      {schemaInfo.available && (
+        <Input
+          label={
+            <Dropdown
+              options={schemaInfo.tagset.map((tag) => ({
+                text: tag.key,
+                value: tag.key
+              }))}
+              onChange={handleTagChange}
+              selectOnBlur={false}
+              value={dropdownValue}
+              placeholder="Tags"
+              clearable
+            />
+          }
+          value={props.search.text}
+          labelPosition="right"
+          onChange={handleFieldChange}
+          placeholder="Tag Search"
+        />
+      )}
     </div>
   );
 };

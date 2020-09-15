@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Dimmer, Loader } from 'semantic-ui-react';
 import AWS from 'aws-sdk';
-import { getObject } from '../../utils/amazon-s3-utils';
 import SchemaForm from '../../schema-form';
 
 const SchemaStructureModal = (props) => {
