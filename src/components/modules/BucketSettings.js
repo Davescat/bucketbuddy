@@ -1,5 +1,5 @@
-import React from 'react';
-import { Button, Dropdown } from 'semantic-ui-react';
+import React, { useState } from 'react';
+import { Button, Dropdown, Confirm } from 'semantic-ui-react';
 import FileUploadModal from '../modals/file-upload-modal';
 import FolderUploadModal from '../modals/folder-upload-modal';
 import SchemaStructureModal from '../modals/schema-structure-modal';
@@ -15,6 +15,8 @@ const BucketSettings = ({
   pathInfo,
   schemaInfo
 }) => {
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const deleteCurrentFolder = () => {
     if (pathInfo.depth >= 1) {
       let pathValues = pathInfo.path.split('/');
@@ -27,6 +29,14 @@ const BucketSettings = ({
         updateList();
       });
     }
+  };
+
+  const showConfirmDelete = () => {
+    setShowConfirm(true);
+  };
+
+  const closeConfirmDelete = () => {
+    setShowConfirm(false);
   };
 
   return (
@@ -80,9 +90,18 @@ const BucketSettings = ({
       </span>
       <span className="bucket-buttons-right">
         {pathInfo.depth >= 1 ? (
-          <Button size="medium" color="red" onClick={deleteCurrentFolder}>
-            Delete Current Folder
-          </Button>
+          <>
+            <Button size="medium" color="red" onClick={showConfirmDelete}>
+              Delete Current Folder
+            </Button>
+            <Confirm
+              open={showConfirm}
+              cancelButton="Cancel"
+              confirmButton="Delete"
+              onCancel={closeConfirmDelete}
+              onConfirm={deleteCurrentFolder}
+            />
+          </>
         ) : (
           ''
         )}

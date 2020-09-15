@@ -12,7 +12,8 @@ import {
   Label,
   Icon,
   Placeholder,
-  Message
+  Message,
+  Confirm
 } from 'semantic-ui-react';
 import { deleteObject, getSignedURL } from '../../utils/amazon-s3-utils';
 import { schemaFileName } from '../../modules/BucketViewer';
@@ -21,15 +22,26 @@ import { withRouter } from 'react-router-dom';
 
 const FileDetailsModal = (props) => {
   const [dataLoaded, setDataLoaded] = useState(props.tagInfo.tagsLoaded);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [conformsToSchema, setConformsToSchema] = useState(true);
   const [downloadLink, setDownloadLink] = useState('');
   const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
+
   const {
     file,
     bucket,
     schemaInfo,
     tagInfo: { fileTags, setFileTags }
   } = props;
+
+  const showConfirmDelete = () => {
+    setShowConfirm(true);
+  };
+
+  const closeConfirmDelete = () => {
+    setShowConfirm(false);
+  };
+
   /**
    *
    * @param {AWS.S3.GetObjectOutput} response
@@ -193,9 +205,16 @@ const FileDetailsModal = (props) => {
                       Download
                     </a>
                   )}
-                  <Button color="red" onClick={deleteFile}>
+                  <Button color="red" onClick={showConfirmDelete}>
                     Delete File
                   </Button>
+                  <Confirm
+                    open={showConfirm}
+                    cancelButton="Cancel"
+                    confirmButton="Delete"
+                    onCancel={closeConfirmDelete}
+                    onConfirm={deleteFile}
+                  />
                 </ListContent>
               </List.Item>
             </List>
