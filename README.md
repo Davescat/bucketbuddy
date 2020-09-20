@@ -8,6 +8,8 @@ Amazon's S3 is great and a very versatile storage service, however it is harder 
 
 ## This solution
 
+![Image of Bucket Buddy main screen](./public/bucket-buddy-main-screen.jpg)
+
 Bucket Buddy is a simple React application used to be a tool for users to better manage their S3 bucket objects.
 
 This application can be used to:
@@ -62,6 +64,8 @@ AWS uses IAM Roles for all their services to handle security and user permission
 }
 ```
 
+Ensure also to set your S3 s=bucket's signature version to be V4.
+
 ## Installation and running locally
 
 1. Download a ZIP of the project by clicking [here](https://github.com/js-montreal/bucketbuddy/archive/master.zip)
@@ -98,7 +102,12 @@ Navigating through the bucket is similar to a file explorer (folders and files a
 
 ## Creating/Editing a schema for your objects' tags
 
-A folder's tag schema is how bucket buddy knows what tags should be always appied to the objects in the folder. You can create one by clicking on the "Tags in folder Schema" button and you will be prompted to create your field names and default values for them.
+A folder's tag schema is how bucket buddy knows what tags should be always appied to the objects in the folder. You can create one by clicking on the "Tags in folder Schema" button and you will be prompted to create your field names and default values for them. You will also be able to set the types. The field types work as follows:
+
+- Text: Any text values such as `hello world`
+- Numeric: Any numeric values such as integers like 1, 3, or 6. You can also specify decimals such as 123.11 (not text is allowed)
+- Date: The value should be a date such as 2020-03-09 (year-month-day)
+- Flag: The value should either be True or False.
 
 Don't worry if you have pre-existing objects, a tag is displayed to let you know they are missing the schema tags and you will be able to add them. You can always go back and edit the schema as you wish and if you wish to no longer have the schema simply deleting the `bucket-buddy-schema.json` file.
 
@@ -137,6 +146,14 @@ You can delete any folder except the root folder. Simply navigate to the folder 
 # Special thanks
 
 This project developed by the team at [Rasion d'Art](https://www.raisondart.org/) a non-profit organization and is made available for anyone who will find use in making managing their S3 bucket easier.
+
+Also special thanks to the team:
+
+- [Davide Catalano](https://github.com/Davescat)
+- [Jeffrey Boisvert](https://github.com/jdboisvert)
+- [Bruno Carriere](https://github.com/bruno-c)
+- [Olivia](https://github.com/olioli)
+- [Jean-Francois Duval](https://github.com/gsquad-jfduval)
 
 ## Having issues?
 
