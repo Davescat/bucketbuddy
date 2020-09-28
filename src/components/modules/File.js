@@ -1,32 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Image, Placeholder, Icon } from 'semantic-ui-react';
 import FileDetailsModal from '../modals/file-details-modal';
-import { getObjectURL, getObjectTags } from '../utils/amazon-s3-utils';
+import {
+  getObjectURL,
+  getObjectTags,
+  getImageSrc
+} from '../utils/amazon-s3-utils';
 
 const File = (props) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [tagsLoaded, setTagsLoaded] = useState(false);
-  const [fileTags, setFileTags] = useState({ TagSet: [] });
   const [modalOpen, setModalOpen] = useState(false);
-  const [src, setSrc] = useState({});
+  const [src, setSrc] = useState('');
 
-  const getImageUrl = () => getObjectURL(props.bucket, props.file.Key);
   const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
-
-  const getTags = () => {
-    getObjectTags(props.bucket, props.file.Key).then((response) => {
-      setTagsLoaded(true);
-      setFileTags(response);
-    });
-  };
 
   useEffect(() => {
     if (props.file.type === 'file') {
-      getTags();
-      getImageUrl().then((data) => {
+      if (fileTest.test(props.file.filename)) {
+        if (props.file.src) {
+          setImageLoaded(true);
+          setSrc(props.file.src);
+        } else {
+          getImageSrc(
+            props.bucket,
+            props.file.Key,
+            (data) => {
+              setSrc(data);
+              setImageLoaded(true);
+            },
+            props.settings.cacheImages
+          );
+        }
+      } else {
         setImageLoaded(true);
-        setSrc(data);
-      });
+      }
     }
   }, [props.file.Key]);
 
@@ -34,25 +41,19 @@ const File = (props) => {
    * Gets the appropriate tags for whatever type of file requested
    */
   const getImage = () => {
-    if (props.settings.loadImages) {
-      if (props.file.type === 'file') {
-        if (imageLoaded) {
-          if (fileTest.test(props.file.filename)) {
-            return <Image src={src} className="card-file-image" />;
-          } else {
-            return <Icon name="file" className="card-file-icon" />;
-          }
+    if (props.file.type === 'file') {
+      if (imageLoaded) {
+        if (fileTest.test(props.file.filename)) {
+          return <Image src={src} className="card-file-image" />;
         } else {
-          return (
-            <Placeholder>
-              <Placeholder.Image square />
-            </Placeholder>
-          );
+          return <Icon name="file" className="card-file-icon" />;
         }
-      }
-    } else {
-      if (props.file.type === 'file') {
-        return <Image wrapped ui={false} />;
+      } else {
+        return (
+          <Placeholder>
+            <Placeholder.Image square />
+          </Placeholder>
+        );
       }
     }
   };
@@ -88,9 +89,8 @@ const File = (props) => {
         schemaInfo={props.schemaInfo}
         handleClose={() => setModalOpen(false)}
         tagInfo={{
-          tagsLoaded: tagsLoaded,
-          fileTags: fileTags,
-          setFileTags: setFileTags
+          fileTags: props.file.TagSet,
+          updateTagState: props.updateTagState
         }}
         file={{
           ...props.file,

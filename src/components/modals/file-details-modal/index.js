@@ -1,4 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import {
+  deleteObject,
+  getSignedURL,
+  getObjectRequest
+} from '../../utils/amazon-s3-utils';
+import { schemaFileName } from '../../modules/BucketViewer';
+import EditObjectTagsModal from '../edit-tags-modal';
+import { withRouter } from 'react-router-dom';
 import {
   Modal,
   Image,
@@ -15,23 +23,20 @@ import {
   Message,
   Confirm
 } from 'semantic-ui-react';
-import { deleteObject, getSignedURL } from '../../utils/amazon-s3-utils';
-import { schemaFileName } from '../../modules/BucketViewer';
-import EditObjectTagsModal from '../edit-tags-modal';
-import { withRouter } from 'react-router-dom';
 
 const FileDetailsModal = (props) => {
-  const [dataLoaded, setDataLoaded] = useState(props.tagInfo.tagsLoaded);
+  // const [dataLoaded, setDataLoaded] = useState(props.tagInfo.tagsLoaded);
   const [showConfirm, setShowConfirm] = useState(false);
   const [conformsToSchema, setConformsToSchema] = useState(true);
+  const [src, setSrc] = useState('');
   const [downloadLink, setDownloadLink] = useState('');
   const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
-
+  const imagec = useRef(null);
   const {
     file,
     bucket,
     schemaInfo,
-    tagInfo: { fileTags, setFileTags }
+    tagInfo: { updateTagState }
   } = props;
 
   const showConfirmDelete = () => {
@@ -59,15 +64,13 @@ const FileDetailsModal = (props) => {
   };
 
   useEffect(() => {
-    if (downloadLink === '') {
-      getSignedURL(bucket, file.Key).then(setDownloadLink);
-    }
-    if (props.tagInfo.tagsLoaded != dataLoaded) {
-      setDataLoaded(props.tagInfo.tagsLoaded);
-    }
-    if (fileTags && fileTags.TagSet.length > 0) {
+    // if (downloadLink === '') {
+    // getSignedURL(bucket, file.Key).then(setDownloadLink);
+    // }
+    if (file.TagSet && file.TagSet.length > 0) {
       let schemaKeys = getKeys(schemaInfo.tagset, 'key');
-      let fileKeys = getKeys(fileTags.TagSet, 'Key');
+      let fileKeys = getKeys(file.TagSet, 'Key');
+      // console.log(schemaKeys, fileKeys);
       if (schemaKeys) {
         setConformsToSchema(
           schemaKeys.every((schemaKey) => fileKeys.includes(schemaKey))
@@ -83,24 +86,22 @@ const FileDetailsModal = (props) => {
   });
 
   const getImage = () => {
-    if (dataLoaded) {
-      if (fileTest.test(file.filename)) {
-        return <Image wrapped size="medium" src={file.src} />;
-      } else {
-        return <Icon name="file" className="card-file-icon" />;
-      }
-    } else {
+    if (fileTest.test(file.filename)) {
+      //Using "div" and "img" instead of the Image object so that a ref could be made
       return (
-        <Placeholder>
-          <Placeholder.Image square />
-        </Placeholder>
+        <div class="ui medium middle aligned image">
+          {' '}
+          <img crossOrigin="anonymous" ref={imagec} src={file.src} />
+        </div>
       );
+    } else {
+      return <Icon name="file" className="card-file-icon" />;
     }
   };
 
   const cleanTagSetValuesForForm = (tagset) => {
     const newTagset = [];
-
+    // console.log(tagset);
     tagset.map((set, i) =>
       newTagset.push({
         key: set.Key ? set.Key : set.key,
@@ -122,107 +123,97 @@ const FileDetailsModal = (props) => {
       <Modal.Content image>
         {getImage()}
         <Modal.Description>
-          {dataLoaded ? (
-            <List className="file-details" divided>
-              {!conformsToSchema && file.filename !== schemaFileName && (
-                <Label color="red" ribbon>
-                  Does not conform to Schema
-                </Label>
-              )}
-              {file.filename === schemaFileName && (
-                <Message className="s3-message">
-                  <Message.Header>Bucket Buddy Schema</Message.Header>
-                  <p>
-                    This file is so we know what values you want to set to your
-                    objects' tags.
-                    <br />
-                    You can delete this but you will have to make another one
-                  </p>
-                </Message>
-              )}
-              <List.Item>
-                <ListContent>
-                  <ListHeader>Path</ListHeader>
-                  <ListDescription>{file.Key}</ListDescription>
-                </ListContent>
-              </List.Item>
-              {fileTags &&
-                fileTags.TagSet.map((set, i) => (
-                  <List.Item>
-                    <ListContent>
-                      <ListHeader>{set.Key}</ListHeader>
-                      <ListDescription>{set.Value}</ListDescription>
-                    </ListContent>
-                  </List.Item>
-                ))}
-              <List.Item>
-                <ListContent>
-                  <ListHeader>LastModified</ListHeader>
-                  <ListDescription>
-                    {file.LastModified.toString()}
-                  </ListDescription>
-                </ListContent>
-              </List.Item>
-              <List.Item>
-                <ListContent>
-                  <ListHeader>Size</ListHeader>
-                  <ListDescription>{file.Size}</ListDescription>
-                </ListContent>
-              </List.Item>
-              <List.Item>
-                <ListContent>
-                  <ListHeader>Storage Class</ListHeader>
-                  <ListDescription>{file.StorageClass}</ListDescription>
-                </ListContent>
-              </List.Item>
-              <List.Item>
-                <ListContent>
-                  {file.filename !== schemaFileName && (
-                    <EditObjectTagsModal
-                      bucket={bucket}
-                      keyValue={file.Key}
-                      tagset={cleanTagSetValuesForForm(
-                        conformsToSchema
-                          ? fileTags.TagSet
-                          : Object.assign(
-                              [],
-                              fileTags.TagSet,
-                              schemaInfo.tagset
-                            )
-                      )}
-                      setFileTags={setFileTags}
-                      trigger={<Button size="medium">Edit Tags</Button>}
-                    />
-                  )}
-                  {downloadLink !== '' && (
-                    <a
-                      download=""
-                      href={downloadLink}
-                      target="_blank"
-                      class="ui button"
-                      role="button"
-                    >
-                      Download
-                    </a>
-                  )}
-                  <Button color="red" onClick={showConfirmDelete}>
-                    Delete File
-                  </Button>
-                  <Confirm
-                    open={showConfirm}
-                    cancelButton="Cancel"
-                    confirmButton="Delete"
-                    onCancel={closeConfirmDelete}
-                    onConfirm={deleteFile}
+          <List className="file-details" divided>
+            {!conformsToSchema && file.filename !== schemaFileName && (
+              <Label color="red" ribbon>
+                Does not conform to Schema
+              </Label>
+            )}
+            {file.filename === schemaFileName && (
+              <Message className="s3-message">
+                <Message.Header>Bucket Buddy Schema</Message.Header>
+                <p>
+                  This file is so we know what values you want to set to your
+                  objects' tags.
+                  <br />
+                  You can delete this but you will have to make another one
+                </p>
+              </Message>
+            )}
+            <List.Item>
+              <ListContent>
+                <ListHeader>Path</ListHeader>
+                <ListDescription>{file.Key}</ListDescription>
+              </ListContent>
+            </List.Item>
+            {file.TagSet &&
+              file.TagSet.map((set, i) => (
+                <List.Item>
+                  <ListContent>
+                    <ListHeader>{set.Key}</ListHeader>
+                    <ListDescription>{set.Value}</ListDescription>
+                  </ListContent>
+                </List.Item>
+              ))}
+            <List.Item>
+              <ListContent>
+                <ListHeader>LastModified</ListHeader>
+                <ListDescription>
+                  {file.LastModified.toString()}
+                </ListDescription>
+              </ListContent>
+            </List.Item>
+            <List.Item>
+              <ListContent>
+                <ListHeader>Size</ListHeader>
+                <ListDescription>{file.Size}</ListDescription>
+              </ListContent>
+            </List.Item>
+            <List.Item>
+              <ListContent>
+                <ListHeader>Storage Class</ListHeader>
+                <ListDescription>{file.StorageClass}</ListDescription>
+              </ListContent>
+            </List.Item>
+            <List.Item>
+              <ListContent>
+                {file.TagSet && file.filename !== schemaFileName && (
+                  <EditObjectTagsModal
+                    bucket={bucket}
+                    keyValue={file.Key}
+                    tagset={cleanTagSetValuesForForm(
+                      conformsToSchema
+                        ? file.TagSet
+                        : Object.assign([], file.TagSet, schemaInfo.tagset)
+                    )}
+                    updateTagState={updateTagState}
+                    trigger={<Button size="medium">Edit Tags</Button>}
                   />
-                </ListContent>
-              </List.Item>
-            </List>
-          ) : (
-            <Dimmer active inverted>
-              <Loader inverted>Loading</Loader>
-            </Dimmer>
-          )}
+                )}
+                {downloadLink !== '' && (
+                  <a
+                    download=""
+                    href={downloadLink}
+                    target="_blank"
+                    class="ui button"
+                    role="button"
+                  >
+                    Download
+                  </a>
+                )}
+                <Button color="red" onClick={showConfirmDelete}>
+                  Delete File
+                </Button>
+                <Confirm
+                  open={showConfirm}
+                  cancelButton="Cancel"
+                  confirmButton="Delete"
+                  onCancel={closeConfirmDelete}
+                  onConfirm={deleteFile}
+                />
+              </ListContent>
+            </List.Item>
+          </List>
         </Modal.Description>
       </Modal.Content>
     </Modal>

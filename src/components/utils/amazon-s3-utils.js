@@ -5,6 +5,7 @@ import {
   GenericS3Error,
   NoSuchKeyError
 } from '../errors/s3-errors';
+import { getCacheSrc } from './cache-utils';
 
 export const testConnectionS3Bucket = async ({
   bucketName,
@@ -19,6 +20,7 @@ export const testConnectionS3Bucket = async ({
     signatureVersion: 'v4'
   });
   try {
+    console.log('calling!');
     await s3.headBucket({ Bucket: bucketName }).promise();
   } catch (error) {
     if (!error.code) {
@@ -47,6 +49,7 @@ export const getObject = async (
     signatureVersion: 'v4'
   });
   try {
+    console.log('calling!');
     return await s3
       .getObject({
         Bucket: name,
@@ -83,7 +86,55 @@ export const getObjectURL = async (
     signatureVersion: 'v4'
   });
   try {
+    console.log('calling!');
     return await s3.getSignedUrlPromise('getObject', {
+      Bucket: name,
+      Key: key
+    });
+  } catch (error) {
+    if (!error.code) {
+      throw new GenericS3Error();
+    } else {
+      if (error.code === 'Forbidden') {
+        throw new ForbiddenError();
+      }
+      if (error.code === 'NetworkError') {
+        throw NetworkError();
+      } else {
+        throw new GenericS3Error();
+      }
+    }
+  }
+};
+
+export const getImageSrc = (bucket, key, callback, cached = false) => {
+  if (cached) {
+    return getCacheSrc(bucket, key, callback);
+  } else {
+    return getObjectURL(bucket, key).then(callback);
+  }
+};
+
+/**
+ *
+ * @param {*} param0 Bucket Info { name, accessKeyId, secretAccessKey, region }
+ * @param {String} key
+ *
+ * @returns {AWS.Request<AWS.S3.GetObjectOutput, AWS.AWSError>}
+ */
+export const getObjectRequest = (
+  { name, accessKeyId, secretAccessKey, region },
+  key
+) => {
+  const s3 = new AWS.S3({
+    accessKeyId,
+    secretAccessKey,
+    region,
+    signatureVersion: 'v4'
+  });
+  try {
+    console.log('calling!');
+    return s3.getObject({
       Bucket: name,
       Key: key
     });
@@ -113,6 +164,7 @@ export const getSignedURL = async (
     signatureVersion: 'v4'
   });
   try {
+    console.log('calling!');
     return await s3.getSignedUrl('getObject', {
       Bucket: name,
       Key: key,
@@ -144,6 +196,7 @@ export const listObjects = async (
     signatureVersion: 'v4'
   });
   try {
+    console.log('calling!');
     return await s3
       .listObjectsV2({
         Bucket: name,
@@ -165,6 +218,7 @@ export const listObjects = async (
     }
   }
 };
+
 export const deleteObject = async (
   { name, accessKeyId, secretAccessKey, region },
   key
@@ -176,6 +230,7 @@ export const deleteObject = async (
     signatureVersion: 'v4'
   });
   try {
+    console.log('calling!');
     return await s3
       .deleteObject({
         Bucket: name,
@@ -212,6 +267,7 @@ export const uploadObject = async (
   tags
 ) => {
   try {
+    console.log('calling!');
     const s3 = new AWS.S3({
       accessKeyId,
       secretAccessKey,
@@ -256,6 +312,7 @@ export const getFolderSchema = async (
     signatureVersion: 'v4'
   });
   try {
+    console.log('calling!');
     return await s3
       .getObject({
         Bucket: name,
@@ -294,6 +351,7 @@ export const getObjectTags = async (
     signatureVersion: 'v4'
   });
   try {
+    console.log('calling!', key);
     return await s3
       .getObjectTagging({
         Bucket: name,
@@ -333,6 +391,7 @@ export const putObjectTags = async (
     signatureVersion: 'v4'
   });
   try {
+    console.log('calling!');
     return await s3
       .putObjectTagging({
         Bucket: name,

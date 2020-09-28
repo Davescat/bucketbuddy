@@ -22,7 +22,7 @@ const EditObjectTagsModal = (props) => {
       key,
       targetSetForCall
     );
-    props.setFileTags(targetSetForCall);
+    props.updateTagState(key, targetSetForCall);
 
     setModalOpen(false);
   };

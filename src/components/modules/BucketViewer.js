@@ -11,6 +11,7 @@ import {
 import FolderMenu from './FolderMenu';
 import NavMenu from '../modules/NavMenu';
 import AWS from 'aws-sdk';
+import { updateCacheFiles, updateCacheList } from '../utils/cache-utils';
 
 export const schemaFileName = 'bucket-buddy-schema.json';
 
@@ -24,15 +25,13 @@ const BucketViewer = (props) => {
   const [chosenTag, setChosenTag] = useState('');
   const [tagSearchText, setTagSearchText] = useState('');
   const [transitions, setTransitions] = useState(['fly right', 'fly left']);
+  const [filesLoading, setFilesLoading] = useState(true);
   const [schemaInfo, setSchemaInfo] = useState({
     available: false,
     tagset: []
   });
-  const [filesLoading, setFilesLoading] = useState(true);
   const [settings, setSettings] = useState({
-    loadMetadata: true,
-    loadTags: false,
-    loadImages: true
+    cacheImages: false
   });
 
   //This checks the url and tries to navigate to the folders directly if refreshed
@@ -60,8 +59,14 @@ const BucketViewer = (props) => {
   });
 
   useEffect(() => {
-    updateList();
+    if (!loading) {
+      updateList();
+    }
   }, [pathInfo]);
+
+  useEffect(() => {
+    setFilesLoading(false);
+  }, [visibleFiles]);
 
   useEffect(() => {
     if (
@@ -96,17 +101,12 @@ const BucketViewer = (props) => {
     );
   };
 
-  useEffect(() => {
-    setFilesLoading(false);
-  }, [visibleFiles]);
-
   const updateList = () => {
+    console.log('updating!');
     setFilesLoading(true);
-    listFiles().then(filterList);
-  };
-
-  const listFiles = () => {
-    return listObjects(bucket, pathInfo.path);
+    listObjects(bucket, pathInfo.path).then((data) => {
+      filterList(data);
+    });
   };
 
   /**
@@ -139,9 +139,7 @@ const BucketViewer = (props) => {
    * @param {AWS.S3.ListObjectsV2Output} response
    */
   const filterList = async (response) => {
-    console.log(response);
     let depth = pathInfo.depth + 1;
-
     const newFolders = response.Contents.filter(
       (x) =>
         x.Key.split('/').length === depth + 1 && x.Key[x.Key.length - 1] === '/'
@@ -164,6 +162,16 @@ const BucketViewer = (props) => {
     });
 
     newFiles = await getAllTags(newFiles);
+    const cachedSrcData = await updateCacheFiles(
+      newFiles,
+      `bucbud${bucket.name}`,
+      pathInfo
+    );
+    console.log(cachedSrcData);
+    newFiles = newFiles.map((value) => ({
+      ...value,
+      ...cachedSrcData.cachedKeys.find((val) => val.cacheKey === value.Key)
+    }));
 
     sortObjectsAlphabetically(newFiles);
     sortObjectsAlphabetically(newFolders);
@@ -183,6 +191,22 @@ const BucketViewer = (props) => {
         files: newFiles
       });
     }
+  };
+
+  const updateTagState = (key, tagset) => {
+    console.log(key, tagset);
+    const fileIndex = visibleFiles.files.findIndex((file) => file.Key === key);
+    const updatedFile = {
+      ...visibleFiles.files[fileIndex],
+      ...tagset
+    };
+    const filesCopy = [...visibleFiles.files];
+    filesCopy[fileIndex] = updatedFile;
+    console.log(filesCopy, filesCopy[fileIndex], visibleFiles.files[fileIndex]);
+    setVisibleFiles({
+      folders: visibleFiles.folders,
+      files: filesCopy
+    });
   };
 
   const transition = () => {
@@ -205,7 +229,7 @@ const BucketViewer = (props) => {
           settings={settings}
           schemaInfo={schemaInfo}
           updateList={updateList}
-          settingsChange={setSettings}
+          setSettings={setSettings}
           pathChange={updatePath}
         />
         <BucketPath
@@ -286,6 +310,7 @@ const BucketViewer = (props) => {
                         }
                       })
                     }
+                    updateTagState={updateTagState}
                     schemaInfo={schemaInfo}
                     settings={settings}
                     pathChange={updatePath}

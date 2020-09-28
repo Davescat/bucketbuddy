@@ -14,6 +14,7 @@ const FileContainer = (props) => {
             bucket={bucket}
             key={`${i}${x.filename}`}
             file={x}
+            updateTagState={props.updateTagState}
             schemaInfo={props.schemaInfo}
             updateList={props.updateList}
             settings={props.settings}

@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
-import { Button, Dropdown, Confirm } from 'semantic-ui-react';
+import { Button, Dropdown, Confirm, Radio } from 'semantic-ui-react';
 import FileUploadModal from '../modals/file-upload-modal';
 import FolderUploadModal from '../modals/folder-upload-modal';
 import SchemaStructureModal from '../modals/schema-structure-modal';
-import { deleteObject } from '../utils/amazon-s3-utils';
+import {
+  deleteObject,
+  getObjectProm,
+  getObjectRequest
+} from '../utils/amazon-s3-utils';
+import { cacheSrc } from '../utils/cache-utils';
 
 /**
  * This component controls how much info you want to load in from the api
  */
 const BucketSettings = ({
+  settings,
+  setSettings,
   pathChange,
   updateList,
   bucket,
@@ -37,6 +44,12 @@ const BucketSettings = ({
 
   const closeConfirmDelete = () => {
     setShowConfirm(false);
+  };
+
+  const cacheThings = async () => {
+    let request = await cacheSrc(bucket, 'alfys.png');
+    console.log(request);
+    // thing.promise().then(console.log)
   };
 
   return (
@@ -86,6 +99,18 @@ const BucketSettings = ({
           bucket={bucket}
           pathInfo={pathInfo}
           trigger={<Button size="medium">Tags in folder Schema</Button>}
+        />
+        <Radio
+          toggle
+          name="loadTags"
+          checked={settings.cacheImages}
+          label="Cache Images"
+          onChange={() =>
+            setSettings({
+              ...settings,
+              cacheImages: !settings.cacheImages
+            })
+          }
         />
       </span>
       <span className="bucket-buttons-right">
