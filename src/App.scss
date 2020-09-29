@@ -3,9 +3,10 @@
   padding: 6px;
   display: flex;
   justify-content: space-between;
-  .bucket-buttons-left {
-  }
-  .bucket-buttons-right {
+  .bucket-buttons {
+    div.ui {
+      margin-right: 8px;
+    }
   }
 }
 

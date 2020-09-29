@@ -20,7 +20,6 @@ export const testConnectionS3Bucket = async ({
     signatureVersion: 'v4'
   });
   try {
-    console.log('calling!');
     await s3.headBucket({ Bucket: bucketName }).promise();
   } catch (error) {
     if (!error.code) {
@@ -49,7 +48,6 @@ export const getObject = async (
     signatureVersion: 'v4'
   });
   try {
-    console.log('calling!');
     return await s3
       .getObject({
         Bucket: name,
@@ -86,7 +84,6 @@ export const getObjectURL = async (
     signatureVersion: 'v4'
   });
   try {
-    console.log('calling!');
     return await s3.getSignedUrlPromise('getObject', {
       Bucket: name,
       Key: key
@@ -133,7 +130,6 @@ export const getObjectRequest = (
     signatureVersion: 'v4'
   });
   try {
-    console.log('calling!');
     return s3.getObject({
       Bucket: name,
       Key: key
@@ -164,7 +160,6 @@ export const getSignedURL = async (
     signatureVersion: 'v4'
   });
   try {
-    console.log('calling!');
     return await s3.getSignedUrl('getObject', {
       Bucket: name,
       Key: key,
@@ -196,7 +191,6 @@ export const listObjects = async (
     signatureVersion: 'v4'
   });
   try {
-    console.log('calling!');
     return await s3
       .listObjectsV2({
         Bucket: name,
@@ -230,7 +224,6 @@ export const deleteObject = async (
     signatureVersion: 'v4'
   });
   try {
-    console.log('calling!');
     return await s3
       .deleteObject({
         Bucket: name,
@@ -267,7 +260,6 @@ export const uploadObject = async (
   tags
 ) => {
   try {
-    console.log('calling!');
     const s3 = new AWS.S3({
       accessKeyId,
       secretAccessKey,
@@ -312,7 +304,6 @@ export const getFolderSchema = async (
     signatureVersion: 'v4'
   });
   try {
-    console.log('calling!');
     return await s3
       .getObject({
         Bucket: name,
@@ -351,7 +342,6 @@ export const getObjectTags = async (
     signatureVersion: 'v4'
   });
   try {
-    console.log('calling!', key);
     return await s3
       .getObjectTagging({
         Bucket: name,
@@ -383,7 +373,6 @@ export const putObjectTags = async (
   key,
   tagset
 ) => {
-  console.log(key);
   const s3 = new AWS.S3({
     accessKeyId,
     secretAccessKey,
@@ -391,7 +380,6 @@ export const putObjectTags = async (
     signatureVersion: 'v4'
   });
   try {
-    console.log('calling!');
     return await s3
       .putObjectTagging({
         Bucket: name,

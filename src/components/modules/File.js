@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Image, Placeholder, Icon } from 'semantic-ui-react';
 import FileDetailsModal from '../modals/file-details-modal';
-import {
-  getObjectURL,
-  getObjectTags,
-  getImageSrc
-} from '../utils/amazon-s3-utils';
+import { getImageSrc } from '../utils/amazon-s3-utils';
 
 const File = (props) => {
   const [imageLoaded, setImageLoaded] = useState(false);

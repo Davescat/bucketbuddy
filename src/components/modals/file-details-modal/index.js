@@ -1,31 +1,23 @@
 import React, { useRef, useState, useEffect } from 'react';
-import {
-  deleteObject,
-  getSignedURL,
-  getObjectRequest
-} from '../../utils/amazon-s3-utils';
+import { deleteObject, getSignedURL } from '../../utils/amazon-s3-utils';
 import { schemaFileName } from '../../modules/BucketViewer';
 import EditObjectTagsModal from '../edit-tags-modal';
 import { withRouter } from 'react-router-dom';
 import {
   Modal,
-  Image,
   List,
   ListHeader,
   ListDescription,
   ListContent,
-  Dimmer,
-  Loader,
   Button,
   Label,
   Icon,
-  Placeholder,
   Message,
   Confirm
 } from 'semantic-ui-react';
 
 const FileDetailsModal = (props) => {
-  // const [dataLoaded, setDataLoaded] = useState(props.tagInfo.tagsLoaded);
+  const [dataLoaded, setDataLoaded] = useState(props.tagInfo.tagsLoaded);
   const [showConfirm, setShowConfirm] = useState(false);
   const [conformsToSchema, setConformsToSchema] = useState(true);
   const [src, setSrc] = useState('');
@@ -64,13 +56,12 @@ const FileDetailsModal = (props) => {
   };
 
   useEffect(() => {
-    // if (downloadLink === '') {
-    // getSignedURL(bucket, file.Key).then(setDownloadLink);
-    // }
+    if (downloadLink === '') {
+      getSignedURL(bucket, file.Key).then(setDownloadLink);
+    }
     if (file.TagSet && file.TagSet.length > 0) {
       let schemaKeys = getKeys(schemaInfo.tagset, 'key');
       let fileKeys = getKeys(file.TagSet, 'Key');
-      // console.log(schemaKeys, fileKeys);
       if (schemaKeys) {
         setConformsToSchema(
           schemaKeys.every((schemaKey) => fileKeys.includes(schemaKey))
@@ -101,7 +92,6 @@ const FileDetailsModal = (props) => {
 
   const cleanTagSetValuesForForm = (tagset) => {
     const newTagset = [];
-    // console.log(tagset);
     tagset.map((set, i) =>
       newTagset.push({
         key: set.Key ? set.Key : set.key,

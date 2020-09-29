@@ -10,8 +10,7 @@ import {
 } from '../utils/amazon-s3-utils';
 import FolderMenu from './FolderMenu';
 import NavMenu from '../modules/NavMenu';
-import AWS from 'aws-sdk';
-import { updateCacheFiles, updateCacheList } from '../utils/cache-utils';
+import { updateCacheFiles } from '../utils/cache-utils';
 
 export const schemaFileName = 'bucket-buddy-schema.json';
 
@@ -31,7 +30,7 @@ const BucketViewer = (props) => {
     tagset: []
   });
   const [settings, setSettings] = useState({
-    cacheImages: false
+    cacheImages: localStorage.cacheImages
   });
 
   //This checks the url and tries to navigate to the folders directly if refreshed
@@ -57,6 +56,10 @@ const BucketViewer = (props) => {
       setLoading(false);
     }
   });
+
+  useEffect(() => {
+    localStorage.cacheImages = settings.cacheImages;
+  }, [settings]);
 
   useEffect(() => {
     if (!loading) {
@@ -102,7 +105,6 @@ const BucketViewer = (props) => {
   };
 
   const updateList = () => {
-    console.log('updating!');
     setFilesLoading(true);
     listObjects(bucket, pathInfo.path).then((data) => {
       filterList(data);
@@ -167,7 +169,6 @@ const BucketViewer = (props) => {
       `bucbud${bucket.name}`,
       pathInfo
     );
-    console.log(cachedSrcData);
     newFiles = newFiles.map((value) => ({
       ...value,
       ...cachedSrcData.cachedKeys.find((val) => val.cacheKey === value.Key)
@@ -194,7 +195,6 @@ const BucketViewer = (props) => {
   };
 
   const updateTagState = (key, tagset) => {
-    console.log(key, tagset);
     const fileIndex = visibleFiles.files.findIndex((file) => file.Key === key);
     const updatedFile = {
       ...visibleFiles.files[fileIndex],
@@ -202,7 +202,6 @@ const BucketViewer = (props) => {
     };
     const filesCopy = [...visibleFiles.files];
     filesCopy[fileIndex] = updatedFile;
-    console.log(filesCopy, filesCopy[fileIndex], visibleFiles.files[fileIndex]);
     setVisibleFiles({
       folders: visibleFiles.folders,
       files: filesCopy

@@ -1,12 +1,13 @@
 import { getObjectRequest } from './amazon-s3-utils';
 
 export const encode = (data) => {
+  let str = '';
   if (data.Body.data) {
-    var str = data.Body.data.reduce((a, b) => {
+    str = data.Body.data.reduce((a, b) => {
       return a + String.fromCharCode(b);
     }, '');
   } else if (data.Body && !data.Body.data) {
-    var str = data.Body.reduce((a, b) => {
+    str = data.Body.reduce((a, b) => {
       return a + String.fromCharCode(b);
     }, '');
   }
