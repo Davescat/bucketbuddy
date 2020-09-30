@@ -73,6 +73,7 @@ export const getObject = async (
     }
   }
 };
+
 export const getObjectURL = async (
   { name, accessKeyId, secretAccessKey, region },
   key
@@ -112,43 +113,6 @@ export const getImageSrc = (bucket, key, callback, cached = false) => {
   }
 };
 
-/**
- *
- * @param {*} param0 Bucket Info { name, accessKeyId, secretAccessKey, region }
- * @param {String} key
- *
- * @returns {AWS.Request<AWS.S3.GetObjectOutput, AWS.AWSError>}
- */
-export const getObjectRequest = (
-  { name, accessKeyId, secretAccessKey, region },
-  key
-) => {
-  const s3 = new AWS.S3({
-    accessKeyId,
-    secretAccessKey,
-    region,
-    signatureVersion: 'v4'
-  });
-  try {
-    return s3.getObject({
-      Bucket: name,
-      Key: key
-    });
-  } catch (error) {
-    if (!error.code) {
-      throw new GenericS3Error();
-    } else {
-      if (error.code === 'Forbidden') {
-        throw new ForbiddenError();
-      }
-      if (error.code === 'NetworkError') {
-        throw NetworkError();
-      } else {
-        throw new GenericS3Error();
-      }
-    }
-  }
-};
 export const getSignedURL = async (
   { name, accessKeyId, secretAccessKey, region },
   key

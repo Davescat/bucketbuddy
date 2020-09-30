@@ -17,10 +17,8 @@ import {
 } from 'semantic-ui-react';
 
 const FileDetailsModal = (props) => {
-  const [dataLoaded, setDataLoaded] = useState(props.tagInfo.tagsLoaded);
   const [showConfirm, setShowConfirm] = useState(false);
   const [conformsToSchema, setConformsToSchema] = useState(true);
-  const [src, setSrc] = useState('');
   const [downloadLink, setDownloadLink] = useState('');
   const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
   const imagec = useRef(null);

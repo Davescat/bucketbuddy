@@ -42,10 +42,10 @@ const BucketViewer = (props) => {
         depth: 0
       });
     } else {
+      let urlInfo = urlPathInfo.slice(urlPathInfo.indexOf(bucket.name) + 1);
       setPathInfo({
-        path: urlPathInfo.slice(urlPathInfo.indexOf(bucket.name) + 1).join('/'),
-        depth:
-          urlPathInfo.slice(urlPathInfo.indexOf(bucket.name) + 1).length - 1
+        path: urlInfo.join('/'),
+        depth: urlInfo.length - 1
       });
     }
   }
@@ -138,29 +138,27 @@ const BucketViewer = (props) => {
 
   /**
    * Filters the response into files and folders
+   *
+   *
+   *
    * @param {AWS.S3.ListObjectsV2Output} response
    */
   const filterList = async (response) => {
-    let depth = pathInfo.depth + 1;
-    const newFolders = response.Contents.filter(
-      (x) =>
-        x.Key.split('/').length === depth + 1 && x.Key[x.Key.length - 1] === '/'
-    ).map((folder) => {
-      const keys = folder.Key.split('/');
-      folder.filename =
-        keys.length === 1 ? keys[0] : keys[keys.length - 2] + '/';
-      folder.type = 'folder';
-      return folder;
-    });
-
-    let newFiles = response.Contents.filter(
-      (x) =>
-        x.Key.split('/').length === depth && x.Key[x.Key.length - 1] !== '/'
-    ).map((file) => {
-      const keys = file.Key.split('/');
-      file.filename = keys.length === 1 ? keys[0] : keys[keys.length - 1];
-      file.type = 'file';
-      return file;
+    const filetest = new RegExp(
+      `^${pathInfo.path}([\\w!\\-\\.\\*'\\(\\)]+[/]?)$`
+    );
+    let newFiles = [];
+    const newFolders = [];
+    response.Contents.forEach((file) => {
+      const filename = filetest.exec(file.Key);
+      if (filename && filename[1]) {
+        file.filename = filename[1];
+        if (filename[1][filename[1].length - 1] === '/') {
+          newFolders.push(file);
+        } else {
+          newFiles.push(file);
+        }
+      }
     });
 
     newFiles = await getAllTags(newFiles);
@@ -176,21 +174,15 @@ const BucketViewer = (props) => {
 
     sortObjectsAlphabetically(newFiles);
     sortObjectsAlphabetically(newFolders);
-
+    const currentFiles = {
+      folders: newFolders,
+      files: newFiles
+    };
     if (visibleFiles) {
-      setVisibleFiles({
-        folders: newFolders,
-        files: newFiles
-      });
+      setVisibleFiles(currentFiles);
     } else {
-      setVisibleFiles({
-        folders: newFolders,
-        files: newFiles
-      });
-      setFiles({
-        folders: newFolders,
-        files: newFiles
-      });
+      setVisibleFiles(currentFiles);
+      setFiles(currentFiles);
     }
   };
 
