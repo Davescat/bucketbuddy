@@ -112,6 +112,7 @@ const BucketViewer = (props) => {
   };
 
   /**
+   * Takes a list of files and attaches it each individual file
    *
    * @param {S3.GetObjectOutput[]} files
    */
@@ -137,9 +138,8 @@ const BucketViewer = (props) => {
   };
 
   /**
-   * Filters the response into files and folders
-   *
-   *
+   * Filters the response into files and folders and adds the tag
+   * information as well as the sources for the images
    *
    * @param {AWS.S3.ListObjectsV2Output} response
    */
@@ -279,12 +279,12 @@ const BucketViewer = (props) => {
                         if (chosenTag == '') {
                           return tagSearchText === '';
                         } else {
-                          //This filter checks if there are any files with the tag that was chosen
+                          //This filter checks if there are any files with the tag that is used to search
                           const tagFile = file.TagSet.filter(
                             (x) => x['Key'] === chosenTag
                           );
-                          //If file has Tag chosen
-                          if (tagFile.length) {
+                          //If a file has the Tag chosen for searching.
+                          if (tagFile.length === 0) {
                             //If no tag search text has been written just show all files with tag chosen
                             if (tagSearchText === '') {
                               return true;
