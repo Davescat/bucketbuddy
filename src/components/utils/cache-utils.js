@@ -69,7 +69,7 @@ export const updateCacheFiles = async (files, cacheName, pathInfo) => {
       return key.cacheKey.split('/').length === depth;
     });
     for (let i = 0; i < files.length; i++) {
-      \; //If -1 there is a new file found that must be cached
+      //If -1 there is a new file found that must be cached
       let cacheIndex = keys.findIndex((key) => key.cacheKey === files[i].Key);
       if (cacheIndex >= 0) {
         let response = await (await cache.match(keys[cacheIndex])).json();
