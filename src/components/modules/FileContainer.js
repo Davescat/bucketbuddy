@@ -1,17 +1,57 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from 'semantic-ui-react';
+import FileDetailsModal from '../modals/file-details-modal';
+import useWindowDimensions from '../utils/window-utils';
 import File from './File';
 
 const FileContainer = (props) => {
   const { bucket, files } = props;
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalFile, setModalFile] = useState(null);
+  const { width } = useWindowDimensions();
+  const breakpoints = {
+    mobile: 320,
+    tablet: 768,
+    computer: 992,
+    largeScreen: 1200,
+    largerScreen: 1510,
+    widescreen: 1920
+  };
+  const openModal = (file) => {
+    setModalFile(file);
+    setModalOpen(true);
+  };
 
-  return (
-    <Card.Group className="file-container" doubling>
+  const items = () => {
+    console.log(width);
+    if (width > 0 && width <= breakpoints.mobile) return 1;
+    else if (width > breakpoints.mobile && width <= breakpoints.tablet)
+      return 3;
+    else if (width > breakpoints.tablet && width <= breakpoints.computer)
+      return 3;
+    else if (width > breakpoints.computer && width <= breakpoints.largeScreen)
+      return 4;
+    else if (
+      width > breakpoints.largeScreen &&
+      width <= breakpoints.largerScreen
+    )
+      return 5;
+    else if (
+      width > breakpoints.largerScreen &&
+      width <= breakpoints.widescreen
+    )
+      return 6;
+    else return 9;
+  };
+
+  return [
+    <Card.Group itemsPerRow={items()} className="file-container" doubling>
       {files &&
         files.length > 0 &&
         files.map((x, i) => (
           <File
             bucket={bucket}
+            openModal={openModal}
             key={`${i}${x.filename}`}
             file={x}
             updateTagState={props.updateTagState}
@@ -21,7 +61,18 @@ const FileContainer = (props) => {
             customClickEvent={props.pathChange}
           />
         ))}
-    </Card.Group>
-  );
+    </Card.Group>,
+    files && files.length > 0 && (
+      <FileDetailsModal
+        updateList={props.updateList}
+        bucket={bucket}
+        modalOpen={modalOpen}
+        schemaInfo={props.schemaInfo}
+        handleClose={() => setModalOpen(false)}
+        updateTagState={props.updateTagState}
+        file={modalFile}
+      />
+    )
+  ];
 };
 export default FileContainer;

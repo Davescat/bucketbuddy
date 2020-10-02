@@ -35,6 +35,7 @@
   justify-content: start;
   .file-card {
     max-height: 430px;
+    // min-width: 200px !important;
     cursor: pointer;
     .card-file-image {
       object-fit: contain;
@@ -82,6 +83,9 @@
   }
 }
 .details-modal {
+  .file-segment {
+    padding-top: 0 !important;
+  }
   .description {
     width: inherit !important;
   }

@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Image, Placeholder, Icon } from 'semantic-ui-react';
-import FileDetailsModal from '../modals/file-details-modal';
 import { getImageSrc } from '../utils/amazon-s3-utils';
 
 const File = (props) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
   const [src, setSrc] = useState('');
 
   const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
@@ -51,29 +49,23 @@ const File = (props) => {
   };
 
   return [
-    <Card className="file-card" onClick={() => setModalOpen(true)}>
+    <Card
+      fluid
+      className="file-card"
+      onClick={() =>
+        props.openModal({
+          ...props.file,
+          src: src
+        })
+      }
+    >
       {getImage()}
       <Card.Content>
         <Card.Header>{props.file.filename}</Card.Header>
         <Card.Meta>{`Last modified: ${props.file.LastModified}`}</Card.Meta>
         <Card.Meta>{`Size: ${props.file.Size} bytes`}</Card.Meta>
       </Card.Content>
-    </Card>,
-    <FileDetailsModal
-      updateList={props.updateList}
-      bucket={props.bucket}
-      modalOpen={modalOpen}
-      schemaInfo={props.schemaInfo}
-      handleClose={() => setModalOpen(false)}
-      tagInfo={{
-        fileTags: props.file.TagSet,
-        updateTagState: props.updateTagState
-      }}
-      file={{
-        ...props.file,
-        src: src
-      }}
-    />
+    </Card>
   ];
 };
 export default File;

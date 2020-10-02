@@ -13,7 +13,12 @@ import {
   Label,
   Icon,
   Message,
-  Confirm
+  Confirm,
+  Grid,
+  GridRow,
+  GridColumn,
+  Divider,
+  Segment
 } from 'semantic-ui-react';
 
 const FileDetailsModal = (props) => {
@@ -22,12 +27,30 @@ const FileDetailsModal = (props) => {
   const [downloadLink, setDownloadLink] = useState('');
   const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
   const imagec = useRef(null);
-  const {
-    file,
-    bucket,
-    schemaInfo,
-    tagInfo: { updateTagState }
-  } = props;
+  const { file, bucket, schemaInfo, updateTagState } = props;
+
+  useEffect(() => {
+    if (file) {
+      if (downloadLink === '') {
+        getSignedURL(bucket, file.Key).then(setDownloadLink);
+      }
+      if (file.TagSet && file.TagSet.length > 0) {
+        let schemaKeys = getKeys(schemaInfo.tagset, 'key');
+        let fileKeys = getKeys(file.TagSet, 'Key');
+        if (schemaKeys) {
+          setConformsToSchema(
+            schemaKeys.every((schemaKey) => fileKeys.includes(schemaKey))
+          );
+        }
+      } else {
+        if (schemaInfo) {
+          setConformsToSchema(schemaInfo.available === false);
+        } else {
+          setConformsToSchema(false);
+        }
+      }
+    }
+  });
 
   const showConfirmDelete = () => {
     setShowConfirm(true);
@@ -53,33 +76,11 @@ const FileDetailsModal = (props) => {
     props.updateList();
   };
 
-  useEffect(() => {
-    if (downloadLink === '') {
-      getSignedURL(bucket, file.Key).then(setDownloadLink);
-    }
-    if (file.TagSet && file.TagSet.length > 0) {
-      let schemaKeys = getKeys(schemaInfo.tagset, 'key');
-      let fileKeys = getKeys(file.TagSet, 'Key');
-      if (schemaKeys) {
-        setConformsToSchema(
-          schemaKeys.every((schemaKey) => fileKeys.includes(schemaKey))
-        );
-      }
-    } else {
-      if (schemaInfo) {
-        setConformsToSchema(schemaInfo.available === false);
-      } else {
-        setConformsToSchema(false);
-      }
-    }
-  });
-
   const getImage = () => {
     if (fileTest.test(file.filename)) {
       //Using "div" and "img" instead of the Image object so that a ref could be made
       return (
         <div class="ui medium middle aligned image">
-          {' '}
           <img crossOrigin="anonymous" ref={imagec} src={file.src} />
         </div>
       );
@@ -107,16 +108,11 @@ const FileDetailsModal = (props) => {
       className="details-modal"
       closeIcon
     >
-      <Modal.Header>{file.filename}</Modal.Header>
-      <Modal.Content image>
-        {getImage()}
-        <Modal.Description>
-          <List className="file-details" divided>
-            {!conformsToSchema && file.filename !== schemaFileName && (
-              <Label color="red" ribbon>
-                Does not conform to Schema
-              </Label>
-            )}
+      <Modal.Header>{file && file.filename}</Modal.Header>
+      {file && (
+        <Modal.Content image>
+          {file.filename !== schemaFileName && getImage()}
+          <Modal.Description>
             {file.filename === schemaFileName && (
               <Message className="s3-message">
                 <Message.Header>Bucket Buddy Schema</Message.Header>
@@ -128,82 +124,119 @@ const FileDetailsModal = (props) => {
                 </p>
               </Message>
             )}
-            <List.Item>
-              <ListContent>
-                <ListHeader>Path</ListHeader>
-                <ListDescription>{file.Key}</ListDescription>
-              </ListContent>
-            </List.Item>
-            {file.TagSet &&
-              file.TagSet.map((set, i) => (
-                <List.Item>
-                  <ListContent>
-                    <ListHeader>{set.Key}</ListHeader>
-                    <ListDescription>{set.Value}</ListDescription>
-                  </ListContent>
-                </List.Item>
-              ))}
-            <List.Item>
-              <ListContent>
-                <ListHeader>LastModified</ListHeader>
-                <ListDescription>
-                  {file.LastModified.toString()}
-                </ListDescription>
-              </ListContent>
-            </List.Item>
-            <List.Item>
-              <ListContent>
-                <ListHeader>Size</ListHeader>
-                <ListDescription>{file.Size}</ListDescription>
-              </ListContent>
-            </List.Item>
-            <List.Item>
-              <ListContent>
-                <ListHeader>Storage Class</ListHeader>
-                <ListDescription>{file.StorageClass}</ListDescription>
-              </ListContent>
-            </List.Item>
-            <List.Item>
-              <ListContent>
-                {file.TagSet && file.filename !== schemaFileName && (
-                  <EditObjectTagsModal
-                    bucket={bucket}
-                    keyValue={file.Key}
-                    tagset={cleanTagSetValuesForForm(
-                      conformsToSchema
-                        ? file.TagSet
-                        : Object.assign([], file.TagSet, schemaInfo.tagset)
-                    )}
-                    updateTagState={updateTagState}
-                    trigger={<Button size="medium">Edit Tags</Button>}
-                  />
-                )}
-                {downloadLink !== '' && (
-                  <a
-                    download=""
-                    href={downloadLink}
-                    target="_blank"
-                    class="ui button"
-                    role="button"
-                  >
-                    Download
-                  </a>
-                )}
-                <Button color="red" onClick={showConfirmDelete}>
-                  Delete File
-                </Button>
-                <Confirm
-                  open={showConfirm}
-                  cancelButton="Cancel"
-                  confirmButton="Delete"
-                  onCancel={closeConfirmDelete}
-                  onConfirm={deleteFile}
-                />
-              </ListContent>
-            </List.Item>
-          </List>
-        </Modal.Description>
-      </Modal.Content>
+            <Segment className="file-segment">
+              {!conformsToSchema && file.filename !== schemaFileName && (
+                <Label color="red" ribbon>
+                  Does not conform to Schema
+                </Label>
+              )}
+              <Grid columns={file.filename === schemaFileName ? 2 : 1}>
+                <GridRow divided>
+                  <GridColumn>
+                    <List className="file-details" divided>
+                      <Label attached="top">File Data</Label>
+                      <List.Item>
+                        <ListContent>
+                          <ListHeader>Path</ListHeader>
+                          <ListDescription>{file.Key}</ListDescription>
+                        </ListContent>
+                      </List.Item>
+                      {file.TagSet &&
+                        file.TagSet.map((set, i) => (
+                          <List.Item>
+                            <ListContent>
+                              <ListHeader>{set.Key}</ListHeader>
+                              <ListDescription>{set.Value}</ListDescription>
+                            </ListContent>
+                          </List.Item>
+                        ))}
+                      <List.Item>
+                        <ListContent>
+                          <ListHeader>LastModified</ListHeader>
+                          <ListDescription>
+                            {file.LastModified.toString()}
+                          </ListDescription>
+                        </ListContent>
+                      </List.Item>
+                      <List.Item>
+                        <ListContent>
+                          <ListHeader>Size</ListHeader>
+                          <ListDescription>{file.Size}</ListDescription>
+                        </ListContent>
+                      </List.Item>
+                      <List.Item>
+                        <ListContent>
+                          <ListHeader>Storage Class</ListHeader>
+                          <ListDescription>{file.StorageClass}</ListDescription>
+                        </ListContent>
+                      </List.Item>
+                      <List.Item>
+                        <ListContent>
+                          {file.TagSet && file.filename !== schemaFileName && (
+                            <EditObjectTagsModal
+                              bucket={bucket}
+                              keyValue={file.Key}
+                              tagset={cleanTagSetValuesForForm(
+                                conformsToSchema
+                                  ? file.TagSet
+                                  : Object.assign(
+                                      [],
+                                      file.TagSet,
+                                      schemaInfo.tagset
+                                    )
+                              )}
+                              updateTagState={updateTagState}
+                              trigger={<Button size="medium">Edit Tags</Button>}
+                            />
+                          )}
+                          {downloadLink !== '' && (
+                            <a
+                              download=""
+                              href={downloadLink}
+                              target="_blank"
+                              class="ui button"
+                              role="button"
+                            >
+                              Download
+                            </a>
+                          )}
+                          <Button color="red" onClick={showConfirmDelete}>
+                            Delete File
+                          </Button>
+                          <Confirm
+                            open={showConfirm}
+                            cancelButton="Cancel"
+                            confirmButton="Delete"
+                            onCancel={closeConfirmDelete}
+                            onConfirm={deleteFile}
+                          />
+                        </ListContent>
+                      </List.Item>
+                    </List>
+                  </GridColumn>
+
+                  {file.filename === schemaFileName && (
+                    <GridColumn>
+                      <List className="file-details" divided>
+                        <Label attached="top">Schema Tags</Label>
+                        {schemaInfo.tagset &&
+                          schemaInfo.tagset.map((set, i) => (
+                            <List.Item>
+                              <ListContent>
+                                <ListHeader>{set.key}</ListHeader>
+                                <ListDescription>{set.value}</ListDescription>
+                              </ListContent>
+                            </List.Item>
+                          ))}
+                      </List>
+                    </GridColumn>
+                  )}
+                </GridRow>
+              </Grid>
+            </Segment>
+          </Modal.Description>
+        </Modal.Content>
+      )}
     </Modal>
   );
 };
