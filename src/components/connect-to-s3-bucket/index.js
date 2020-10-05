@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { withRouter, useHistory } from 'react-router-dom';
 import testConnectionS3Bucket from '../utils/amazon-s3-utils';
 import { Button, Form, Message, Dimmer, Loader } from 'semantic-ui-react';
@@ -81,7 +81,19 @@ const ConnectToS3BucketForm = () => {
   });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const history = useHistory();
+
+  useEffect(() => {
+    if (localStorage.rememberMe) {
+      setState({
+        bucketName: localStorage.bucketName,
+        accessKeyId: localStorage.accessKeyId,
+        secretAccessKey: localStorage.secretAccessKey,
+        selectedRegion: localStorage.selectedRegion
+      });
+    }
+  }, []);
 
   const connectToS3Bucket = async ({
     bucketName,
@@ -113,6 +125,19 @@ const ConnectToS3BucketForm = () => {
   const handleS3BucketSubmit = (event) => {
     event.preventDefault();
     setLoading(true);
+    if (rememberMe) {
+      localStorage.bucketName = state.bucketName;
+      localStorage.accessKeyId = state.accessKeyId;
+      localStorage.secretAccessKey = state.secretAccessKey;
+      localStorage.selectedRegion = state.selectedRegion;
+    } else {
+      localStorage.bucketName = '';
+      localStorage.accessKeyId = '';
+      localStorage.secretAccessKey = '';
+      localStorage.selectedRegion = '';
+    }
+    localStorage.rememberMe = rememberMe;
+
     connectToS3Bucket({
       bucketName: state.bucketName,
       accessKeyId: state.accessKeyId,
@@ -123,6 +148,10 @@ const ConnectToS3BucketForm = () => {
 
   const handleFieldChange = (event, { name, value }) => {
     setState((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  const handleRememberMeCheck = (event) => {
+    setRememberMe(!rememberMe);
   };
 
   return (
@@ -187,6 +216,11 @@ const ConnectToS3BucketForm = () => {
             id: 'form-select-control-region'
           }}
           onChange={handleFieldChange}
+        />
+        <Form.Checkbox
+          label="Remember me"
+          checked={rememberMe}
+          onChange={handleRememberMeCheck}
         />
         <Button type="submit" primary>
           Connect

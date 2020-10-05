@@ -61,13 +61,15 @@ const FileUploadModal = (props) => {
           {props.schemaInfo.available &&
             tagInput.tagset.map((schemaValue, idx) => {
               const key = 'key',
-                value = 'value';
+                value = 'value',
+                type = 'type';
               return (
                 <Form.Field>
                   <Input
                     label={schemaValue[key]}
                     name={value}
                     id={'' + idx}
+                    type={schemaValue[type]}
                     required
                     placeholder="Enter field input here"
                     onChange={handleFieldChange}

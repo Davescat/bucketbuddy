@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
 import BucketPath from './BucketPath';
 import BucketSettings from './BucketSettings';
 import FileContainer from './FileContainer';
-import { Dimmer, Loader, Transition, Button } from 'semantic-ui-react';
-import { listObjects, getFolderSchema } from '../utils/amazon-s3-utils';
+import { Dimmer, Loader, Transition } from 'semantic-ui-react';
+import {
+  listObjects,
+  getFolderSchema,
+  getObjectTags
+} from '../utils/amazon-s3-utils';
 import FolderMenu from './FolderMenu';
 import NavMenu from '../modules/NavMenu';
+import { updateCacheFiles } from '../utils/cache-utils';
 
 export const schemaFileName = 'bucket-buddy-schema.json';
 
@@ -16,17 +20,17 @@ const BucketViewer = (props) => {
   const [files, setFiles] = useState({ folders: [], files: [] });
   const [visibleFiles, setVisibleFiles] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState('');
+  const [fileSearchText, setFileSearchText] = useState('');
+  const [chosenTag, setChosenTag] = useState('');
+  const [tagSearchText, setTagSearchText] = useState('');
   const [transitions, setTransitions] = useState(['fly right', 'fly left']);
+  const [filesLoading, setFilesLoading] = useState(true);
   const [schemaInfo, setSchemaInfo] = useState({
     available: false,
     tagset: []
   });
-  const [filesLoading, setFilesLoading] = useState(true);
   const [settings, setSettings] = useState({
-    loadMetadata: true,
-    loadTags: false,
-    loadImages: true
+    cacheImages: localStorage.cacheImages
   });
 
   //This checks the url and tries to navigate to the folders directly if refreshed
@@ -38,10 +42,10 @@ const BucketViewer = (props) => {
         depth: 0
       });
     } else {
+      let urlInfo = urlPathInfo.slice(urlPathInfo.indexOf(bucket.name) + 1);
       setPathInfo({
-        path: urlPathInfo.slice(urlPathInfo.indexOf(bucket.name) + 1).join('/'),
-        depth:
-          urlPathInfo.slice(urlPathInfo.indexOf(bucket.name) + 1).length - 1
+        path: urlInfo.join('/'),
+        depth: urlInfo.length - 1
       });
     }
   }
@@ -54,8 +58,18 @@ const BucketViewer = (props) => {
   });
 
   useEffect(() => {
-    updateList();
+    localStorage.cacheImages = settings.cacheImages;
+  }, [settings]);
+
+  useEffect(() => {
+    if (!loading) {
+      updateList();
+    }
   }, [pathInfo]);
+
+  useEffect(() => {
+    setFilesLoading(false);
+  }, [visibleFiles]);
 
   useEffect(() => {
     if (
@@ -63,9 +77,9 @@ const BucketViewer = (props) => {
         ({ Key }) => Key.split('/')[pathInfo.depth] === schemaFileName
       )
     ) {
-      getFolderSchema(bucket, pathInfo.path).then((response) =>
-        setSchemaInfo({ available: true, tagset: response })
-      );
+      getFolderSchema(bucket, pathInfo.path).then((response) => {
+        setSchemaInfo({ available: true, tagset: response });
+      });
     } else {
       setSchemaInfo({ available: false, tagset: [] });
     }
@@ -92,11 +106,25 @@ const BucketViewer = (props) => {
 
   const updateList = () => {
     setFilesLoading(true);
-    listFiles().then(filterList);
+    listObjects(bucket, pathInfo.path).then((data) => {
+      filterList(data);
+    });
   };
 
-  const listFiles = () => {
-    return listObjects(bucket, pathInfo.path);
+  /**
+   * Takes a list of files and attaches it each individual file
+   *
+   * @param {S3.GetObjectOutput[]} files
+   */
+  const getAllTags = (files) => {
+    return Promise.all(
+      files.map(async function (file) {
+        return await getObjectTags(bucket, file.Key).then((TagSet) => ({
+          ...file,
+          ...TagSet
+        }));
+      })
+    );
   };
 
   const sortObjectsAlphabetically = (objects) => {
@@ -110,45 +138,66 @@ const BucketViewer = (props) => {
   };
 
   /**
-   * Filters the response into files and folders
+   * Filters the response into files and folders and adds the tag
+   * information as well as the sources for the images
+   *
    * @param {AWS.S3.ListObjectsV2Output} response
    */
-  const filterList = (response) => {
-    let depth = pathInfo.depth + 1;
-    let newFolders = response.Contents.filter(
-      (x) =>
-        x.Key.split('/').length === depth + 1 && x.Key[x.Key.length - 1] === '/'
-    ).map((folder) => {
-      folder.type = 'folder';
-      return folder;
+  const filterList = async (response) => {
+    const filetest = new RegExp(
+      `^${pathInfo.path}([\\w!\\-\\.\\*'\\(\\)]+[/]?)$`
+    );
+    let newFiles = [];
+    const newFolders = [];
+    response.Contents.forEach((file) => {
+      const filename = filetest.exec(file.Key);
+      if (filename && filename[1]) {
+        file.filename = filename[1];
+        if (filename[1][filename[1].length - 1] === '/') {
+          newFolders.push(file);
+        } else {
+          newFiles.push(file);
+        }
+      }
     });
-    let newFiles = response.Contents.filter(
-      (x) =>
-        x.Key.split('/').length === depth && x.Key[x.Key.length - 1] !== '/'
-    ).map((file) => {
-      file.type = 'file';
-      return file;
-    });
+
+    newFiles = await getAllTags(newFiles);
+    const cachedSrcData = await updateCacheFiles(
+      newFiles,
+      `bucbud${bucket.name}`,
+      pathInfo
+    );
+    newFiles = newFiles.map((value) => ({
+      ...value,
+      ...cachedSrcData.cachedKeys.find((val) => val.cacheKey === value.Key)
+    }));
 
     sortObjectsAlphabetically(newFiles);
     sortObjectsAlphabetically(newFolders);
-
-    setFilesLoading(false);
+    const currentFiles = {
+      folders: newFolders,
+      files: newFiles
+    };
     if (visibleFiles) {
-      setVisibleFiles({
-        folders: newFolders,
-        files: newFiles
-      });
+      setVisibleFiles(currentFiles);
     } else {
-      setVisibleFiles({
-        folders: newFolders,
-        files: newFiles
-      });
-      setFiles({
-        folders: newFolders,
-        files: newFiles
-      });
+      setVisibleFiles(currentFiles);
+      setFiles(currentFiles);
     }
+  };
+
+  const updateTagState = (key, tagset) => {
+    const fileIndex = visibleFiles.files.findIndex((file) => file.Key === key);
+    const updatedFile = {
+      ...visibleFiles.files[fileIndex],
+      ...tagset
+    };
+    const filesCopy = [...visibleFiles.files];
+    filesCopy[fileIndex] = updatedFile;
+    setVisibleFiles({
+      folders: visibleFiles.folders,
+      files: filesCopy
+    });
   };
 
   const transition = () => {
@@ -165,37 +214,37 @@ const BucketViewer = (props) => {
     return (
       <div className="bucket-viewer">
         <NavMenu />
-        <BucketPath
-          bucket={bucket}
-          pathInfo={pathInfo}
-          pathChange={updatePath}
-          updateList={updateList}
-        />
         <BucketSettings
           bucket={bucket}
           pathInfo={pathInfo}
           settings={settings}
           schemaInfo={schemaInfo}
           updateList={updateList}
-          settingsChange={setSettings}
+          setSettings={setSettings}
           pathChange={updatePath}
+        />
+        <BucketPath
+          bucket={bucket}
+          pathInfo={pathInfo}
+          schemaInfo={schemaInfo}
+          pathChange={updatePath}
+          updateList={updateList}
+          search={{
+            text: tagSearchText,
+            setSearchText: setTagSearchText,
+            chosenTag: chosenTag,
+            setChosenTag: setChosenTag
+          }}
         />
         <div className="files-folders">
           <FolderMenu
             bucket={bucket}
-            folders={files.folders.map((x) => {
-              const keys = x.Key.split('/');
-              const filename =
-                keys.length === 1 ? keys[0] : keys[keys.length - 2] + '/';
-              return {
-                ...x,
-                filename: filename
-              };
-            })}
+            isLoading={filesLoading}
+            folders={files.folders}
             updateList={updateList}
             pathInfo={pathInfo}
             customClickEvent={updatePath}
-            search={{ text: searchText, setSearchText: setSearchText }}
+            search={{ text: fileSearchText, setSearchText: setFileSearchText }}
           />
           <div>
             <Transition
@@ -221,9 +270,38 @@ const BucketViewer = (props) => {
                 ) : (
                   <FileContainer
                     card
+                    updateList={updateList}
                     isLoading={filesLoading}
                     bucket={bucket}
-                    files={files}
+                    files={
+                      visibleFiles &&
+                      visibleFiles.files.filter((file) => {
+                        if (chosenTag == '') {
+                          return tagSearchText === '';
+                        } else {
+                          //This filter checks if there are any files with the tag that is used to search
+                          const tagFile = file.TagSet.filter(
+                            (x) => x['Key'] === chosenTag
+                          );
+                          //If a file has the Tag chosen for searching.
+                          if (tagFile.length === 0) {
+                            //If no tag search text has been written just show all files with tag chosen
+                            if (tagSearchText === '') {
+                              return true;
+                            } else {
+                              return (
+                                tagFile[0]['Value']
+                                  .toLowerCase()
+                                  .search(tagSearchText.toLowerCase()) !== -1
+                              );
+                            }
+                          } else {
+                            return false;
+                          }
+                        }
+                      })
+                    }
+                    updateTagState={updateTagState}
                     schemaInfo={schemaInfo}
                     settings={settings}
                     pathChange={updatePath}
@@ -237,4 +315,4 @@ const BucketViewer = (props) => {
     );
   }
 };
-export default withRouter(BucketViewer);
+export default BucketViewer;

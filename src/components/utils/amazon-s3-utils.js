@@ -5,6 +5,7 @@ import {
   GenericS3Error,
   NoSuchKeyError
 } from '../errors/s3-errors';
+import { getCacheSrc } from './cache-utils';
 
 export const testConnectionS3Bucket = async ({
   bucketName,
@@ -15,7 +16,8 @@ export const testConnectionS3Bucket = async ({
   const s3 = new AWS.S3({
     accessKeyId,
     secretAccessKey,
-    region
+    region,
+    signatureVersion: 'v4'
   });
   try {
     await s3.headBucket({ Bucket: bucketName }).promise();
@@ -42,7 +44,8 @@ export const getObject = async (
   const s3 = new AWS.S3({
     accessKeyId,
     secretAccessKey,
-    region
+    region,
+    signatureVersion: 'v4'
   });
   try {
     return await s3
@@ -70,6 +73,7 @@ export const getObject = async (
     }
   }
 };
+
 export const getObjectURL = async (
   { name, accessKeyId, secretAccessKey, region },
   key
@@ -77,12 +81,53 @@ export const getObjectURL = async (
   const s3 = new AWS.S3({
     accessKeyId,
     secretAccessKey,
-    region
+    region,
+    signatureVersion: 'v4'
   });
   try {
     return await s3.getSignedUrlPromise('getObject', {
       Bucket: name,
       Key: key
+    });
+  } catch (error) {
+    if (!error.code) {
+      throw new GenericS3Error();
+    } else {
+      if (error.code === 'Forbidden') {
+        throw new ForbiddenError();
+      }
+      if (error.code === 'NetworkError') {
+        throw NetworkError();
+      } else {
+        throw new GenericS3Error();
+      }
+    }
+  }
+};
+
+export const getImageSrc = (bucket, key, callback, cached = false) => {
+  if (cached) {
+    return getCacheSrc(bucket, key, callback);
+  } else {
+    return getObjectURL(bucket, key).then(callback);
+  }
+};
+
+export const getSignedURL = async (
+  { name, accessKeyId, secretAccessKey, region },
+  key
+) => {
+  const s3 = new AWS.S3({
+    accessKeyId,
+    secretAccessKey,
+    region,
+    signatureVersion: 'v4'
+  });
+  try {
+    return await s3.getSignedUrl('getObject', {
+      Bucket: name,
+      Key: key,
+      Expires: 60
     });
   } catch (error) {
     if (!error.code) {
@@ -106,7 +151,8 @@ export const listObjects = async (
   const s3 = new AWS.S3({
     accessKeyId,
     secretAccessKey,
-    region
+    region,
+    signatureVersion: 'v4'
   });
   try {
     return await s3
@@ -130,6 +176,7 @@ export const listObjects = async (
     }
   }
 };
+
 export const deleteObject = async (
   { name, accessKeyId, secretAccessKey, region },
   key
@@ -137,7 +184,8 @@ export const deleteObject = async (
   const s3 = new AWS.S3({
     accessKeyId,
     secretAccessKey,
-    region
+    region,
+    signatureVersion: 'v4'
   });
   try {
     return await s3
@@ -179,7 +227,8 @@ export const uploadObject = async (
     const s3 = new AWS.S3({
       accessKeyId,
       secretAccessKey,
-      region
+      region,
+      signatureVersion: 'v4'
     });
     var params = {
       Bucket: name,
@@ -215,7 +264,8 @@ export const getFolderSchema = async (
   const s3 = new AWS.S3({
     accessKeyId,
     secretAccessKey,
-    region
+    region,
+    signatureVersion: 'v4'
   });
   try {
     return await s3
@@ -252,7 +302,8 @@ export const getObjectTags = async (
   const s3 = new AWS.S3({
     accessKeyId,
     secretAccessKey,
-    region
+    region,
+    signatureVersion: 'v4'
   });
   try {
     return await s3
@@ -286,11 +337,11 @@ export const putObjectTags = async (
   key,
   tagset
 ) => {
-  console.log(key);
   const s3 = new AWS.S3({
     accessKeyId,
     secretAccessKey,
-    region
+    region,
+    signatureVersion: 'v4'
   });
   try {
     return await s3
