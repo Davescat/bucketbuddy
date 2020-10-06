@@ -80,6 +80,7 @@ const FileDetailsModal = (props) => {
 
   const deleteFile = () => {
     deleteObject(bucket, file.Key);
+    setFile(null);
     props.handleClose();
     props.updateList();
   };
