@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Card } from 'semantic-ui-react';
-import FileDetailsModal from '../modals/file-details-modal';
-import useWindowDimensions from '../utils/window-utils';
-import File from './File';
+import FileDetailsModal from '../../modals/file-details-modal';
+import useWindowDimensions from '../../utils/window-utils';
+import File from '../File';
+import './filecontainer.scss';
 
 const FileContainer = (props) => {
   const { bucket, files } = props;
@@ -14,7 +15,7 @@ const FileContainer = (props) => {
     tablet: 768,
     computer: 992,
     largeScreen: 1200,
-    largerScreen: 1510,
+    largerScreen: 1560,
     widescreen: 1920
   };
   const openModal = (file) => {
@@ -23,12 +24,11 @@ const FileContainer = (props) => {
   };
 
   const items = () => {
-    console.log(width);
-    if (width > 0 && width <= breakpoints.mobile) return 1;
+    if (width > 0 && width <= breakpoints.mobile) return 3;
     else if (width > breakpoints.mobile && width <= breakpoints.tablet)
-      return 3;
+      return 4;
     else if (width > breakpoints.tablet && width <= breakpoints.computer)
-      return 3;
+      return 4;
     else if (width > breakpoints.computer && width <= breakpoints.largeScreen)
       return 4;
     else if (
@@ -40,7 +40,7 @@ const FileContainer = (props) => {
       width > breakpoints.largerScreen &&
       width <= breakpoints.widescreen
     )
-      return 6;
+      return 7;
     else return 9;
   };
 

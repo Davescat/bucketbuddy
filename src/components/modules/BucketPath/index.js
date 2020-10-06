@@ -7,6 +7,7 @@ import {
   Input,
   Dropdown
 } from 'semantic-ui-react';
+import './bucketpath.scss';
 
 const BucketPath = (props) => {
   const [schemaInfo, setSchemaInfo] = useState(props.schemaInfo);

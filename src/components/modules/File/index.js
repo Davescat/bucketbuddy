@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Image, Placeholder, Icon } from 'semantic-ui-react';
-import { getImageSrc } from '../utils/amazon-s3-utils';
+import { getImageSrc } from '../../utils/amazon-s3-utils';
+import './file.scss';
 
 const File = (props) => {
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -35,9 +36,13 @@ const File = (props) => {
   const getImage = () => {
     if (imageLoaded) {
       if (fileTest.test(props.file.filename)) {
-        return <Image src={src} className="card-file-image" />;
+        return <Image src={src} wrapped className="card-file-image" />;
       } else {
-        return <Icon name="file" className="card-file-icon" />;
+        return (
+          <div className="ui image ">
+            <Icon name="file" className="card-file-icon" />
+          </div>
+        );
       }
     } else {
       return (
@@ -48,9 +53,9 @@ const File = (props) => {
     }
   };
 
-  return [
+  return (
     <Card
-      fluid
+      raised
       className="file-card"
       onClick={() =>
         props.openModal({
@@ -62,10 +67,12 @@ const File = (props) => {
       {getImage()}
       <Card.Content>
         <Card.Header>{props.file.filename}</Card.Header>
-        <Card.Meta>{`Last modified: ${props.file.LastModified}`}</Card.Meta>
-        <Card.Meta>{`Size: ${props.file.Size} bytes`}</Card.Meta>
+        <Card.Meta>
+          <span>Last modified:</span>
+          <span>{new Date(props.file.LastModified).toDateString()}</span>
+        </Card.Meta>
       </Card.Content>
     </Card>
-  ];
+  );
 };
 export default File;

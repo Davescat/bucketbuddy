@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import BucketPath from './BucketPath';
-import BucketSettings from './BucketSettings';
-import FileContainer from './FileContainer';
+import BucketPath from '../BucketPath';
+import BucketSettings from '../BucketSettings';
+import FileContainer from '../FileContainer';
 import { Dimmer, Loader, Transition } from 'semantic-ui-react';
 import {
   listObjects,
   getFolderSchema,
   getObjectTags
-} from '../utils/amazon-s3-utils';
-import FolderMenu from './FolderMenu';
-import NavMenu from '../modules/NavMenu';
-import { updateCacheFiles } from '../utils/cache-utils';
+} from '../../utils/amazon-s3-utils';
+import FolderMenu from '../FolderMenu';
+import NavMenu from '../NavMenu';
+import { updateCacheFiles } from '../../utils/cache-utils';
+import './bucketviewer.scss';
 
 export const schemaFileName = 'bucket-buddy-schema.json';
 
@@ -121,7 +122,10 @@ const BucketViewer = (props) => {
       files.map(async function (file) {
         return await getObjectTags(bucket, file.Key).then((TagSet) => ({
           ...file,
-          ...TagSet
+          TagSet: TagSet.TagSet.map(({ Key, Value }) => ({
+            key: Key,
+            value: Value
+          }))
         }));
       })
     );
@@ -190,7 +194,7 @@ const BucketViewer = (props) => {
     const fileIndex = visibleFiles.files.findIndex((file) => file.Key === key);
     const updatedFile = {
       ...visibleFiles.files[fileIndex],
-      ...tagset
+      TagSet: tagset
     };
     const filesCopy = [...visibleFiles.files];
     filesCopy[fileIndex] = updatedFile;
@@ -213,29 +217,31 @@ const BucketViewer = (props) => {
   } else {
     return (
       <div className="bucket-viewer">
-        <NavMenu />
-        <BucketSettings
-          bucket={bucket}
-          pathInfo={pathInfo}
-          settings={settings}
-          schemaInfo={schemaInfo}
-          updateList={updateList}
-          setSettings={setSettings}
-          pathChange={updatePath}
-        />
-        <BucketPath
-          bucket={bucket}
-          pathInfo={pathInfo}
-          schemaInfo={schemaInfo}
-          pathChange={updatePath}
-          updateList={updateList}
-          search={{
-            text: tagSearchText,
-            setSearchText: setTagSearchText,
-            chosenTag: chosenTag,
-            setChosenTag: setChosenTag
-          }}
-        />
+        <div className="bucket-info">
+          <NavMenu />
+          <BucketPath
+            bucket={bucket}
+            pathInfo={pathInfo}
+            schemaInfo={schemaInfo}
+            pathChange={updatePath}
+            updateList={updateList}
+            search={{
+              text: tagSearchText,
+              setSearchText: setTagSearchText,
+              chosenTag: chosenTag,
+              setChosenTag: setChosenTag
+            }}
+          />
+          <BucketSettings
+            bucket={bucket}
+            pathInfo={pathInfo}
+            settings={settings}
+            schemaInfo={schemaInfo}
+            updateList={updateList}
+            setSettings={setSettings}
+            pathChange={updatePath}
+          />
+        </div>
         <div className="files-folders">
           <FolderMenu
             bucket={bucket}
@@ -246,7 +252,7 @@ const BucketViewer = (props) => {
             customClickEvent={updatePath}
             search={{ text: fileSearchText, setSearchText: setFileSearchText }}
           />
-          <div>
+          <div style={{ width: '100%' }}>
             <Transition
               visible={!filesLoading}
               onStart={() => transition()}
@@ -256,7 +262,6 @@ const BucketViewer = (props) => {
                   setFiles(visibleFiles);
                 }
               }}
-              unmountOnHide
               animation={transitions[0]}
               duration={250}
             >
@@ -281,16 +286,16 @@ const BucketViewer = (props) => {
                         } else {
                           //This filter checks if there are any files with the tag that is used to search
                           const tagFile = file.TagSet.filter(
-                            (x) => x['Key'] === chosenTag
+                            (x) => x['key'] === chosenTag
                           );
-                          //If a file has the Tag chosen for searching.
-                          if (tagFile.length === 0) {
+                          //If a file has the Tag chosen for searching. If length doesn't exist or is 0 it will be false
+                          if (tagFile.length) {
                             //If no tag search text has been written just show all files with tag chosen
                             if (tagSearchText === '') {
                               return true;
                             } else {
                               return (
-                                tagFile[0]['Value']
+                                tagFile[0]['value']
                                   .toLowerCase()
                                   .search(tagSearchText.toLowerCase()) !== -1
                               );

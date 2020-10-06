@@ -16,13 +16,12 @@ const EditObjectTagsModal = (props) => {
     const key = props.keyValue;
 
     const targetSetForCall = cleanTagSetValuesForCall(tagset);
-
     putObjectTags(
       { name, accessKeyId, secretAccessKey, region },
       key,
       targetSetForCall
     );
-    props.updateTagState(key, targetSetForCall);
+    props.updateTagState(key, tagset);
 
     setModalOpen(false);
   };

@@ -7,7 +7,9 @@ import {
   Dimmer,
   Loader,
   Icon,
-  Label
+  Label,
+  Divider,
+  Segment
 } from 'semantic-ui-react';
 import { schemaTagTypes, selectBoolean } from '../utils/tag-types';
 import './SchemaForm.scss';
@@ -102,109 +104,112 @@ const SchemaForm = (props) => {
           <p className="error-message">{error}</p>
         )}
       </Message>
-      <Form onSubmit={handleSubmit}>
-        {state.schemaValues.map((schemaValue, idx) => {
-          const key = 'key',
-            value = 'value',
-            type = 'type';
-          console.log(
-            schemaValue,
-            schemaValue[type] === undefined && schemaValue[type] === ''
-          );
+      <Segment padded>
+        <Form onSubmit={handleSubmit}>
+          {state.schemaValues.map &&
+            state.schemaValues
+              .sort(({ needed: x }, { showNeeded: y }) =>
+                x === y ? 0 : x ? 1 : -1
+              )
+              .map((schemaValue, idx, arr) => {
+                const key = 'key',
+                  value = 'value',
+                  type = 'type';
+                return (
+                  // {schemaValue.showNeeded && <Divider horizontal>Needed to conform with Schema</Divider>}
+                  <>
+                    <Form.Group className="field-row">
+                      <Icon
+                        onClick={removeSchemaValue}
+                        className="button-fit-content"
+                        name="cancel"
+                      />
 
-          return (
-            <>
-              <Form.Group className="field-row">
-                <Form.Button
-                  width={1}
-                  fluid
-                  color="red"
-                  className="button-fit-content"
-                  onClick={removeSchemaValue}
-                >
-                  <Icon name="cancel" />
-                </Form.Button>
-                <Form.Select
-                  width={3}
-                  fluid
-                  name={type}
-                  options={schemaTagTypes}
-                  label="Field Type"
-                  required
-                  defaultValue={
-                    !schemaValue[type] && schemaValue[type] === ''
-                      ? schemaTagTypes[0].value
-                      : schemaValue[type]
-                  }
-                  onChange={(event, data) =>
-                    handleFieldChange(event, data, idx)
-                  }
-                />
-                {props.editFieldName ? (
-                  <Form.Input
-                    width={6}
-                    fluid
-                    name={key}
-                    label="Field Name"
-                    required
-                    placeholder="Enter field name here"
-                    value={schemaValue[key]}
-                    onChange={(event, data) =>
-                      handleFieldChange(event, data, idx)
-                    }
-                  />
-                ) : (
-                  <Label>{schemaValue[key]}</Label>
-                )}
-                {schemaValue[type] === 'flag' ? (
-                  <Form.Select
-                    width={6}
-                    fluid
-                    name={value}
-                    options={selectBoolean}
-                    label="Field Input"
-                    required
-                    defaultValue={
-                      typeof schemaValue[value] === 'boolean'
-                        ? schemaValue[value]
-                        : selectBoolean[0].value
-                    }
-                    onChange={(event, data) =>
-                      handleFieldChange(event, data, idx)
-                    }
-                  />
-                ) : (
-                  <Form.Input
-                    width={6}
-                    fluid
-                    name={value}
-                    label="Field Input"
-                    required
-                    placeholder="Enter field input here"
-                    value={schemaValue[value]}
-                    onChange={(event, data) =>
-                      handleFieldChange(event, data, idx)
-                    }
-                    type={schemaValue[type]}
-                  />
-                )}
-              </Form.Group>
-            </>
-          );
-        })}
-        <div>
-          <Button type="submit" primary>
-            Submit
-          </Button>
-          {props.editFieldName ? (
-            <Button onClick={addNewSchemaValue} secondary>
-              Add field
+                      {props.editFieldName ? (
+                        <Form.Input
+                          width={6}
+                          fluid
+                          name={key}
+                          label="Field Name"
+                          required={schemaValue[key] === ''}
+                          placeholder="Enter field name here"
+                          value={schemaValue[key]}
+                          onChange={(event, data) =>
+                            handleFieldChange(event, data, idx)
+                          }
+                        />
+                      ) : (
+                        <Label>{schemaValue[key]}</Label>
+                      )}
+
+                      {schemaValue[type] === 'flag' ? (
+                        <Form.Select
+                          width={6}
+                          fluid
+                          name={value}
+                          options={selectBoolean}
+                          label="Field Input"
+                          required={schemaValue[value] === null}
+                          defaultValue={
+                            typeof schemaValue[value] === 'boolean'
+                              ? schemaValue[value]
+                              : selectBoolean[0].value
+                          }
+                          onChange={(event, data) =>
+                            handleFieldChange(event, data, idx)
+                          }
+                        />
+                      ) : (
+                        <Form.Input
+                          width={6}
+                          fluid
+                          name={value}
+                          label="Field Input"
+                          required={schemaValue[value] === ''}
+                          placeholder="Enter field input here"
+                          value={schemaValue[value]}
+                          onChange={(event, data) =>
+                            handleFieldChange(event, data, idx)
+                          }
+                          type={schemaValue[type]}
+                        />
+                      )}
+                      {(schemaValue[type] ||
+                        props.title === 'Create Schema') && (
+                        <Form.Select
+                          width={3}
+                          fluid
+                          name={type}
+                          options={schemaTagTypes}
+                          label="Field Type"
+                          defaultValue={
+                            !schemaValue[type] && schemaValue[type] === ''
+                              ? schemaTagTypes[0].value
+                              : schemaValue[type]
+                          }
+                          onChange={(event, data) =>
+                            handleFieldChange(event, data, idx)
+                          }
+                        />
+                      )}
+                    </Form.Group>
+                  </>
+                );
+              })}
+          <div>
+            <Button type="submit" primary>
+              Submit
             </Button>
-          ) : (
-            ''
-          )}
-        </div>
-      </Form>
+            {props.editFieldName ? (
+              <Button onClick={addNewSchemaValue} secondary>
+                Add field
+              </Button>
+            ) : (
+              ''
+            )}
+          </div>
+        </Form>
+      </Segment>
     </div>
   );
 };

@@ -17,26 +17,30 @@ import {
   Grid,
   GridRow,
   GridColumn,
-  Divider,
   Segment
 } from 'semantic-ui-react';
+import './file-details-modal.scss';
 
 const FileDetailsModal = (props) => {
+  const { bucket, schemaInfo, updateTagState } = props;
   const [showConfirm, setShowConfirm] = useState(false);
   const [conformsToSchema, setConformsToSchema] = useState(true);
   const [downloadLink, setDownloadLink] = useState('');
+  // This property is the combined tags of the files tags and the schema's tags
+  const [file, setFile] = useState(props.file);
   const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
   const imagec = useRef(null);
-  const { file, bucket, schemaInfo, updateTagState } = props;
+
+  useEffect(() => {}, [file]);
 
   useEffect(() => {
-    if (file) {
+    if (file && file === props.file) {
       if (downloadLink === '') {
         getSignedURL(bucket, file.Key).then(setDownloadLink);
       }
       if (file.TagSet && file.TagSet.length > 0) {
-        let schemaKeys = getKeys(schemaInfo.tagset, 'key');
-        let fileKeys = getKeys(file.TagSet, 'Key');
+        const schemaKeys = getKeys(schemaInfo.tagset);
+        const fileKeys = getKeys(file.TagSet);
         if (schemaKeys) {
           setConformsToSchema(
             schemaKeys.every((schemaKey) => fileKeys.includes(schemaKey))
@@ -49,6 +53,8 @@ const FileDetailsModal = (props) => {
           setConformsToSchema(false);
         }
       }
+    } else if (props.file !== file) {
+      setFile(props.file);
     }
   });
 
@@ -67,6 +73,8 @@ const FileDetailsModal = (props) => {
   const getKeys = (array, keyName = 'key') => {
     if (array.length > 0) {
       return array.map((val) => val[keyName]).sort();
+    } else {
+      return [];
     }
   };
 
@@ -89,22 +97,35 @@ const FileDetailsModal = (props) => {
     }
   };
 
-  const cleanTagSetValuesForForm = (tagset) => {
-    const newTagset = [];
-    tagset.map((set, i) =>
-      newTagset.push({
-        key: set.Key ? set.Key : set.key,
-        value: set.Value ? set.Value : set.value
-      })
-    );
-
-    return newTagset;
+  const combineTags = () => {
+    const tagset = [];
+    //The reason for creating and turning the set back into the array was to
+    // quickly get rid of repeating values as a set only contains unique values.
+    const totalKeys = [
+      ...new Set([...getKeys(schemaInfo.tagset), ...getKeys(file.TagSet)])
+    ];
+    if (totalKeys) {
+      totalKeys.forEach((key, i) => {
+        let schemaSet = schemaInfo.tagset.find((set) => set['key'] === key);
+        let fileSet = file.TagSet.find((set) => set['key'] === key);
+        tagset.push({
+          ...schemaSet,
+          ...fileSet
+        });
+        if (schemaSet && !fileSet) {
+          tagset[i].showNeeded = true;
+        }
+      });
+      return tagset;
+    }
   };
-
   return (
     <Modal
       open={props.modalOpen}
-      onClose={props.handleClose}
+      onClose={() => {
+        setFile(null);
+        props.handleClose();
+      }}
       className="details-modal"
       closeIcon
     >
@@ -145,8 +166,8 @@ const FileDetailsModal = (props) => {
                         file.TagSet.map((set, i) => (
                           <List.Item>
                             <ListContent>
-                              <ListHeader>{set.Key}</ListHeader>
-                              <ListDescription>{set.Value}</ListDescription>
+                              <ListHeader>{set.key}</ListHeader>
+                              <ListDescription>{set.value}</ListDescription>
                             </ListContent>
                           </List.Item>
                         ))}
@@ -176,16 +197,13 @@ const FileDetailsModal = (props) => {
                             <EditObjectTagsModal
                               bucket={bucket}
                               keyValue={file.Key}
-                              tagset={cleanTagSetValuesForForm(
-                                conformsToSchema
-                                  ? file.TagSet
-                                  : Object.assign(
-                                      [],
-                                      file.TagSet,
-                                      schemaInfo.tagset
-                                    )
-                              )}
-                              updateTagState={updateTagState}
+                              tagset={combineTags()}
+                              updateTagState={(key, tagset) => {
+                                setFile(
+                                  Object.assign(file, { TagSet: tagset })
+                                );
+                                updateTagState(key, tagset);
+                              }}
                               trigger={<Button size="medium">Edit Tags</Button>}
                             />
                           )}
@@ -200,7 +218,7 @@ const FileDetailsModal = (props) => {
                               Download
                             </a>
                           )}
-                          <Button color="red" onClick={showConfirmDelete}>
+                          <Button color="blue" onClick={showConfirmDelete}>
                             Delete File
                           </Button>
                           <Confirm
