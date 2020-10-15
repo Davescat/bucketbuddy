@@ -149,7 +149,7 @@ const BucketViewer = (props) => {
    */
   const filterList = async (response) => {
     const filetest = new RegExp(
-      `^${pathInfo.path}([\\w!\\-\\.\\*'\\(\\)]+[/]?)$`
+      `^${pathInfo.path}([\\w!\\-\\.\\*'\\(\\),]+[/]?)$`
     );
     let newFiles = [];
     const newFolders = [];

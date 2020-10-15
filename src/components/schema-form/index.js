@@ -108,16 +108,21 @@ const SchemaForm = (props) => {
         <Form onSubmit={handleSubmit}>
           {state.schemaValues.map &&
             state.schemaValues
-              .sort(({ needed: x }, { showNeeded: y }) =>
-                x === y ? 0 : x ? 1 : -1
+              .sort(({ showNeeded: set1 }, { showNeeded: set2 }) =>
+                set1 === set2 ? 0 : set1 ? 1 : -1
               )
               .map((schemaValue, idx, arr) => {
                 const key = 'key',
                   value = 'value',
                   type = 'type';
+                const dividingLine = arr.findIndex((set) => set.showNeeded);
                 return (
-                  // {schemaValue.showNeeded && <Divider horizontal>Needed to conform with Schema</Divider>}
                   <>
+                    {idx == dividingLine && (
+                      <Divider horizontal>
+                        Needed to conform with Schema
+                      </Divider>
+                    )}
                     <Form.Group className="field-row">
                       <Icon
                         onClick={removeSchemaValue}
