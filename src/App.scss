@@ -1,99 +1,19 @@
-.bucket-bar {
-  border-bottom: 1px solid rgba(204, 204, 204, 0.425);
-  padding: 6px;
-  display: flex;
-  justify-content: space-between;
-  .bucket-buttons {
-    div.ui {
-      margin-right: 8px;
-    }
-  }
+$card-height: 300px;
+@media (max-width: 575.98px) {
+  $card-height: 200px;
 }
 
-.menu {
-  margin-bottom: 0 !important;
+// Small devices (landscape phones, less than 768px)
+@media (max-width: 767.98px) {
+  $card-height: 767px;
 }
 
-.bucket-path {
-  display: flex;
-  background-color: #f7f7f7a9;
-  padding-right: 20px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(204, 204, 204, 0.541);
-  div {
-    display: flex;
-    margin: 0 !important;
-  }
+// Medium devices (tablets, less than 992px)
+@media (max-width: 991.98px) {
+  $card-height: 991px;
 }
 
-.file-container {
-  display: flex;
-  padding: 10px;
-  flex-wrap: wrap;
-  justify-content: start;
-  .file-card {
-    max-height: 430px;
-    cursor: pointer;
-    .card-file-image {
-      object-fit: contain;
-      max-height: 300px !important;
-    }
-    .card-file-icon {
-      display: flex;
-      align-self: center;
-      text-align: center;
-      padding: 2em;
-      color: #919191;
-      height: 100%;
-      vertical-align: middle;
-      font-size: 3em;
-    }
-    div {
-      object-fit: scale-down !important;
-    }
-  }
-}
-
-.file-list {
-  .file-list-item {
-    font-size: 1.4rem;
-    margin-left: 6px;
-  }
-}
-
-.modal-bold {
-  font-weight: bold;
-}
-.file-details {
-  .item {
-    margin-bottom: 8px;
-  }
-  .card-file-icon {
-    display: flex;
-    align-self: center;
-    text-align: center;
-    padding: 2em;
-    color: #919191;
-    height: 100%;
-    vertical-align: middle;
-    font-size: 3em;
-  }
-}
-.details-modal {
-  .description {
-    width: inherit !important;
-  }
-}
-
-.files-folders {
-  display: flex;
-}
-.folder-menu {
-  z-index: 2;
-}
-
-body {
-  // overflow: hidden;
+// Large devices (desktops, less than 1200px)
+@media (max-width: 1199.98px) {
+  $card-height: 1199px;
 }

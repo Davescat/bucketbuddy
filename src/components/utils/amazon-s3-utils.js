@@ -236,7 +236,7 @@ export const uploadObject = async (
       Body: file,
       Tagging: tags ? tags : ''
     };
-    s3.upload(params).promise();
+    return s3.upload(params).promise();
   } catch (error) {
     console.log(error);
     if (!error.code) {

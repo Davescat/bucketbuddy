@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Button, Dropdown, Confirm, Radio } from 'semantic-ui-react';
-import FileUploadModal from '../modals/file-upload-modal';
-import FolderUploadModal from '../modals/folder-upload-modal';
-import SchemaStructureModal from '../modals/schema-structure-modal';
-import { deleteObject } from '../utils/amazon-s3-utils';
+import { Dropdown, Confirm, Radio } from 'semantic-ui-react';
+import FileUploadModal from '../../modals/file-upload-modal';
+import FolderUploadModal from '../../modals/folder-upload-modal';
+import SchemaStructureModal from '../../modals/schema-structure-modal';
+import { deleteObject } from '../../utils/amazon-s3-utils';
+import './bucketsettings.scss';
 
 /**
  * This component controls how much info you want to load in from the api
@@ -59,6 +60,23 @@ const BucketSettings = ({
               pathInfo={pathInfo}
               trigger={<Dropdown.Item text="New Folder" />}
             />
+            {pathInfo.depth >= 1 ? (
+              <>
+                <Dropdown.Item
+                  text="Delete Folder"
+                  onClick={showConfirmDelete}
+                />
+                <Confirm
+                  open={showConfirm}
+                  cancelButton="Cancel"
+                  confirmButton="Delete"
+                  onCancel={closeConfirmDelete}
+                  onConfirm={deleteCurrentFolder}
+                />
+              </>
+            ) : (
+              ''
+            )}
             <Dropdown.Divider />
             <SchemaStructureModal
               updateList={updateList}
@@ -82,24 +100,7 @@ const BucketSettings = ({
           }
         />
       </span>
-      <span className="bucket-buttons-right">
-        {pathInfo.depth >= 1 ? (
-          <>
-            <Button size="medium" color="red" onClick={showConfirmDelete}>
-              Delete Current Folder
-            </Button>
-            <Confirm
-              open={showConfirm}
-              cancelButton="Cancel"
-              confirmButton="Delete"
-              onCancel={closeConfirmDelete}
-              onConfirm={deleteCurrentFolder}
-            />
-          </>
-        ) : (
-          ''
-        )}
-      </span>
+      <span className="bucket-buttons-right"></span>
     </div>
   );
 };
