@@ -12,11 +12,11 @@ Bucket Buddy is a simple React application used to be a tool for users to better
 
 This application can be used to:
 
-- navigate an existing bucket
-- upload and delete files
-- see the thumbnails of image files
-- edit and add tags to an object
-- create a schema which will be used to add predefined tags to all objects
+- Navigate an existing bucket
+- Upload and delete files
+- See the thumbnails of image files
+- Edit and add tags to an object
+- Create a schema which will be used to add predefined tags to objects
 
 ## Requirements before installing
 
@@ -100,7 +100,7 @@ Navigating through the bucket is similar to a file explorer (folders and files a
 
 ## Creating/Editing a schema for your objects' tags
 
-A folder's tag schema is how bucket buddy knows what tags should be always appied to the objects in the folder. You can create one by clicking on the "Tags in folder Schema" button and you will be prompted to create your field names and default values for them. You will also be able to set the types. The field types work as follows:
+A folder's tag schema is how bucket buddy knows what tags should be always appied to the objects in the folder. You can create one by clicking on the "Folder Schema" button in the "Actions" dropdown and you will be prompted to create your field names and default values for them. You will also be able to set the types. The field types work as follows:
 
 - Text: Any text values such as `hello world`
 - Numeric: Any numeric values such as integers like 1, 3, or 6. You can also specify decimals such as 123.11 (not text is allowed)
@@ -115,7 +115,7 @@ Don't worry if you have pre-existing objects, a tag is displayed to let you know
 
 Viewing and editing an object is simply with bucket buddy. Simply click on the object you wish to view. You will then be prompted with the object's details and with two buttons. One will be to edit the object's tags and the other is to delete the file.
 
-To edit the object's tags simply click on the "Edit Tags" button and you will be prompted with a screen similar to when you created your schema. Here you can edit the object's tags and once you are done simply clicko n the "Submit" button to save the changes.
+To edit the object's tags simply click on the "Edit Tags" button and you will be prompted with a screen similar to when you created your schema. Here you can edit the object's tags and once you are done simply click on the "Submit" button to save the changes.
 
 ![Image of Bucket Buddy viewing an object and editing tags](./public/view-and-edit-object.gif)
 
@@ -123,13 +123,13 @@ To edit the object's tags simply click on the "Edit Tags" button and you will be
 
 Uploading objects to your S3 bucket is simple with Bucket Buddy. If you created the schema before attempting to upload an object you will be prompted with the fields and asked to fill them out accordingly. If you did not create a schema you can still upload objects.
 
-To upload an object simply click on the "Upload" button in the top left corner under the "Create Connection" button. There you will be able to upload a file from your computer.
+To upload an object simply click on the "Upload" button in the "Actions" dropdown in the top left corner. There you will be able to upload a file from your computer.
 
 ![Image of Bucket Buddy uploading a file to bucket](./public/upload-object.gif)
 
 ## Adding folders
 
-Like most file systems S3 supports folders too! Creating a folder in bucket buddy is easy. Simple click on "New Folder" in the top left corner of the screen and there you will be able to enter the name of your new folder.
+Like most file systems S3 supports folders too! Creating a folder in bucket buddy is easy. Simple click on "New Folder" in the "Actions" dropdown in the top left corner of the screen and there you will be able to enter the name of your new folder.
 
 Please be careful because if you write a name of a folder that already exists it will replace the other one!
 
@@ -137,13 +137,23 @@ Please be careful because if you write a name of a folder that already exists it
 
 ## Deleting folders
 
-You can delete any folder except the root folder. Simply navigate to the folder you wish to delete and select the red "Delete Folder" button to delete it. Be very careful doing this since this action cannot be undone!
+You can delete any folder except the root folder. Simply navigate to the folder you wish to delete and open the "Actions" dropdown and select "Delete Folder" to delete it. Be very careful doing this since this action cannot be undone! You also cannot delete the root of the bucket (aka the main folder). You can only delete lower folders.
 
 ![Image of Bucket Buddy deleting a folder](./public/delete-folder.gif)
 
+## Search through objects by tag
+
+You can search for objects that have a specific tag value in a folder. Simpply select the tag in the top right corner you wish to to search by and then type in the text.
+
+![Image of Bucket Buddy deleting a folder](./public/search-tags.gif)
+
+## Cache
+
+Downloading images everytime you wish to view the bucket can be very time consuming (even more so when you have a lot of objects in your bucket). We added a toggle which when enabled will cache the images on your machine so you will not have to download it next time you view your bucket. It will redownload the image if there are any changes. You can turn this feature on and off by simply clicking on the toggle labled "Cache images" next to the "Actions" dropdown.
+
 # Special thanks
 
-This project developed by the team at [Rasion d'Art](https://www.raisondart.org/) a non-profit organization and is made available for anyone who will find use in making managing their S3 bucket easier.
+This project developed by the team at [Rasion d'Art](https://www.raisondart.org/) a non-profit organization and is made available for anyone who will find use in making managing their S3 bucket easier. The team's mission was not to just make a tool helpful for themselves but others too.
 
 Special thanks to the team:
 
@@ -152,6 +162,8 @@ Special thanks to the team:
 - [Bruno Carriere](https://github.com/bruno-c)
 - [Olivia](https://github.com/olioli)
 - [Jean-Francois Duval](https://github.com/gsquad-jfduval)
+
+We hope this project helps you do something great!
 
 ## Having issues?
 
