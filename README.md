@@ -1,12 +1,10 @@
 # Bucket Buddy
 
-# Overview
-
 ## The problem
 
-Amazon's S3 is great and a very versatile storage service, however it is harder for non-developers to use to manage their objects (such as image files like JPG, PNG, etc.). It can be difficult to navigate an S3 bucket when there are no thumbnails for the images present and no predefined values for tags to be used for objects.
+Need a tool to edit S3 objects? Amazon's S3 is great and a very versatile storage service, however it is harder for non-developers to use to manage their objects (such as image files like JPG, PNG, etc.). It can be difficult to navigate an S3 bucket when there are no thumbnails for the images present and no predefined values for tags to be used for objects.
 
-## This solution
+## Our solution
 
 ![Image of Bucket Buddy main screen](./public/bucket-buddy-main-screen.jpg)
 
@@ -64,7 +62,7 @@ AWS uses IAM Roles for all their services to handle security and user permission
 }
 ```
 
-Ensure also to set your S3 s=bucket's signature version to be V4.
+Ensure also to set your S3 bucket's signature version to be V4.
 
 ## Installation and running locally
 
@@ -147,7 +145,7 @@ You can delete any folder except the root folder. Simply navigate to the folder 
 
 This project developed by the team at [Rasion d'Art](https://www.raisondart.org/) a non-profit organization and is made available for anyone who will find use in making managing their S3 bucket easier.
 
-Also special thanks to the team:
+Special thanks to the team:
 
 - [Davide Catalano](https://github.com/Davescat)
 - [Jeffrey Boisvert](https://github.com/jdboisvert)
