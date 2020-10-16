@@ -2,7 +2,7 @@
 
 ## The problem
 
-Need a tool to edit S3 objects? Amazon's S3 is great and a very versatile storage service, however it is harder for non-developers to use to manage their objects (such as image files like JPG, PNG, etc.). It can be difficult to navigate an S3 bucket when there are no thumbnails for the images present and no predefined values for tags to be used for objects.
+Need a tool to edit S3 objects? [Amazon's S3](https://aws.amazon.com/s3/) is great and a very versatile storage service, however it is harder for non-developers to use to manage their objects (such as image files like JPG, PNG, etc.). It can be difficult to navigate an S3 bucket when there are no thumbnails for the images present and no predefined values for tags to be used for objects.
 
 ## Our solution
 
@@ -80,7 +80,7 @@ npm install
 npm start
 ```
 
-5. If run successfully you should see the application start in your default browser and be greeted with the following screen asking you to connect t your bucket :)
+5. If run successfully you should see the application start in your default browser and be greeted with the following screen asking you to connect to your bucket.
 
 ![Image of Bucket Buddy connect screen](./public/connect-to-bucket-screen.jpg)
 

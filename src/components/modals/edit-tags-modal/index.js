@@ -29,7 +29,9 @@ const EditObjectTagsModal = (props) => {
   const cleanTagSetValuesForCall = (tagset) => {
     const newTagset = [];
 
-    tagset.map((set, i) => newTagset.push({ Key: set.key, Value: set.value }));
+    tagset.map((set, i) =>
+      newTagset.push({ Key: set.key, Value: set.value.toString() })
+    );
 
     return { TagSet: newTagset };
   };
