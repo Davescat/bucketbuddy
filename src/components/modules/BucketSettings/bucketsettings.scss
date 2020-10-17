@@ -1,0 +1,11 @@
+.bucket-bar {
+  border-bottom: 1px solid rgba(204, 204, 204, 0.425);
+  padding: 6px;
+  display: flex;
+  justify-content: space-between;
+  .bucket-buttons {
+    div.ui {
+      margin-right: 8px;
+    }
+  }
+}
