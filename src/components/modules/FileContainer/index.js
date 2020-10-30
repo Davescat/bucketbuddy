@@ -1,3 +1,4 @@
+import { Organizations } from 'aws-sdk';
 import React, { useState } from 'react';
 import { Card } from 'semantic-ui-react';
 import FileDetailsModal from '../../modals/file-details-modal';
@@ -54,6 +55,7 @@ const FileContainer = (props) => {
             openModal={openModal}
             key={`${i}${x.filename}`}
             file={x}
+            updateSrcArray={props.updateSrcArray}
             updateTagState={props.updateTagState}
             schemaInfo={props.schemaInfo}
             updateList={props.updateList}

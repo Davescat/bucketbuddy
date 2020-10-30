@@ -1,10 +1,10 @@
 import React, { useRef, useState } from 'react';
 import AWS from 'aws-sdk';
-import { Button, Modal, Form, Input } from 'semantic-ui-react';
+import { Button, Modal, Form, Input, Segment } from 'semantic-ui-react';
 
 const FolderUploadModal = (props) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const textInput = useRef(null);
+  const [textInput, setTextInput] = useState('');
 
   const upload = () => {
     const {
@@ -13,8 +13,8 @@ const FolderUploadModal = (props) => {
       bucket: { accessKeyId, secretAccessKey, region, name }
     } = props;
     // TODO: validate text for creating folder
-    if (textInput && textInput.current.inputRef.current.value !== '') {
-      const folderName = `${pathInfo.path}${textInput.current.inputRef.current.value}/`;
+    if (textInput && textInput !== '') {
+      const folderName = `${pathInfo.path}${textInput}/`;
       return (async function () {
         try {
           AWS.config.update({
@@ -59,23 +59,22 @@ const FolderUploadModal = (props) => {
     >
       <Modal.Header>Create New Folder</Modal.Header>
       <Modal.Content>
-        <Form onSubmit={upload}>
-          {/* TODO have folder inherit an existing schema */}
-          {/* <Form.Field>
+        <Segment>
+          <Form onSubmit={upload}>
+            {/* TODO have folder inherit an existing schema */}
+            {/* <Form.Field>
             <Radio label="Inherit Schema" toggle name="loadTags" />
           </Form.Field> */}
-          <Form.Field>
-            <Input
+            <Form.Input
               label="Folder Name"
-              ref={textInput}
+              value={textInput}
+              onChange={(event, { value }) => setTextInput(value)}
               id="foldername"
               type="text"
             />
-          </Form.Field>
-          <Form.Field>
-            <Button type="submit">Add folder</Button>
-          </Form.Field>
-        </Form>
+            <Form.Button type="submit">Add folder</Form.Button>
+          </Form>
+        </Segment>
       </Modal.Content>
     </Modal>
   );
