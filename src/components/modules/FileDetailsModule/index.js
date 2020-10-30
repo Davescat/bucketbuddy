@@ -1,7 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { deleteObject, getObjectURL } from '../../utils/amazon-s3-utils';
-import { schemaFileName } from '../../modules/BucketViewer';
-import EditObjectTagsModal from '../edit-tags-modal';
+import {
+  deleteObject,
+  getSignedURL,
+  getObjectURL
+} from '../../utils/amazon-s3-utils';
+import { schemaFileName } from '../BucketViewer';
+import EditObjectTagsModule from '../EditObjectTagsModule';
 import { withRouter } from 'react-router-dom';
 import {
   Modal,
@@ -21,7 +25,7 @@ import {
 } from 'semantic-ui-react';
 import './file-details-modal.scss';
 
-const FileDetailsModal = (props) => {
+const FileDetailsModule = (props) => {
   const { bucket, schemaInfo, updateTagState } = props;
   const [showConfirm, setShowConfirm] = useState(false);
   const [conformsToSchema, setConformsToSchema] = useState(true);
@@ -54,6 +58,14 @@ const FileDetailsModal = (props) => {
       setFile(props.file);
     }
   });
+
+  const showConfirmDelete = () => {
+    setShowConfirm(true);
+  };
+
+  const closeConfirmDelete = () => {
+    setShowConfirm(false);
+  };
 
   /**
    * Returns the keys of a tagset.
@@ -91,7 +103,7 @@ const FileDetailsModal = (props) => {
   const combineTags = () => {
     const tagset = [];
     //The reason for creating and turning the set back into the array was to
-    // quickly get rid of repeating values as a set only contains unique values.
+    //quickly get rid of repeating values as a set only contains unique values.
     const totalKeys = [
       ...new Set([...getKeys(schemaInfo.tagset), ...getKeys(file.TagSet)])
     ];
@@ -186,7 +198,7 @@ const FileDetailsModal = (props) => {
                       <List.Item>
                         <ListContent>
                           {file.TagSet && file.filename !== schemaFileName && (
-                            <EditObjectTagsModal
+                            <EditObjectTagsModule
                               bucket={bucket}
                               keyValue={file.Key}
                               tagset={combineTags()}
@@ -253,4 +265,4 @@ const FileDetailsModal = (props) => {
     </Modal>
   );
 };
-export default withRouter(FileDetailsModal);
+export default withRouter(FileDetailsModule);

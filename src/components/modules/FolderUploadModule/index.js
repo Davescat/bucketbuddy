@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import AWS from 'aws-sdk';
 import { Button, Modal, Form, Input, Segment } from 'semantic-ui-react';
 
-const FolderUploadModal = (props) => {
+const FolderUploadModule = (props) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [textInput, setTextInput] = useState('');
 
@@ -12,7 +12,7 @@ const FolderUploadModal = (props) => {
       pathInfo,
       bucket: { accessKeyId, secretAccessKey, region, name }
     } = props;
-    // TODO: validate text for creating folder
+
     if (textInput && textInput !== '') {
       const folderName = `${pathInfo.path}${textInput}/`;
       return (async function () {
@@ -61,10 +61,6 @@ const FolderUploadModal = (props) => {
       <Modal.Content>
         <Segment>
           <Form onSubmit={upload}>
-            {/* TODO have folder inherit an existing schema */}
-            {/* <Form.Field>
-            <Radio label="Inherit Schema" toggle name="loadTags" />
-          </Form.Field> */}
             <Form.Input
               label="Folder Name"
               value={textInput}
@@ -79,4 +75,4 @@ const FolderUploadModal = (props) => {
     </Modal>
   );
 };
-export default FolderUploadModal;
+export default FolderUploadModule;

@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Button, Modal, Form, Input, Segment } from 'semantic-ui-react';
 import { uploadObject } from '../../utils/amazon-s3-utils';
 
-const FileUploadModal = (props) => {
+const FileUploadModule = (props) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [tagInput, setTagInput] = useState(props.schemaInfo);
   const fileInput = useRef(null);
@@ -10,10 +10,6 @@ const FileUploadModal = (props) => {
   const isFormFilled = () =>
     tagInput.tagset.map((x) => x['value']).includes('');
 
-  /**
-   *
-   * @param {Event} event
-   */
   const upload = () => {
     if (fileInput && fileInput.current.inputRef.current.files.length === 1) {
       let file = fileInput.current.inputRef.current.files[0];
@@ -95,4 +91,4 @@ const FileUploadModal = (props) => {
   );
 };
 
-export default FileUploadModal;
+export default FileUploadModule;

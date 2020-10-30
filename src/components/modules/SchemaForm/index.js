@@ -11,8 +11,8 @@ import {
   Divider,
   Segment
 } from 'semantic-ui-react';
-import { schemaTagTypes, selectBoolean } from '../utils/tag-types';
-import './SchemaForm.scss';
+import { schemaTagTypes, selectBoolean } from '../../utils/tag-types';
+import './schema-form.scss';
 
 const SchemaForm = (props) => {
   const issueSubmittingError =
@@ -136,7 +136,7 @@ const SchemaForm = (props) => {
                 const dividingLine = arr.findIndex((set) => set.showNeeded);
                 return (
                   <>
-                    {idx == dividingLine && (
+                    {idx === dividingLine && (
                       <Divider horizontal>
                         Needed to conform with Schema
                       </Divider>

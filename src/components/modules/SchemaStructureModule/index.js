@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Dimmer, Loader } from 'semantic-ui-react';
 import AWS from 'aws-sdk';
-import SchemaForm from '../../schema-form';
+import SchemaForm from '../SchemaForm';
 
-const SchemaStructureModal = (props) => {
+const SchemaStructureModule = (props) => {
   const bucketBuddySchemaFileName = 'bucket-buddy-schema.json';
 
   const [schemaPath, setSchemaPath] = useState(props.pathInfo.path);
@@ -100,4 +100,4 @@ const SchemaStructureModal = (props) => {
     </Modal>
   );
 };
-export default SchemaStructureModal;
+export default SchemaStructureModule;

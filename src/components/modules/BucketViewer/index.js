@@ -14,7 +14,7 @@ import {
 import FolderMenu from '../FolderMenu';
 import NavMenu from '../NavMenu';
 import { updateCacheFiles } from '../../utils/cache-utils';
-import './bucketviewer.scss';
+import './bucket-viewer.scss';
 
 export const schemaFileName = 'bucket-buddy-schema.json';
 

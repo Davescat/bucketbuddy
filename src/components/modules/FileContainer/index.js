@@ -1,10 +1,10 @@
 import { Organizations } from 'aws-sdk';
 import React, { useState } from 'react';
 import { Card } from 'semantic-ui-react';
-import FileDetailsModal from '../../modals/file-details-modal';
+import FileDetailsModal from '../FileDetailsModule';
 import useWindowDimensions from '../../utils/window-utils';
 import File from '../File';
-import './filecontainer.scss';
+import './file-container.scss';
 
 const FileContainer = (props) => {
   const { bucket, files } = props;
