@@ -5,10 +5,9 @@ import './file.scss';
 
 const File = (props) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [src, setSrc] = useState('');
+  const [src, setSrc] = useState(props.file.src);
 
   const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
-
   useEffect(() => {
     if (fileTest.test(props.file.filename)) {
       if (props.file.src) {
@@ -19,6 +18,7 @@ const File = (props) => {
           props.bucket,
           props.file.Key,
           (data) => {
+            props.updateSrcArray(props.file.Key, data);
             setSrc(data);
             setImageLoaded(true);
           },
@@ -28,8 +28,7 @@ const File = (props) => {
     } else {
       setImageLoaded(true);
     }
-  }, [props.file.Key]);
-
+  }, []);
   /**
    * Gets the appropriate tags for whatever type of file requested
    */
@@ -56,7 +55,7 @@ const File = (props) => {
   return (
     <Card
       raised
-      className="file-card"
+      className={`file-card ${props.file.hidden ? 'hidden' : ''}`}
       onClick={() =>
         props.openModal({
           ...props.file,

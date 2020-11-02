@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { deleteObject, getSignedURL } from '../../utils/amazon-s3-utils';
+import { deleteObject, getObjectURL } from '../../utils/amazon-s3-utils';
 import { schemaFileName } from '../../modules/BucketViewer';
 import EditObjectTagsModal from '../edit-tags-modal';
 import { withRouter } from 'react-router-dom';
@@ -29,14 +29,11 @@ const FileDetailsModal = (props) => {
   // This property is the combined tags of the files tags and the schema's tags
   const [file, setFile] = useState(props.file);
   const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
-  const imagec = useRef(null);
-
-  useEffect(() => {}, [file]);
 
   useEffect(() => {
     if (file && file === props.file) {
       if (downloadLink === '') {
-        getSignedURL(bucket, file.Key).then(setDownloadLink);
+        getObjectURL(bucket, file.Key).then(setDownloadLink);
       }
       if (file.TagSet && file.TagSet.length > 0) {
         const schemaKeys = getKeys(schemaInfo.tagset);
@@ -58,15 +55,8 @@ const FileDetailsModal = (props) => {
     }
   });
 
-  const showConfirmDelete = () => {
-    setShowConfirm(true);
-  };
-
-  const closeConfirmDelete = () => {
-    setShowConfirm(false);
-  };
-
   /**
+   * Returns the keys of a tagset.
    *
    * @param {AWS.S3.GetObjectOutput} response
    */
@@ -79,18 +69,18 @@ const FileDetailsModal = (props) => {
   };
 
   const deleteFile = () => {
-    deleteObject(bucket, file.Key);
-    setFile(null);
-    props.handleClose();
-    props.updateList();
+    deleteObject(bucket, file.Key).then(() => {
+      setFile(null);
+      props.handleClose();
+      props.updateList();
+    });
   };
 
   const getImage = () => {
     if (fileTest.test(file.filename)) {
-      //Using "div" and "img" instead of the Image object so that a ref could be made
       return (
         <div class="ui medium middle aligned image">
-          <img crossOrigin="anonymous" ref={imagec} src={file.src} />
+          <img crossOrigin="anonymous" src={file.src} />
         </div>
       );
     } else {
@@ -106,20 +96,21 @@ const FileDetailsModal = (props) => {
       ...new Set([...getKeys(schemaInfo.tagset), ...getKeys(file.TagSet)])
     ];
     if (totalKeys) {
-      totalKeys.forEach((key, i) => {
+      return totalKeys.reduce((acc, key) => {
         let schemaSet = schemaInfo.tagset.find((set) => set['key'] === key);
         let fileSet = file.TagSet.find((set) => set['key'] === key);
-        tagset.push({
-          ...schemaSet,
-          ...fileSet
+        acc.push({
+          tags: {
+            ...schemaSet,
+            ...fileSet
+          },
+          showNeeded: schemaSet && !fileSet
         });
-        if (schemaSet && !fileSet) {
-          tagset[i].showNeeded = true;
-        }
-      });
-      return tagset;
+        return acc;
+      }, []);
     }
   };
+
   return (
     <Modal
       open={props.modalOpen}
@@ -219,14 +210,17 @@ const FileDetailsModal = (props) => {
                               Download
                             </a>
                           )}
-                          <Button color="blue" onClick={showConfirmDelete}>
+                          <Button
+                            color="blue"
+                            onClick={() => setShowConfirm(true)}
+                          >
                             Delete File
                           </Button>
                           <Confirm
                             open={showConfirm}
                             cancelButton="Cancel"
                             confirmButton="Delete"
-                            onCancel={closeConfirmDelete}
+                            onCancel={() => setShowConfirm(false)}
                             onConfirm={deleteFile}
                           />
                         </ListContent>

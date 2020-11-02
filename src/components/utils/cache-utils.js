@@ -70,14 +70,16 @@ export const updateCacheFiles = async (files, cacheName, pathInfo) => {
     });
     for (let i = 0; i < files.length; i++) {
       //If -1 there is a new file found that must be cached
-      let cacheIndex = keys.findIndex((key) => key.cacheKey === files[i].Key);
+      let cacheIndex = keys.findIndex(
+        (key) => key.cacheKey === encodeURI(files[i].Key)
+      );
       if (cacheIndex >= 0) {
         let response = await (await cache.match(keys[cacheIndex])).json();
         //If Last modified has changed the file must be updated
         if (files[i].LastModified.toISOString() === response.LastModified) {
           //If found and not modified, can remove request from list,
           response.Key = files[i].Key;
-          cachedKeys.push(response);
+          cachedKeys[response.Key] = response;
           keys.splice(cacheIndex, 1);
         } else {
           neededKeys.push(files[i]);
@@ -85,8 +87,8 @@ export const updateCacheFiles = async (files, cacheName, pathInfo) => {
       } else {
         neededKeys.push(files[i]);
       }
+      if (i < files.length - 1) return { neededKeys, cachedKeys };
     }
-    return { neededKeys, cachedKeys };
   });
 };
 
@@ -98,6 +100,17 @@ export const getCacheSrc = async (bucket, key, callback) => {
     callback(file.src);
   } else {
     cacheSrc(bucket, key, cache).then((response) => callback(response.src));
+  }
+};
+
+export const getCacheSrc2 = async (bucket, key) => {
+  const cache = await caches.open(`bucbud${bucket.name}`);
+  const cacheInfo = await isRequestCached(`/${key}`, cache);
+  if (cacheInfo) {
+    const file = await cacheInfo.json();
+    return file.src;
+  } else {
+    return (await cacheSrc(bucket, key, cache)).src;
   }
 };
 

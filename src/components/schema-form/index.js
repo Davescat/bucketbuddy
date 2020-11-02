@@ -22,9 +22,10 @@ const SchemaForm = (props) => {
     'You have duplicate field names. Please verify you have no field names that are the same!';
 
   const [state, setState] = useState({
-    schemaValues: props.schemaValues
-      ? props.schemaValues
-      : [{ key: '', value: '', type: '' }]
+    schemaValues:
+      props.schemaValues && props.schemaValues.length > 0
+        ? props.schemaValues
+        : [{ tags: { key: '', value: '', type: '' } }]
   });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -32,10 +33,10 @@ const SchemaForm = (props) => {
   const checkIfDuplicateKeys = (schemaValues) => {
     for (let i = 0; i < schemaValues.length; i++) {
       let count = 0;
-      const field = schemaValues[i];
+      const field = schemaValues[i].tags;
 
       for (let j = i + 1; j < schemaValues.length; j++) {
-        const innerField = schemaValues[j];
+        const innerField = schemaValues[j].tags;
 
         if (innerField['key'] === field['key']) {
           count++;
@@ -55,7 +56,13 @@ const SchemaForm = (props) => {
       setError(duplicateError);
     } else {
       try {
-        props.actionOnSubmit(state.schemaValues);
+        props.actionOnSubmit(
+          state.schemaValues.map((set) => ({
+            key: set.tags.key,
+            value: `${set.tags.value}`,
+            type: set.tags.type
+          }))
+        );
       } catch (e) {
         setError(issueSubmittingError);
       }
@@ -69,22 +76,24 @@ const SchemaForm = (props) => {
     setState((prevState) => ({
       schemaValues: [
         ...prevState.schemaValues,
-        { key: '', value: '', type: schemaTagTypes[0].value }
+        { tags: { key: '', value: '' } }
       ]
     }));
   };
 
-  const removeSchemaValue = (event, { name }) => {
-    event.preventDefault();
+  const removeSchemaValue = (key) => {
     const schemaValues = state.schemaValues;
-    const index = parseInt(name);
+    const index = schemaValues.findIndex(
+      (set) => `${set.tags.key}` === `${key}`
+    );
     schemaValues.splice(index, 1);
     setState((prevState) => ({ schemaValues }));
   };
 
   const handleFieldChange = (event, { name, value }, row) => {
     const schemaValues = state.schemaValues;
-    schemaValues[parseInt(row)][name] = value;
+    console.log(schemaValues);
+    schemaValues[parseInt(row)].tags[name] = value;
     setState((prevState) => ({ schemaValues }));
   };
   return (
@@ -108,10 +117,19 @@ const SchemaForm = (props) => {
         <Form onSubmit={handleSubmit}>
           {state.schemaValues.map &&
             state.schemaValues
-              .sort(({ showNeeded: set1 }, { showNeeded: set2 }) =>
-                set1 === set2 ? 0 : set1 ? 1 : -1
+              .sort(
+                (
+                  { showNeeded: set1, tags: tag1 },
+                  { showNeeded: set2, tags: tag2 }
+                ) =>
+                  set1 === set2
+                    ? // tag1.key.toLowerCase().localeCompare(tag2.key.toLowerCase())
+                      0
+                    : set1
+                    ? 1
+                    : -1
               )
-              .map((schemaValue, idx, arr) => {
+              .map(({ tags: schemaValue }, idx, arr) => {
                 const key = 'key',
                   value = 'value',
                   type = 'type';
@@ -125,7 +143,7 @@ const SchemaForm = (props) => {
                     )}
                     <Form.Group className="field-row">
                       <Icon
-                        onClick={removeSchemaValue}
+                        onClick={() => removeSchemaValue(schemaValue[key])}
                         className="button-fit-content"
                         name="cancel"
                       />

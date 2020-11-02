@@ -42,13 +42,6 @@ const BucketPath = (props) => {
     setDropdownValue(value);
   };
 
-  let pathArr = props.pathInfo.path.split('/');
-  let arr = ['/'];
-  for (let i = 0; i < props.pathInfo.depth; i++) {
-    arr.push(pathArr.shift());
-    if (i !== props.pathInfo.depth - 1) arr.push('/');
-  }
-
   return (
     <div className="bucket-path">
       <Segment basic>
@@ -66,37 +59,44 @@ const BucketPath = (props) => {
               {props.bucket.name}
             </BreadcrumbSection>
           )}
-          {arr.map((file, index) => {
-            if (file === '/') {
-              return (
-                <BreadcrumbDivider key={`bread${index}`}>/</BreadcrumbDivider>
-              );
-            } else {
-              let sectionDepth = (index + 1) / 2;
-              return index !== props.pathInfo.depth * 2 - 1 ? (
-                <BreadcrumbSection
-                  key={`bread${index}`}
-                  onClick={changePath}
-                  depth={sectionDepth}
-                >
-                  {file}
-                </BreadcrumbSection>
-              ) : (
-                <BreadcrumbSection
-                  key={`bread${index}`}
-                  depth={sectionDepth}
-                  active
-                >
-                  {file}
-                </BreadcrumbSection>
-              );
-            }
-          })}
+          {props.pathInfo.path
+            .split('/')
+            .reduce((acc, prev, index, array) => {
+              if (index !== array.length - 1 || index === 0) acc.push('/');
+              if (prev !== '') acc.push(prev);
+              return acc;
+            }, [])
+            .map((file, index) => {
+              if (file === '/') {
+                return (
+                  <BreadcrumbDivider key={`bread${index}`}>/</BreadcrumbDivider>
+                );
+              } else {
+                let sectionDepth = (index + 1) / 2;
+                return index !== props.pathInfo.depth * 2 - 1 ? (
+                  <BreadcrumbSection
+                    key={`bread${index}`}
+                    onClick={changePath}
+                    depth={sectionDepth}
+                  >
+                    {file}
+                  </BreadcrumbSection>
+                ) : (
+                  <BreadcrumbSection
+                    key={`bread${index}`}
+                    depth={sectionDepth}
+                    active
+                  >
+                    {file}
+                  </BreadcrumbSection>
+                );
+              }
+            })}
         </Breadcrumb>
       </Segment>
-      {schemaInfo.available && (
-        <Input
-          label={
+      <Input
+        label={
+          schemaInfo.available ? (
             <Dropdown
               options={schemaInfo.tagset.map((tag) => ({
                 text: tag.key,
@@ -105,16 +105,18 @@ const BucketPath = (props) => {
               onChange={handleTagChange}
               selectOnBlur={false}
               value={dropdownValue}
-              placeholder="Tags"
+              placeholder="Filename"
               clearable
             />
-          }
-          value={props.search.text}
-          labelPosition="right"
-          onChange={handleFieldChange}
-          placeholder="Tag Search"
-        />
-      )}
+          ) : (
+            'Filename'
+          )
+        }
+        value={props.search.text}
+        labelPosition="right"
+        onChange={handleFieldChange}
+        placeholder="Tag Search"
+      />
     </div>
   );
 };

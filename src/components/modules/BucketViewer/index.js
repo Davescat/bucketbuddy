@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import BucketPath from '../BucketPath';
 import BucketSettings from '../BucketSettings';
 import FileContainer from '../FileContainer';
-import { Dimmer, Loader, Transition } from 'semantic-ui-react';
+import { Dimmer, Loader, Pagination, Transition } from 'semantic-ui-react';
 import {
   listObjects,
   getFolderSchema,
-  getObjectTags
+  getObjectTags,
+  getSrcList,
+  getImageSrc,
+  getImageSrc2
 } from '../../utils/amazon-s3-utils';
 import FolderMenu from '../FolderMenu';
 import NavMenu from '../NavMenu';
@@ -20,6 +23,7 @@ const BucketViewer = (props) => {
   const [pathInfo, setPathInfo] = useState(null);
   const [files, setFiles] = useState({ folders: [], files: [] });
   const [visibleFiles, setVisibleFiles] = useState(null);
+  const [srcArray, setSrcArray] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fileSearchText, setFileSearchText] = useState('');
   const [chosenTag, setChosenTag] = useState('');
@@ -31,11 +35,11 @@ const BucketViewer = (props) => {
     tagset: []
   });
   const [settings, setSettings] = useState({
-    cacheImages: localStorage.cacheImages
+    cacheImages: localStorage.cacheImages === 'true' ? true : false
   });
 
-  //This checks the url and tries to navigate to the folders directly if refreshed
-  if (!pathInfo) {
+  //This checks the url and tries to navigate to the folders directly if refreshed. Will only run once.
+  useEffect(() => {
     const urlPathInfo = props.location.pathname.split('/');
     if (urlPathInfo.length === 2) {
       setPathInfo({
@@ -49,14 +53,14 @@ const BucketViewer = (props) => {
         depth: urlInfo.length - 1
       });
     }
-  }
+  }, []);
 
   useEffect(() => {
-    if (bucket && loading) {
+    if (bucket && loading && pathInfo) {
       updateList();
       setLoading(false);
     }
-  });
+  }, [bucket, loading, pathInfo]);
 
   useEffect(() => {
     localStorage.cacheImages = settings.cacheImages;
@@ -70,6 +74,20 @@ const BucketViewer = (props) => {
 
   useEffect(() => {
     setFilesLoading(false);
+
+    //   // const t1 = bel.map((file) => getImageSrc2(bucket, file.Key, settings.cacheImages))
+    //   // const help = Promise.all(t1)
+    //   // Promise.all(t3)
+    //   // .then(arr=>console.log(JSON.stringify(arr)))
+    //   // .then(arr => {
+    //   //   const d = (arr.reduce((acc, prev, i) => {
+    //   //     acc[bel[i].Ke] = prev;
+    //   //     return acc;
+    //   //   }, []))
+    //   //   setSrcArray(d)
+    //   //   // console.log((poop));
+    //   // });
+    // }
   }, [visibleFiles]);
 
   useEffect(() => {
@@ -93,7 +111,7 @@ const BucketViewer = (props) => {
       setTransitions(['fly left', 'fly right']);
     }
     const { history } = props;
-
+    setSrcArray([]);
     setPathInfo(newPath);
     history.replace(
       {
@@ -113,7 +131,7 @@ const BucketViewer = (props) => {
   };
 
   /**
-   * Takes a list of files and attaches it each individual file
+   * Takes a list of files and attaches requested S3 tags to each file
    *
    * @param {S3.GetObjectOutput[]} files
    */
@@ -139,6 +157,14 @@ const BucketViewer = (props) => {
         ? 1
         : 0;
     });
+    const schemaIndex = objects.findIndex(
+      (file) => file.filename === schemaFileName
+    );
+    if (schemaIndex !== -1) {
+      const temp = objects[0];
+      objects[0] = objects[schemaIndex];
+      objects[schemaIndex] = temp;
+    }
   };
 
   /**
@@ -149,7 +175,7 @@ const BucketViewer = (props) => {
    */
   const filterList = async (response) => {
     const filetest = new RegExp(
-      `^${pathInfo.path}([\\w!\\-\\.\\*'\\(\\),]+[/]?)$`
+      `^${pathInfo.path}([\\w!\\-\\.\\*'\\(\\), ]+[/]?)$`
     );
     let newFiles = [];
     const newFolders = [];
@@ -164,20 +190,10 @@ const BucketViewer = (props) => {
         }
       }
     });
-
-    newFiles = await getAllTags(newFiles);
-    const cachedSrcData = await updateCacheFiles(
-      newFiles,
-      `bucbud${bucket.name}`,
-      pathInfo
-    );
-    newFiles = newFiles.map((value) => ({
-      ...value,
-      ...cachedSrcData.cachedKeys.find((val) => val.cacheKey === value.Key)
-    }));
-
     sortObjectsAlphabetically(newFiles);
     sortObjectsAlphabetically(newFolders);
+
+    newFiles = await getAllTags(newFiles);
     const currentFiles = {
       folders: newFolders,
       files: newFiles
@@ -191,6 +207,7 @@ const BucketViewer = (props) => {
   };
 
   const updateTagState = (key, tagset) => {
+    console.log(key, tagset);
     const fileIndex = visibleFiles.files.findIndex((file) => file.Key === key);
     const updatedFile = {
       ...visibleFiles.files[fileIndex],
@@ -206,6 +223,45 @@ const BucketViewer = (props) => {
 
   const transition = () => {
     visibleFiles ? setFiles(visibleFiles) : setVisibleFiles(null);
+  };
+
+  const getFilterFiles = () => {
+    const sourceObject = srcArray.reduce((acc, prev) => {
+      return Object.assign(acc, prev);
+    }, []);
+    if (visibleFiles) {
+      return visibleFiles.files.map((file) => {
+        let isHidden = false;
+        if (chosenTag === '') {
+          if (tagSearchText === '') {
+            isHidden = false;
+          } else {
+            isHidden = file.filename
+              .toLowerCase()
+              .search(tagSearchText.toLowerCase());
+          }
+        } else {
+          //This filter checks if there are any files with the tag that is used to search
+          const tagFile = file.TagSet.filter((x) => x['key'] === chosenTag);
+          //If a file has the Tag chosen for searching. If length doesn't exist or is 0 it will be false
+          if (tagFile.length && tagFile.length > 0) {
+            //If no tag search text has been written just show all files with tag chosen
+            if (tagSearchText === '') {
+              isHidden = false;
+            } else {
+              isHidden = !(
+                tagFile[0]['value']
+                  .toLowerCase()
+                  .search(tagSearchText.toLowerCase()) !== -1
+              );
+            }
+          } else {
+            isHidden = true;
+          }
+        }
+        return { ...file, hidden: isHidden, src: sourceObject[file.Key] };
+      });
+    }
   };
 
   if (loading) {
@@ -257,11 +313,11 @@ const BucketViewer = (props) => {
               visible={!filesLoading}
               onStart={() => transition()}
               onComplete={() => transitions.reverse()}
-              onShow={() => {
-                if (!filesLoading && files !== visibleFiles) {
-                  setFiles(visibleFiles);
-                }
-              }}
+              onShow={() =>
+                !filesLoading &&
+                files !== visibleFiles &&
+                setFiles(visibleFiles)
+              }
               animation={transitions[0]}
               duration={250}
             >
@@ -278,34 +334,10 @@ const BucketViewer = (props) => {
                     updateList={updateList}
                     isLoading={filesLoading}
                     bucket={bucket}
-                    files={
-                      visibleFiles &&
-                      visibleFiles.files.filter((file) => {
-                        if (chosenTag == '') {
-                          return tagSearchText === '';
-                        } else {
-                          //This filter checks if there are any files with the tag that is used to search
-                          const tagFile = file.TagSet.filter(
-                            (x) => x['key'] === chosenTag
-                          );
-                          //If a file has the Tag chosen for searching. If length doesn't exist or is 0 it will be false
-                          if (tagFile.length) {
-                            //If no tag search text has been written just show all files with tag chosen
-                            if (tagSearchText === '') {
-                              return true;
-                            } else {
-                              return (
-                                tagFile[0]['value']
-                                  .toLowerCase()
-                                  .search(tagSearchText.toLowerCase()) !== -1
-                              );
-                            }
-                          } else {
-                            return false;
-                          }
-                        }
-                      })
-                    }
+                    updateSrcArray={(key, src) => {
+                      srcArray.push({ [key]: src });
+                    }}
+                    files={getFilterFiles() || srcArray}
                     updateTagState={updateTagState}
                     schemaInfo={schemaInfo}
                     settings={settings}

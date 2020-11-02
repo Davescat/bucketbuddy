@@ -82,7 +82,7 @@ const SchemaStructureModal = (props) => {
               actionOnSubmit={createSchemaFile}
               title="Edit Schema"
               editFieldName={true}
-              schemaValues={jsonSchemaValues}
+              schemaValues={jsonSchemaValues.map((set) => ({ tags: set }))}
             />
           ) : (
             <SchemaForm

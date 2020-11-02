@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Button, Modal, Form, Input } from 'semantic-ui-react';
+import { Button, Modal, Form, Input, Segment } from 'semantic-ui-react';
 import { uploadObject } from '../../utils/amazon-s3-utils';
 
 const FileUploadModal = (props) => {
@@ -57,15 +57,21 @@ const FileUploadModal = (props) => {
     >
       <Modal.Header>Select an Image to Upload</Modal.Header>
       <Modal.Content>
-        <Form onSubmit={upload}>
-          {props.schemaInfo.available &&
-            tagInput.tagset.map((schemaValue, idx) => {
-              const key = 'key',
-                value = 'value',
-                type = 'type';
-              return (
-                <Form.Field>
-                  <Input
+        <Segment>
+          <Form onSubmit={upload}>
+            <Form.Input
+              ref={fileInput}
+              label="File"
+              id="fileupload"
+              type="file"
+            />
+            {props.schemaInfo.available &&
+              tagInput.tagset.map((schemaValue, idx) => {
+                const key = 'key',
+                  value = 'value',
+                  type = 'type';
+                return (
+                  <Form.Input
                     label={schemaValue[key]}
                     name={value}
                     id={'' + idx}
@@ -75,18 +81,15 @@ const FileUploadModal = (props) => {
                     onChange={handleFieldChange}
                     value={schemaValue[value]}
                   />
-                </Form.Field>
-              );
-            })}
-          <Form.Field>
-            <Input ref={fileInput} label="File" id="fileupload" type="file" />
-          </Form.Field>
-          <Form.Field>
-            <Button disabled={isFormFilled()} type="submit">
-              Upload
-            </Button>
-          </Form.Field>
-        </Form>
+                );
+              })}
+            <Form.Button
+              disabled={isFormFilled()}
+              type="submit"
+              content={'Upload'}
+            />
+          </Form>
+        </Segment>
       </Modal.Content>
     </Modal>
   );

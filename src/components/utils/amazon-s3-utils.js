@@ -5,8 +5,13 @@ import {
   GenericS3Error,
   NoSuchKeyError
 } from '../errors/s3-errors';
-import { getCacheSrc } from './cache-utils';
+import { getCacheSrc, getCacheSrc2 } from './cache-utils';
 
+/**
+ * Tests connection with an amazon S3 bucket.
+ *
+ * @param {{bucketName,accessKeyId,secretAccessKey,region}} bucketInfo Bucket information containing bucket name, access key, secret access key, and region.
+ */
 export const testConnectionS3Bucket = async ({
   bucketName,
   accessKeyId,
@@ -37,7 +42,15 @@ export const testConnectionS3Bucket = async ({
   }
 };
 
-export const getObject = async (
+/**
+ * Gets information and UInt8Array binary data about the S3 object associated with the key.
+ *
+ * @param {{bucketName,accessKeyId,secretAccessKey,region}} bucketInfo Bucket information containing bucket name, access key, secret access key, and region.
+ * @param {String} key Key of amazon object
+ *
+ * @returns {Promise<AWS.S3.GetObjectOutput, AWS.AWSError>} getObjectOutput
+ */
+export const getObject = (
   { name, accessKeyId, secretAccessKey, region },
   key
 ) => {
@@ -48,7 +61,7 @@ export const getObject = async (
     signatureVersion: 'v4'
   });
   try {
-    return await s3
+    return s3
       .getObject({
         Bucket: name,
         Key: key
@@ -74,7 +87,15 @@ export const getObject = async (
   }
 };
 
-export const getObjectURL = async (
+/**
+ * Returns a 'thenable' promise that will be resolved with a pre-signed URL for a given operation name.
+ *
+ * @param {{bucketName,accessKeyId,secretAccessKey,region}} bucketInfo Bucket information containing bucket name, access key, secret access key, and region.
+ * @param {String} key Key of amazon object
+ *
+ * @returns {Promise<string>}
+ */
+export const getObjectURL = (
   { name, accessKeyId, secretAccessKey, region },
   key
 ) => {
@@ -85,7 +106,7 @@ export const getObjectURL = async (
     signatureVersion: 'v4'
   });
   try {
-    return await s3.getSignedUrlPromise('getObject', {
+    return s3.getSignedUrlPromise('getObject', {
       Bucket: name,
       Key: key
     });
@@ -105,46 +126,45 @@ export const getObjectURL = async (
   }
 };
 
+/**
+ * Returns a string src string for an image tag. If cached is set to true, the cache will be searched and the base64 representation of the image will be returned. If the request has not been cached, the S3 object will be requested, the image base64 encoded, and cached.
+ *
+ * @param {{bucketName,accessKeyId,secretAccessKey,region}} bucketInfo Bucket information containing bucket name, access key, secret access key, and region.
+ * @param {String} key Key of amazon object
+ * @param {Function} callback
+ * @param {boolean} cached If true, will search cache for request and return src.
+ *
+ * @returns {Promise<String>} Promise<String>
+ */
 export const getImageSrc = (bucket, key, callback, cached = false) => {
-  if (cached) {
-    return getCacheSrc(bucket, key, callback);
-  } else {
-    return getObjectURL(bucket, key).then(callback);
-  }
+  return cached
+    ? getCacheSrc(bucket, key, callback)
+    : getObjectURL(bucket, key).then(callback);
 };
 
-export const getSignedURL = async (
-  { name, accessKeyId, secretAccessKey, region },
-  key
-) => {
-  const s3 = new AWS.S3({
-    accessKeyId,
-    secretAccessKey,
-    region,
-    signatureVersion: 'v4'
-  });
-  try {
-    return await s3.getSignedUrl('getObject', {
-      Bucket: name,
-      Key: key,
-      Expires: 60
-    });
-  } catch (error) {
-    if (!error.code) {
-      throw new GenericS3Error();
-    } else {
-      if (error.code === 'Forbidden') {
-        throw new ForbiddenError();
-      }
-      if (error.code === 'NetworkError') {
-        throw NetworkError();
-      } else {
-        throw new GenericS3Error();
-      }
-    }
-  }
+/**
+ * Returns a string src string for an image tag. If cached is set to true, the cache will be searched and the base64 representation of the image will be returned. If the request has not been cached, the S3 object will be requested, the image base64 encoded, and cached.
+ *
+ * @param {{bucketName,accessKeyId,secretAccessKey,region}} bucketInfo Bucket information containing bucket name, access key, secret access key, and region.
+ * @param {String} key Key of amazon object
+ * @param {Function} callback
+ * @param {boolean} cached If true, will search cache for request and return src.
+ *
+ * @returns {Promise<String>} Promise<String>
+ */
+export const getImageSrc2 = (bucket, key, cached = false) => {
+  return cached ? getCacheSrc2(bucket, key) : getObjectURL(bucket, key);
 };
-export const listObjects = async (
+
+/**
+ * Lists objects inside of an S3 bucket with the path supplied
+ *
+ * @param {{bucketName,accessKeyId,secretAccessKey,region}} bucketInfo Bucket information containing bucket name, access key, secret access key, and region.
+ * @param {String} path prefix to keys returned
+ *
+ * @returns {Promise<AWS.S3.ListObjectsV2Output, AWS.AWSError>}
+ */
+export const listObjects = (
   { name, accessKeyId, secretAccessKey, region },
   path
 ) => {
@@ -155,7 +175,7 @@ export const listObjects = async (
     signatureVersion: 'v4'
   });
   try {
-    return await s3
+    return s3
       .listObjectsV2({
         Bucket: name,
         Prefix: path
@@ -177,7 +197,59 @@ export const listObjects = async (
   }
 };
 
-export const deleteObject = async (
+/**
+ *
+ * @param {*} bucket
+ * @param {AWS.S3.ObjectList} imgList
+ */
+export const getSrcList = (
+  { name, accessKeyId, secretAccessKey, region },
+  imgList
+) => {
+  const s3 = new AWS.S3({
+    accessKeyId,
+    secretAccessKey,
+    region,
+    signatureVersion: 'v4'
+  });
+  try {
+    const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
+    return Promise.all(
+      imgList.map(async (img) => {
+        if (fileTest.test(img.Key)) {
+          let src = await s3.getSignedUrlPromise('getObject', {
+            Bucket: name,
+            Key: img.Key
+          });
+          return { ...img, src: src };
+        } else {
+          return img;
+        }
+      })
+    );
+  } catch (error) {
+    if (!error.code) {
+      throw new GenericS3Error();
+    } else {
+      if (error.code === 'Forbidden') {
+        throw new ForbiddenError();
+      }
+      if (error.code === 'NetworkError') {
+        throw NetworkError();
+      } else {
+        throw new GenericS3Error();
+      }
+    }
+  }
+};
+
+/**
+ * Deletes an object inside of the S3 bucket with the key supplied.
+ *
+ * @param {{bucketName,accessKeyId,secretAccessKey,region}} bucketInfo Bucket information containing bucket name, access key, secret access key, and region.
+ * @param {String} key Key of amazon object
+ */
+export const deleteObject = (
   { name, accessKeyId, secretAccessKey, region },
   key
 ) => {
@@ -188,7 +260,7 @@ export const deleteObject = async (
     signatureVersion: 'v4'
   });
   try {
-    return await s3
+    return s3
       .deleteObject({
         Bucket: name,
         Key: key
@@ -210,11 +282,49 @@ export const deleteObject = async (
   }
 };
 
+export const deleteFolder = async (
+  { name, accessKeyId, secretAccessKey, region },
+  key
+) => {
+  try {
+    const contents = await listObjects(
+      { name, accessKeyId, secretAccessKey, region },
+      key
+    );
+    const toDelete = contents.Contents.map((object) => ({ Key: object.Key }));
+    const s3 = new AWS.S3({
+      accessKeyId,
+      secretAccessKey,
+      region,
+      signatureVersion: 'v4'
+    });
+    console.log(toDelete);
+    return s3
+      .deleteObjects({
+        Bucket: name,
+        Delete: { Objects: toDelete }
+      })
+      .promise();
+  } catch (error) {
+    if (!error.code) {
+      throw new GenericS3Error();
+    } else {
+      if (error.code === 'Forbidden') {
+        throw new ForbiddenError();
+      }
+      if (error.code === 'NetworkError') {
+        throw NetworkError();
+      } else {
+        throw new GenericS3Error();
+      }
+    }
+  }
+};
 /**
  *
- * @param {*} BucketData
- * @param {*} path
- * @param {*} file
+ * @param {{bucketName,accessKeyId,secretAccessKey,region}} bucketInfo Bucket information containing bucket name, access key, secret access key, and region.
+ * @param {String} path the folder where the file will be placed
+ * @param {any} file file from a file input.
  * @param {*} tags in URL encoded format ex: Key1=Val1&Key2=Val2
  */
 export const uploadObject = async (
@@ -230,7 +340,7 @@ export const uploadObject = async (
       region,
       signatureVersion: 'v4'
     });
-    var params = {
+    const params = {
       Bucket: name,
       Key: `${path}${file.name}`,
       Body: file,
