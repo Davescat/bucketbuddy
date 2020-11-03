@@ -137,7 +137,7 @@ const BucketViewer = (props) => {
     if (!loading) {
       updateList();
     }
-  }, [pathInfo]);
+  }, [pathInfo, loading, updateList]);
 
   useEffect(() => {
     setFilesLoading(false);
@@ -155,7 +155,7 @@ const BucketViewer = (props) => {
     } else {
       setSchemaInfo({ available: false, tagset: [] });
     }
-  }, [files]);
+  }, [files, bucket, pathInfo]);
 
   const updatePath = (newPath) => {
     if (newPath.depth > pathInfo.depth) {
