@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import AWS from 'aws-sdk';
-import { Button, Modal, Form, Input, Segment } from 'semantic-ui-react';
+import { Modal, Form, Segment } from 'semantic-ui-react';
 
 const FolderUploadModule = (props) => {
   const [modalOpen, setModalOpen] = useState(false);
