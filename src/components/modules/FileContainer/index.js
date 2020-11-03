@@ -1,4 +1,3 @@
-import { Organizations } from 'aws-sdk';
 import React, { useState } from 'react';
 import { Card } from 'semantic-ui-react';
 import FileDetailsModal from '../FileDetailsModule';
