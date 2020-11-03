@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Button, Modal, Form, Input, Segment } from 'semantic-ui-react';
+import { Modal, Form, Segment } from 'semantic-ui-react';
 import { uploadObject } from '../../utils/amazon-s3-utils';
 
 const FileUploadModule = (props) => {
@@ -7,11 +7,17 @@ const FileUploadModule = (props) => {
   const [tagInput, setTagInput] = useState(props.schemaInfo);
   const fileInput = useRef(null);
 
-  const isFormFilled = () =>
+  const isFormFilled = () => {
     tagInput.tagset.map((x) => x['value']).includes('');
+  };
 
   const upload = () => {
-    if (fileInput && fileInput.current.inputRef.current.files.length === 1) {
+    //TODO There seems to be an issue here where fileInput is always null.
+    if (
+      fileInput &&
+      fileInput.current !== null &&
+      fileInput.current.inputRef.current.files.length === 1
+    ) {
       let file = fileInput.current.inputRef.current.files[0];
       const tags =
         tagInput.tagset.length > 0 &&
@@ -35,7 +41,7 @@ const FileUploadModule = (props) => {
 
   useEffect(() => {
     setTagInput(props.schemaInfo);
-  }, [modalOpen]);
+  }, [modalOpen, props.schemaInfo]);
 
   const handleFieldChange = (event, { name, value }) => {
     const schemaValues = tagInput.tagset;
