@@ -21,7 +21,7 @@ const BucketPath = (props) => {
       setDropdownValue('');
       setSchemaInfo(props.schemaInfo);
     }
-  });
+  }, [props.schemaInfo, schemaInfo]);
 
   const changePath = (event, attributes) => {
     let newPathInfo =
