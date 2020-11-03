@@ -77,6 +77,7 @@ const FileUploadModule = (props) => {
                     label={schemaValue[key]}
                     name={value}
                     id={'' + idx}
+                    key={idx}
                     type={schemaValue[type]}
                     required
                     placeholder="Enter field input here"

@@ -92,7 +92,7 @@ const FileDetailsModule = (props) => {
   const getImage = () => {
     if (fileTest.test(file.filename)) {
       return (
-        <div class="ui medium middle aligned image">
+        <div className="ui medium middle aligned image">
           <img crossOrigin="anonymous" src={file.src} alt="File Thumbnail" />
         </div>
       );
@@ -122,7 +122,6 @@ const FileDetailsModule = (props) => {
       }, []);
     }
   };
-
   return (
     <Modal
       open={props.modalOpen}
@@ -160,7 +159,7 @@ const FileDetailsModule = (props) => {
                   <GridColumn>
                     <List className="file-details" divided>
                       <Label attached="top">File Data</Label>
-                      <List.Item>
+                      <List.Item key={file.Key + '1'}>
                         <ListContent>
                           <ListHeader>Path</ListHeader>
                           <ListDescription>{file.Key}</ListDescription>
@@ -168,14 +167,14 @@ const FileDetailsModule = (props) => {
                       </List.Item>
                       {file.TagSet &&
                         file.TagSet.map((set, i) => (
-                          <List.Item>
+                          <List.Item key={i}>
                             <ListContent>
                               <ListHeader>{set.key}</ListHeader>
                               <ListDescription>{set.value}</ListDescription>
                             </ListContent>
                           </List.Item>
                         ))}
-                      <List.Item>
+                      <List.Item key={file.Key + '2'}>
                         <ListContent>
                           <ListHeader>LastModified</ListHeader>
                           <ListDescription>
@@ -183,19 +182,19 @@ const FileDetailsModule = (props) => {
                           </ListDescription>
                         </ListContent>
                       </List.Item>
-                      <List.Item>
+                      <List.Item key={file.Key + '3'}>
                         <ListContent>
                           <ListHeader>Size</ListHeader>
                           <ListDescription>{file.Size}</ListDescription>
                         </ListContent>
                       </List.Item>
-                      <List.Item>
+                      <List.Item key={file.Key + '4'}>
                         <ListContent>
                           <ListHeader>Storage Class</ListHeader>
                           <ListDescription>{file.StorageClass}</ListDescription>
                         </ListContent>
                       </List.Item>
-                      <List.Item>
+                      <List.Item key={file.Key + '5'}>
                         <ListContent>
                           {file.TagSet && file.filename !== schemaFileName && (
                             <EditObjectTagsModule
@@ -216,7 +215,7 @@ const FileDetailsModule = (props) => {
                               download=""
                               href={downloadLink}
                               target="_blank"
-                              class="ui button"
+                              className="ui button"
                               rel="noopener noreferrer"
                               role="button"
                             >
@@ -247,7 +246,7 @@ const FileDetailsModule = (props) => {
                         <Label attached="top">Schema Tags</Label>
                         {schemaInfo.tagset &&
                           schemaInfo.tagset.map((set, i) => (
-                            <List.Item>
+                            <List.Item key={file.Key + i}>
                               <ListContent>
                                 <ListHeader>{set.key}</ListHeader>
                                 <ListDescription>{set.value}</ListDescription>

@@ -45,15 +45,20 @@ const FileContainer = (props) => {
   };
 
   return [
-    <Card.Group itemsPerRow={items()} className="file-container" doubling>
+    <Card.Group
+      itemsPerRow={items()}
+      className="file-container"
+      doubling
+      key={1}
+    >
       {files &&
         files.length > 0 &&
-        files.map((x, i) => (
+        files.map((file, i) => (
           <File
             bucket={bucket}
             openModal={openModal}
-            key={`${i}${x.filename}`}
-            file={x}
+            key={`${i}${file.filename}`}
+            file={file}
             updateSrcArray={props.updateSrcArray}
             updateTagState={props.updateTagState}
             schemaInfo={props.schemaInfo}
@@ -65,6 +70,7 @@ const FileContainer = (props) => {
     </Card.Group>,
     files && files.length > 0 && (
       <FileDetailsModal
+        key={2}
         updateList={props.updateList}
         bucket={bucket}
         modalOpen={modalOpen}

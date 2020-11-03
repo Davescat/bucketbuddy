@@ -318,12 +318,13 @@ const BucketViewer = (props) => {
                   </Dimmer>
                 ) : (
                   <FileContainer
+                    key={1}
                     card
                     updateList={updateList}
                     isLoading={filesLoading}
                     bucket={bucket}
                     updateSrcArray={(key, src) => {
-                      srcArray.push({ [key]: src });
+                      srcArray.push({ [key]: src, key });
                     }}
                     files={getFilterFiles() || srcArray}
                     updateTagState={updateTagState}
