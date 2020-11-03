@@ -37,6 +37,7 @@ const File = ({ file, bucket, updateSrcArray, settings, openModal }) => {
     settings.cacheImages,
     updateSrcArray
   ]);
+
   /**
    * Gets the appropriate tags for whatever type of file requested
    */

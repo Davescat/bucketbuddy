@@ -1,7 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   deleteObject,
-  getSignedURL,
+  // getSignedURL,
   getObjectURL
 } from '../../utils/amazon-s3-utils';
 import { schemaFileName } from '../BucketViewer';
@@ -55,17 +55,18 @@ const FileDetailsModule = (props) => {
         }
       }
     } else if (props.file !== file) {
+      //TODO there appears to be a bug here where the file is not being set correctly and downloads the wrong file
       setFile(props.file);
     }
-  });
+  }, [file, props.file, downloadLink, bucket, schemaInfo]);
 
-  const showConfirmDelete = () => {
-    setShowConfirm(true);
-  };
+  // const showConfirmDelete = () => {
+  //   setShowConfirm(true);
+  // };
 
-  const closeConfirmDelete = () => {
-    setShowConfirm(false);
-  };
+  // const closeConfirmDelete = () => {
+  //   setShowConfirm(false);
+  // };
 
   /**
    * Returns the keys of a tagset.
@@ -92,7 +93,7 @@ const FileDetailsModule = (props) => {
     if (fileTest.test(file.filename)) {
       return (
         <div class="ui medium middle aligned image">
-          <img crossOrigin="anonymous" src={file.src} />
+          <img crossOrigin="anonymous" src={file.src} alt="File Thumbnail" />
         </div>
       );
     } else {
@@ -101,7 +102,6 @@ const FileDetailsModule = (props) => {
   };
 
   const combineTags = () => {
-    const tagset = [];
     //The reason for creating and turning the set back into the array was to
     //quickly get rid of repeating values as a set only contains unique values.
     const totalKeys = [
@@ -217,6 +217,7 @@ const FileDetailsModule = (props) => {
                               href={downloadLink}
                               target="_blank"
                               class="ui button"
+                              rel="noopener noreferrer"
                               role="button"
                             >
                               Download
