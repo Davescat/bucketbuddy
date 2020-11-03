@@ -1,19 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import BucketPath from '../BucketPath';
 import BucketSettings from '../BucketSettings';
 import FileContainer from '../FileContainer';
-import { Dimmer, Loader, Pagination, Transition } from 'semantic-ui-react';
+import { Dimmer, Loader, Transition } from 'semantic-ui-react';
 import {
   listObjects,
   getFolderSchema,
-  getObjectTags,
-  getSrcList,
-  getImageSrc,
-  getImageSrc2
+  getObjectTags
 } from '../../utils/amazon-s3-utils';
 import FolderMenu from '../FolderMenu';
 import NavMenu from '../NavMenu';
-import { updateCacheFiles } from '../../utils/cache-utils';
 import './bucket-viewer.scss';
 
 export const schemaFileName = 'bucket-buddy-schema.json';
@@ -38,6 +34,77 @@ const BucketViewer = (props) => {
     cacheImages: localStorage.cacheImages === 'true' ? true : false
   });
 
+  /**
+   * Takes a list of files and attaches requested S3 tags to each file
+   *
+   * @param {S3.GetObjectOutput[]} files
+   */
+  const getAllTags = useCallback(
+    (files) => {
+      return Promise.all(
+        files.map(async function (file) {
+          return await getObjectTags(bucket, file.Key).then((TagSet) => ({
+            ...file,
+            TagSet: TagSet.TagSet.map(({ Key, Value }) => ({
+              key: Key,
+              value: Value
+            }))
+          }));
+        })
+      );
+    },
+    [bucket]
+  );
+
+  /**
+   * Filters the response into files and folders and adds the tag
+   * information as well as the sources for the images
+   *
+   * @param {AWS.S3.ListObjectsV2Output} response
+   */
+  const filterList = useCallback(
+    async (response) => {
+      const filetest = new RegExp(
+        `^${pathInfo.path}([\\w!\\-\\.\\*'\\(\\), ]+[/]?)$`
+      );
+      let newFiles = [];
+      const newFolders = [];
+      response.Contents.forEach((file) => {
+        const filename = filetest.exec(file.Key);
+        if (filename && filename[1]) {
+          file.filename = filename[1];
+          if (filename[1][filename[1].length - 1] === '/') {
+            newFolders.push(file);
+          } else {
+            newFiles.push(file);
+          }
+        }
+      });
+      sortObjectsAlphabetically(newFiles);
+      sortObjectsAlphabetically(newFolders);
+
+      newFiles = await getAllTags(newFiles);
+      const currentFiles = {
+        folders: newFolders,
+        files: newFiles
+      };
+      if (visibleFiles) {
+        setVisibleFiles(currentFiles);
+      } else {
+        setVisibleFiles(currentFiles);
+        setFiles(currentFiles);
+      }
+    },
+    [getAllTags, pathInfo, visibleFiles]
+  );
+
+  const updateList = useCallback(() => {
+    setFilesLoading(true);
+    listObjects(bucket, pathInfo.path).then((data) => {
+      filterList(data);
+    });
+  }, [bucket, filterList, pathInfo]);
+
   //This checks the url and tries to navigate to the folders directly if refreshed. Will only run once.
   useEffect(() => {
     const urlPathInfo = props.location.pathname.split('/');
@@ -53,14 +120,14 @@ const BucketViewer = (props) => {
         depth: urlInfo.length - 1
       });
     }
-  }, []);
+  }, [bucket.name, props.location.pathname]);
 
   useEffect(() => {
     if (bucket && loading && pathInfo) {
       updateList();
       setLoading(false);
     }
-  }, [bucket, loading, pathInfo]);
+  }, [bucket, loading, pathInfo, updateList]);
 
   useEffect(() => {
     localStorage.cacheImages = settings.cacheImages;
@@ -74,20 +141,6 @@ const BucketViewer = (props) => {
 
   useEffect(() => {
     setFilesLoading(false);
-
-    //   // const t1 = bel.map((file) => getImageSrc2(bucket, file.Key, settings.cacheImages))
-    //   // const help = Promise.all(t1)
-    //   // Promise.all(t3)
-    //   // .then(arr=>console.log(JSON.stringify(arr)))
-    //   // .then(arr => {
-    //   //   const d = (arr.reduce((acc, prev, i) => {
-    //   //     acc[bel[i].Ke] = prev;
-    //   //     return acc;
-    //   //   }, []))
-    //   //   setSrcArray(d)
-    //   //   // console.log((poop));
-    //   // });
-    // }
   }, [visibleFiles]);
 
   useEffect(() => {
@@ -123,32 +176,6 @@ const BucketViewer = (props) => {
     );
   };
 
-  const updateList = () => {
-    setFilesLoading(true);
-    listObjects(bucket, pathInfo.path).then((data) => {
-      filterList(data);
-    });
-  };
-
-  /**
-   * Takes a list of files and attaches requested S3 tags to each file
-   *
-   * @param {S3.GetObjectOutput[]} files
-   */
-  const getAllTags = (files) => {
-    return Promise.all(
-      files.map(async function (file) {
-        return await getObjectTags(bucket, file.Key).then((TagSet) => ({
-          ...file,
-          TagSet: TagSet.TagSet.map(({ Key, Value }) => ({
-            key: Key,
-            value: Value
-          }))
-        }));
-      })
-    );
-  };
-
   const sortObjectsAlphabetically = (objects) => {
     objects.sort(function (fileOne, fileTwo) {
       return fileOne.Key.toLowerCase() < fileTwo.Key.toLowerCase()
@@ -164,45 +191,6 @@ const BucketViewer = (props) => {
       const temp = objects[0];
       objects[0] = objects[schemaIndex];
       objects[schemaIndex] = temp;
-    }
-  };
-
-  /**
-   * Filters the response into files and folders and adds the tag
-   * information as well as the sources for the images
-   *
-   * @param {AWS.S3.ListObjectsV2Output} response
-   */
-  const filterList = async (response) => {
-    const filetest = new RegExp(
-      `^${pathInfo.path}([\\w!\\-\\.\\*'\\(\\), ]+[/]?)$`
-    );
-    let newFiles = [];
-    const newFolders = [];
-    response.Contents.forEach((file) => {
-      const filename = filetest.exec(file.Key);
-      if (filename && filename[1]) {
-        file.filename = filename[1];
-        if (filename[1][filename[1].length - 1] === '/') {
-          newFolders.push(file);
-        } else {
-          newFiles.push(file);
-        }
-      }
-    });
-    sortObjectsAlphabetically(newFiles);
-    sortObjectsAlphabetically(newFolders);
-
-    newFiles = await getAllTags(newFiles);
-    const currentFiles = {
-      folders: newFolders,
-      files: newFiles
-    };
-    if (visibleFiles) {
-      setVisibleFiles(currentFiles);
-    } else {
-      setVisibleFiles(currentFiles);
-      setFiles(currentFiles);
     }
   };
 

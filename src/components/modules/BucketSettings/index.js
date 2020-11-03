@@ -3,7 +3,7 @@ import { Dropdown, Confirm, Radio } from 'semantic-ui-react';
 import FileUploadModule from '../FileUploadModule';
 import FolderUploadModule from '../FolderUploadModule';
 import SchemaStructureModule from '../SchemaStructureModule';
-import { deleteObject, deleteFolder } from '../../utils/amazon-s3-utils';
+import { deleteFolder } from '../../utils/amazon-s3-utils';
 import './bucket-settings.scss';
 
 /**
@@ -22,7 +22,6 @@ const BucketSettings = ({
 
   const deleteCurrentFolder = () => {
     if (pathInfo.depth >= 1) {
-      let pathValues = pathInfo.path.split('/');
       deleteFolder(bucket, pathInfo.path).then(() => {
         pathChange({
           path: `${pathInfo.path.split('/', pathInfo.depth - 1)}/`,

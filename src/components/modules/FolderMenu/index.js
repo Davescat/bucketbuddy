@@ -14,7 +14,13 @@ const FolderMenu = (props) => {
     if (visibleFolders !== props.folders && props.search.text === '') {
       setvisibleFolders(props.folders);
     }
-  });
+  }, [
+    currentPath,
+    props.pathInfo,
+    props.folders,
+    props.search,
+    visibleFolders
+  ]);
 
   const handleFileClick = (key) => {
     const newPathInfo = {
