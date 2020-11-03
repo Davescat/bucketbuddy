@@ -8,13 +8,11 @@ const SchemaStructureModule = (props) => {
 
   const [schemaPath, setSchemaPath] = useState(props.pathInfo.path);
   const [dataLoaded, setDataLoaded] = useState(false);
-  const [isCreateSchema, setIsCreateSchema] = useState(true);
   const [jsonSchemaValues, setJsonSchemaValues] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   const setToCreateSchema = () => {
     setDataLoaded(true);
-    setIsCreateSchema(true);
   };
 
   const createSchemaFile = (schemaValues) => {
@@ -65,7 +63,14 @@ const SchemaStructureModule = (props) => {
         setToCreateSchema();
       }
     }
-  });
+  }, [
+    schemaPath,
+    props.pathInfo.path,
+    props.schemaInfo.available,
+    props.schemaInfo.tagset,
+    modalOpen,
+    dataLoaded
+  ]);
 
   return (
     <Modal
