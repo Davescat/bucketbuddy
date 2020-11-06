@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card } from 'semantic-ui-react';
 import FileDetailsModal from '../FileDetailsModule';
 import useWindowDimensions from '../../utils/window-utils';
@@ -18,9 +18,19 @@ const FileContainer = (props) => {
     largerScreen: 1560,
     widescreen: 1920
   };
+
+  const unmounted = useRef(false);
+  useEffect(() => {
+    return () => {
+      unmounted.current = true;
+    };
+  }, []);
+
   const openModal = (file) => {
-    setModalFile(file);
-    setModalOpen(true);
+    if (!unmounted.current) {
+      setModalFile(file);
+      setModalOpen(true);
+    }
   };
 
   const items = () => {

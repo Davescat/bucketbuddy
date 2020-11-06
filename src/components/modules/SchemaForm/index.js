@@ -76,7 +76,7 @@ const SchemaForm = (props) => {
     setState((prevState) => ({
       schemaValues: [
         ...prevState.schemaValues,
-        { tags: { key: '', value: '' } }
+        { tags: { key: '', value: '', type: schemaTagTypes[0].value } }
       ]
     }));
   };
@@ -92,7 +92,6 @@ const SchemaForm = (props) => {
 
   const handleFieldChange = (event, { name, value }, row) => {
     const schemaValues = state.schemaValues;
-    console.log(schemaValues);
     schemaValues[parseInt(row)].tags[name] = value;
     setState((prevState) => ({ schemaValues }));
   };
@@ -115,110 +114,97 @@ const SchemaForm = (props) => {
       </Message>
       <Segment padded>
         <Form onSubmit={handleSubmit}>
-          {state.schemaValues.map &&
-            state.schemaValues
-              .sort(
-                (
-                  { showNeeded: set1, tags: tag1 },
-                  { showNeeded: set2, tags: tag2 }
-                ) =>
-                  set1 === set2
-                    ? // tag1.key.toLowerCase().localeCompare(tag2.key.toLowerCase())
-                      0
-                    : set1
-                    ? 1
-                    : -1
-              )
-              .map(({ tags: schemaValue }, idx, arr) => {
-                const key = 'key',
-                  value = 'value',
-                  type = 'type';
-                const dividingLine = arr.findIndex((set) => set.showNeeded);
-                return (
-                  <>
-                    {idx === dividingLine && (
-                      <Divider horizontal>
-                        Needed to conform with Schema
-                      </Divider>
-                    )}
-                    <Form.Group className="field-row">
-                      <Icon
-                        onClick={() => removeSchemaValue(schemaValue[key])}
-                        className="button-fit-content"
-                        name="cancel"
-                      />
+          {state.schemaValues.map(({ tags: schemaValue }, idx, arr) => {
+            console.log(schemaValue);
+            const key = 'key',
+              value = 'value',
+              type = 'type';
+            const dividingLine = arr.findIndex((set) => set.showNeeded);
+            return (
+              <>
+                {idx === dividingLine && (
+                  <Divider horizontal>Needed to conform with Schema</Divider>
+                )}
+                <Form.Group className="field-row">
+                  <Icon
+                    onClick={() => removeSchemaValue(schemaValue[key])}
+                    className="button-fit-content"
+                    name="cancel"
+                  />
 
-                      {props.editFieldName ? (
-                        <Form.Input
-                          width={6}
-                          fluid
-                          name={key}
-                          label="Field Name"
-                          required={schemaValue[key] === ''}
-                          placeholder="Enter field name here"
-                          value={schemaValue[key]}
-                          onChange={(event, data) =>
-                            handleFieldChange(event, data, idx)
-                          }
-                        />
-                      ) : (
-                        <Label>{schemaValue[key]}</Label>
-                      )}
+                  {props.editFieldName ? (
+                    <Form.Input
+                      width={6}
+                      fluid
+                      name={key}
+                      label="Field Name"
+                      required={schemaValue[key] === ''}
+                      placeholder="Enter field name here"
+                      value={schemaValue[key]}
+                      onChange={(event, data) =>
+                        handleFieldChange(event, data, idx)
+                      }
+                    />
+                  ) : (
+                    <Label>{schemaValue[key]}</Label>
+                  )}
 
-                      {schemaValue[type] === 'flag' ? (
-                        <Form.Select
-                          width={6}
-                          fluid
-                          name={value}
-                          options={selectBoolean}
-                          label="Field Input"
-                          required={schemaValue[value] === null}
-                          defaultValue={
-                            typeof schemaValue[value] === 'boolean'
-                              ? schemaValue[value]
-                              : selectBoolean[0].value
-                          }
-                          onChange={(event, data) =>
-                            handleFieldChange(event, data, idx)
-                          }
-                        />
-                      ) : (
-                        <Form.Input
-                          width={6}
-                          fluid
-                          name={value}
-                          label="Field Input"
-                          required={schemaValue[value] === ''}
-                          placeholder="Enter field input here"
-                          value={schemaValue[value]}
-                          onChange={(event, data) =>
-                            handleFieldChange(event, data, idx)
-                          }
-                          type={schemaValue[type]}
-                        />
-                      )}
-                      {(schemaValue[type] ||
-                        props.title === 'Create Schema') && (
-                        <Form.Select
-                          width={3}
-                          fluid
-                          name={type}
-                          options={schemaTagTypes}
-                          label="Field Type"
-                          defaultValue={
-                            !schemaValue[type] && schemaValue[type] === ''
-                              ? schemaTagTypes[0].value
-                              : schemaValue[type]
-                          }
-                          onChange={(event, data) =>
-                            handleFieldChange(event, data, idx)
-                          }
-                        />
-                      )}
-                    </Form.Group>
-                  </>
-                );
-              })}
+                  {schemaValue[type] === 'flag' ? (
+                    <Form.Select
+                      width={6}
+                      fluid
+                      name={value}
+                      options={selectBoolean}
+                      label="Field Input"
+                      required={schemaValue[value] === null}
+                      defaultValue={
+                        typeof schemaValue[value] === 'boolean'
+                          ? schemaValue[value]
+                          : selectBoolean[0].value
+                      }
+                      onChange={(event, data) =>
+                        handleFieldChange(event, data, idx)
+                      }
+                    />
+                  ) : (
+                    <Form.Input
+                      width={6}
+                      fluid
+                      name={value}
+                      label="Field Input"
+                      required={schemaValue[value] === ''}
+                      placeholder="Enter field input here"
+                      value={schemaValue[value]}
+                      onChange={(event, data) =>
+                        handleFieldChange(event, data, idx)
+                      }
+                      type={schemaValue[type]}
+                    />
+                  )}
+                  {(schemaValue[type] ||
+                    !schemaValue[type] ||
+                    props.title === 'Create Schema') && (
+                    <Form.Select
+                      width={3}
+                      fluid
+                      name={type}
+                      options={schemaTagTypes}
+                      label="Field Type"
+                      defaultValue={
+                        !(type in schemaValue) ||
+                        (!schemaValue[type] && schemaValue[type] === '')
+                          ? schemaTagTypes[0].value
+                          : schemaValue[type]
+                      }
+                      onChange={(event, data) =>
+                        handleFieldChange(event, data, idx)
+                      }
+                    />
+                  )}
+                </Form.Group>
+              </>
+            );
+          })}
           <div>
             <Button type="submit" primary>
               Submit

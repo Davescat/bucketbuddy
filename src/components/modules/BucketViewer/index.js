@@ -318,7 +318,6 @@ const BucketViewer = (props) => {
                   </Dimmer>
                 ) : (
                   <FileContainer
-                    key={1}
                     card
                     updateList={updateList}
                     isLoading={filesLoading}
