@@ -23,11 +23,12 @@ const BucketSettings = ({
   const deleteCurrentFolder = () => {
     if (pathInfo.depth >= 1) {
       deleteFolder(bucket, pathInfo.path).then(() => {
-        pathChange({
+        const newPath = {
           path: `${pathInfo.path.split('/', pathInfo.depth - 1)}/`,
           depth: pathInfo.depth - 1
-        });
-        updateList();
+        };
+        pathChange(newPath);
+        updateList(newPath.path);
       });
     }
   };

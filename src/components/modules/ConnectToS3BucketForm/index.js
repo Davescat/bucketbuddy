@@ -110,7 +110,7 @@ const ConnectToS3BucketForm = () => {
       });
       history.push(
         {
-          pathname: '/bucket-viewer'
+          pathname: `/bucket-viewer/${encodeURIComponent(bucketName)}`
         },
         {
           bucket: { accessKeyId, secretAccessKey, region, name: bucketName }

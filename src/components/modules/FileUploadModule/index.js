@@ -33,7 +33,7 @@ const FileUploadModule = (props) => {
       uploadObject(props.bucket, props.pathInfo.path, file, tags).then(
         (response) => {
           setModalOpen(false);
-          props.updateList();
+          props.updateList(props.pathInfo.path);
         }
       );
     }

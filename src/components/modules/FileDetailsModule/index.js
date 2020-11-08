@@ -26,7 +26,7 @@ import {
 import './file-details-modal.scss';
 
 const FileDetailsModule = (props) => {
-  const { bucket, schemaInfo, updateTagState } = props;
+  const { bucket, schemaInfo, updateTagState, pathInfo } = props;
   const [showConfirm, setShowConfirm] = useState(false);
   const [conformsToSchema, setConformsToSchema] = useState(true);
   const [downloadLink, setDownloadLink] = useState('');
@@ -85,7 +85,7 @@ const FileDetailsModule = (props) => {
     deleteObject(bucket, file.Key).then(() => {
       setFile(null);
       props.handleClose();
-      props.updateList();
+      props.updateList(pathInfo.path);
     });
   };
 

@@ -37,7 +37,7 @@ const SchemaStructureModule = (props) => {
       .then(
         (data) => {
           setModalOpen(false);
-          props.updateList();
+          props.updateList(props.pathInfo.path);
           window.location.reload();
         },
         (err) => {

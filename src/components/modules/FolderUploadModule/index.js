@@ -33,7 +33,7 @@ const FolderUploadModule = (props) => {
             .then(
               (data) => {
                 setModalOpen(false);
-                updateList();
+                updateList(pathInfo.path);
               },
               (err) => {
                 return alert(

@@ -6,7 +6,7 @@ import File from '../File';
 import './file-container.scss';
 
 const FileContainer = (props) => {
-  const { bucket, files } = props;
+  const { bucket, files, pathInfo } = props;
   const [modalOpen, setModalOpen] = useState(false);
   const [modalFile, setModalFile] = useState(null);
   const { width } = useWindowDimensions();
@@ -81,6 +81,7 @@ const FileContainer = (props) => {
     files && files.length > 0 && (
       <FileDetailsModal
         key={2}
+        pathInfo={pathInfo}
         updateList={props.updateList}
         bucket={bucket}
         modalOpen={modalOpen}
