@@ -50,7 +50,6 @@ const FileDetailsModule = (props) => {
         }
       }
     } else if (props.file !== file) {
-      //TODO there appears to be a bug here where the file is not being set correctly and downloads the wrong file
       setFile(props.file);
     }
   }, [file, props.file, downloadLink, bucket, schemaInfo]);
