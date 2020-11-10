@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  deleteObject,
-  // getSignedURL,
-  getObjectURL
-} from '../../utils/amazon-s3-utils';
+import { deleteObject, getObjectURL } from '../../utils/amazon-s3-utils';
 import { schemaFileName } from '../BucketViewer';
 import EditObjectTagsModule from '../EditObjectTagsModule';
 import { withRouter } from 'react-router-dom';
@@ -15,7 +11,6 @@ import {
   ListContent,
   Button,
   Label,
-  Icon,
   Message,
   Confirm,
   Grid,
@@ -26,7 +21,7 @@ import {
 import './file-details-modal.scss';
 
 const FileDetailsModule = (props) => {
-  const { bucket, schemaInfo, updateTagState, pathInfo } = props;
+  const { bucket, schemaInfo, updateTagState } = props;
   const [showConfirm, setShowConfirm] = useState(false);
   const [conformsToSchema, setConformsToSchema] = useState(true);
   const [downloadLink, setDownloadLink] = useState('');
@@ -60,14 +55,6 @@ const FileDetailsModule = (props) => {
     }
   }, [file, props.file, downloadLink, bucket, schemaInfo]);
 
-  // const showConfirmDelete = () => {
-  //   setShowConfirm(true);
-  // };
-
-  // const closeConfirmDelete = () => {
-  //   setShowConfirm(false);
-  // };
-
   /**
    * Returns the keys of a tagset.
    *
@@ -85,7 +72,7 @@ const FileDetailsModule = (props) => {
     deleteObject(bucket, file.Key).then(() => {
       setFile(null);
       props.handleClose();
-      props.updateList(pathInfo.path);
+      props.updateList();
     });
   };
 
@@ -96,8 +83,6 @@ const FileDetailsModule = (props) => {
           <img crossOrigin="anonymous" src={file.src} alt="File Thumbnail" />
         </div>
       );
-    } else {
-      return <Icon name="file" className="card-file-icon" />;
     }
   };
 

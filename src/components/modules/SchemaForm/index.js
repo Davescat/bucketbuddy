@@ -115,7 +115,6 @@ const SchemaForm = (props) => {
       <Segment padded>
         <Form onSubmit={handleSubmit}>
           {state.schemaValues.map(({ tags: schemaValue }, idx, arr) => {
-            console.log(schemaValue);
             const key = 'key',
               value = 'value',
               type = 'type';
@@ -172,7 +171,6 @@ const SchemaForm = (props) => {
                       fluid
                       name={value}
                       label="Field Input"
-                      required={schemaValue[value] === ''}
                       placeholder="Enter field input here"
                       value={schemaValue[value]}
                       onChange={(event, data) =>

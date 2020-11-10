@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Modal, Form, Segment } from 'semantic-ui-react';
+import { Modal, Form, Segment, Input } from 'semantic-ui-react';
 import { uploadObject } from '../../utils/amazon-s3-utils';
 
 const FileUploadModule = (props) => {
@@ -8,11 +8,12 @@ const FileUploadModule = (props) => {
   const fileInput = useRef(null);
 
   const isFormFilled = () => {
-    tagInput.tagset.map((x) => x['value']).includes('');
+    return tagInput.tagset.length > 0
+      ? !tagInput.tagset.map((x) => x['value']).includes('')
+      : true;
   };
 
   const upload = () => {
-    //TODO There seems to be an issue here where fileInput is always null.
     if (
       fileInput &&
       fileInput.current !== null &&
@@ -33,7 +34,7 @@ const FileUploadModule = (props) => {
       uploadObject(props.bucket, props.pathInfo.path, file, tags).then(
         (response) => {
           setModalOpen(false);
-          props.updateList(props.pathInfo.path);
+          props.updateList();
         }
       );
     }
@@ -60,13 +61,10 @@ const FileUploadModule = (props) => {
       <Modal.Header>Select an Image to Upload</Modal.Header>
       <Modal.Content>
         <Segment>
-          <Form onSubmit={upload}>
-            <Form.Input
-              ref={fileInput}
-              label="File"
-              id="fileupload"
-              type="file"
-            />
+          <Form>
+            <Form.Field>
+              <Input ref={fileInput} label="File" id="fileupload" type="file" />
+            </Form.Field>
             {props.schemaInfo.available &&
               tagInput.tagset.map((schemaValue, idx) => {
                 const key = 'key',
@@ -87,10 +85,13 @@ const FileUploadModule = (props) => {
                 );
               })}
             <Form.Button
-              disabled={isFormFilled()}
+              onClick={() => upload()}
+              id="uploadButton"
+              disabled={!isFormFilled()}
               type="submit"
-              content={'Upload'}
-            />
+            >
+              Upload
+            </Form.Button>
           </Form>
         </Segment>
       </Modal.Content>

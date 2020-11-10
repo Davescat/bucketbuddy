@@ -24,11 +24,12 @@ const BucketSettings = ({
     if (pathInfo.depth >= 1) {
       deleteFolder(bucket, pathInfo.path).then(() => {
         const newPath = {
-          path: `${pathInfo.path.split('/', pathInfo.depth - 1)}/`,
+          path: `${pathInfo.path.split('/', pathInfo.depth - 1)}`,
           depth: pathInfo.depth - 1
         };
+        console.log(newPath);
         pathChange(newPath);
-        updateList(newPath.path);
+        updateList(newPath);
       });
     }
   };
@@ -44,7 +45,7 @@ const BucketSettings = ({
   return (
     <div className="bucket-bar">
       <span className="bucket-buttons">
-        <Dropdown button text="Actions">
+        <Dropdown lazyLoad={true} id="actionDropdown" button text="Actions">
           <Dropdown.Menu>
             <FileUploadModule
               updateList={updateList}

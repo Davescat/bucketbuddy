@@ -24,7 +24,6 @@ const BucketPath = (props) => {
   }, [props.schemaInfo, schemaInfo]);
 
   const changePath = (event, attributes) => {
-    console.log('trying to change path');
     let newPathInfo =
       attributes.depth === 0
         ? {
