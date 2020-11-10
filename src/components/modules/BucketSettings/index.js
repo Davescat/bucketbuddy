@@ -27,7 +27,6 @@ const BucketSettings = ({
           path: `${pathInfo.path.split('/', pathInfo.depth - 1)}`,
           depth: pathInfo.depth - 1
         };
-        console.log(newPath);
         pathChange(newPath);
         updateList(newPath);
       });

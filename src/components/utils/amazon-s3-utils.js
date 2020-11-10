@@ -298,7 +298,6 @@ export const deleteFolder = async (
       region,
       signatureVersion: 'v4'
     });
-    console.log(toDelete);
     return s3
       .deleteObjects({
         Bucket: name,

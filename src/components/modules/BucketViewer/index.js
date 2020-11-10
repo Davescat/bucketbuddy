@@ -144,7 +144,6 @@ const BucketViewer = (props) => {
       )
     ) {
       getFolderSchema(bucket, pathInfo.path).then((response) => {
-        console.log('got schema!');
         setSchemaInfo({ available: true, tagset: response });
       });
     } else {
