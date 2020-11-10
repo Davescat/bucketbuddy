@@ -2,33 +2,28 @@ import React, { useState, useEffect } from 'react';
 import BucketPath from '../BucketPath';
 import BucketSettings from '../BucketSettings';
 import FileContainer from '../FileContainer';
-import { Dimmer, Loader, Pagination, Transition } from 'semantic-ui-react';
+import { Dimmer, Loader, Transition } from 'semantic-ui-react';
 import {
   listObjects,
   getFolderSchema,
-  getObjectTags,
-  getSrcList,
-  getImageSrc,
-  getImageSrc2
+  getObjectTags
 } from '../../utils/amazon-s3-utils';
 import FolderMenu from '../FolderMenu';
 import NavMenu from '../NavMenu';
-import { updateCacheFiles } from '../../utils/cache-utils';
-import './bucketviewer.scss';
+import './bucket-viewer.scss';
 
 export const schemaFileName = 'bucket-buddy-schema.json';
 
 const BucketViewer = (props) => {
   const [bucket] = useState(props.location.state.bucket);
-  const [pathInfo, setPathInfo] = useState(null);
-  const [files, setFiles] = useState({ folders: [], files: [] });
-  const [visibleFiles, setVisibleFiles] = useState(null);
-  const [srcArray, setSrcArray] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pathInfo, setPathInfo] = useState(null);
+  // const [files, setFiles] = useState({ folders: [], files: [] });
+  const [files, setFiles] = useState({ folders: [], files: [] });
+  const [srcArray, setSrcArray] = useState([]);
   const [fileSearchText, setFileSearchText] = useState('');
   const [chosenTag, setChosenTag] = useState('');
   const [tagSearchText, setTagSearchText] = useState('');
-  const [transitions, setTransitions] = useState(['fly right', 'fly left']);
   const [filesLoading, setFilesLoading] = useState(true);
   const [schemaInfo, setSchemaInfo] = useState({
     available: false,
@@ -38,26 +33,95 @@ const BucketViewer = (props) => {
     cacheImages: localStorage.cacheImages === 'true' ? true : false
   });
 
-  //This checks the url and tries to navigate to the folders directly if refreshed. Will only run once.
   useEffect(() => {
-    const urlPathInfo = props.location.pathname.split('/');
-    if (urlPathInfo.length === 2) {
-      setPathInfo({
-        path: '',
-        depth: 0
-      });
-    } else {
-      let urlInfo = urlPathInfo.slice(urlPathInfo.indexOf(bucket.name) + 1);
-      setPathInfo({
-        path: urlInfo.join('/'),
-        depth: urlInfo.length - 1
+    if (filesLoading && pathInfo) {
+      /**
+       * Takes a list of files and attaches requested S3 tags to each file
+       *
+       * @param {S3.GetObjectOutput[]} files
+       */
+      const getAllTags = (files) => {
+        return Promise.all(
+          files.map(async function (file) {
+            return await getObjectTags(bucket, file.Key).then((TagSet) => ({
+              ...file,
+              TagSet: TagSet.TagSet.map(({ Key, Value }) => ({
+                key: Key,
+                value: Value
+              }))
+            }));
+          })
+        );
+      };
+
+      /**
+       * Filters the response into files and folders and adds the tag
+       * information as well as the sources for the images
+       *
+       * @param {AWS.S3.ListObjectsV2Output} response
+       */
+      const filterList = async (response, path) => {
+        const filetest = new RegExp(`^${path}([\\w!\\-\\.\\*'\\(\\), ]+[/]?)$`);
+        let newFiles = [];
+        const newFolders = [];
+        response.Contents.forEach((file) => {
+          const filename = filetest.exec(file.Key);
+          if (filename && filename[1]) {
+            file.filename = filename[1];
+            if (filename[1][filename[1].length - 1] === '/') {
+              newFolders.push(file);
+            } else {
+              newFiles.push(file);
+            }
+          }
+        });
+        sortObjectsAlphabetically(newFiles);
+        sortObjectsAlphabetically(newFolders);
+
+        newFiles = await getAllTags(newFiles);
+        return {
+          folders: newFolders,
+          files: newFiles
+        };
+      };
+
+      listObjects(bucket, pathInfo.path).then((data) => {
+        filterList(data, pathInfo.path).then((files) => {
+          setFiles(files);
+        });
       });
     }
-  }, []);
+  }, [filesLoading, bucket, pathInfo]);
 
+  //This checks the url and tries to navigate to the folders directly if refreshed.
+  useEffect(() => {
+    if (pathInfo) {
+      setFilesLoading(true);
+    } else {
+      const urlPathInfo = window.location.pathname
+        .split('/')
+        .filter((string) => string !== '');
+      if (urlPathInfo.length === 2) {
+        setPathInfo({
+          path: '',
+          depth: 0
+        });
+      } else {
+        let urlInfo = urlPathInfo.slice(
+          urlPathInfo.indexOf('bucket-viewer') + 2
+        );
+        setPathInfo({
+          path: urlInfo.length > 1 ? `${urlInfo.join('/')}/` : `${urlInfo[0]}/`,
+          depth: urlInfo.length
+        });
+      }
+    }
+  }, [pathInfo]);
+
+  //This will only run once, when bucket, loading, pathInfo all have loaded.
   useEffect(() => {
     if (bucket && loading && pathInfo) {
-      updateList();
+      updateList(pathInfo);
       setLoading(false);
     }
   }, [bucket, loading, pathInfo]);
@@ -66,29 +130,12 @@ const BucketViewer = (props) => {
     localStorage.cacheImages = settings.cacheImages;
   }, [settings]);
 
+  //Once files are loaded in loading ends.
   useEffect(() => {
-    if (!loading) {
-      updateList();
+    if (files) {
+      setFilesLoading(false);
     }
-  }, [pathInfo]);
-
-  useEffect(() => {
-    setFilesLoading(false);
-
-    //   // const t1 = bel.map((file) => getImageSrc2(bucket, file.Key, settings.cacheImages))
-    //   // const help = Promise.all(t1)
-    //   // Promise.all(t3)
-    //   // .then(arr=>console.log(JSON.stringify(arr)))
-    //   // .then(arr => {
-    //   //   const d = (arr.reduce((acc, prev, i) => {
-    //   //     acc[bel[i].Ke] = prev;
-    //   //     return acc;
-    //   //   }, []))
-    //   //   setSrcArray(d)
-    //   //   // console.log((poop));
-    //   // });
-    // }
-  }, [visibleFiles]);
+  }, [files]);
 
   useEffect(() => {
     if (
@@ -102,50 +149,32 @@ const BucketViewer = (props) => {
     } else {
       setSchemaInfo({ available: false, tagset: [] });
     }
-  }, [files]);
+  }, [files, bucket, pathInfo]);
+
+  //Triggers the following chain:
+  //Path updated and is not null -> files are set to load -> once in loading mode files are fetched -> once files are updated -> file loading becomes false
+  const updateList = (path) => {
+    if (path === null || path === undefined) {
+      setFilesLoading(true);
+    } else {
+      setPathInfo(path);
+    }
+  };
 
   const updatePath = (newPath) => {
-    if (newPath.depth > pathInfo.depth) {
-      setTransitions(['fly right', 'fly left']);
-    } else {
-      setTransitions(['fly left', 'fly right']);
-    }
     const { history } = props;
     setSrcArray([]);
     setPathInfo(newPath);
+    updateList(newPath);
     history.replace(
       {
-        pathname: `/bucket-viewer/${bucket.name}/${newPath.path}`
+        pathname: `/bucket-viewer/${encodeURIComponent(bucket.name)}/${
+          newPath.path
+        }`
       },
       {
         bucket: bucket
       }
-    );
-  };
-
-  const updateList = () => {
-    setFilesLoading(true);
-    listObjects(bucket, pathInfo.path).then((data) => {
-      filterList(data);
-    });
-  };
-
-  /**
-   * Takes a list of files and attaches requested S3 tags to each file
-   *
-   * @param {S3.GetObjectOutput[]} files
-   */
-  const getAllTags = (files) => {
-    return Promise.all(
-      files.map(async function (file) {
-        return await getObjectTags(bucket, file.Key).then((TagSet) => ({
-          ...file,
-          TagSet: TagSet.TagSet.map(({ Key, Value }) => ({
-            key: Key,
-            value: Value
-          }))
-        }));
-      })
     );
   };
 
@@ -167,70 +196,26 @@ const BucketViewer = (props) => {
     }
   };
 
-  /**
-   * Filters the response into files and folders and adds the tag
-   * information as well as the sources for the images
-   *
-   * @param {AWS.S3.ListObjectsV2Output} response
-   */
-  const filterList = async (response) => {
-    const filetest = new RegExp(
-      `^${pathInfo.path}([\\w!\\-\\.\\*'\\(\\), ]+[/]?)$`
-    );
-    let newFiles = [];
-    const newFolders = [];
-    response.Contents.forEach((file) => {
-      const filename = filetest.exec(file.Key);
-      if (filename && filename[1]) {
-        file.filename = filename[1];
-        if (filename[1][filename[1].length - 1] === '/') {
-          newFolders.push(file);
-        } else {
-          newFiles.push(file);
-        }
-      }
-    });
-    sortObjectsAlphabetically(newFiles);
-    sortObjectsAlphabetically(newFolders);
-
-    newFiles = await getAllTags(newFiles);
-    const currentFiles = {
-      folders: newFolders,
-      files: newFiles
-    };
-    if (visibleFiles) {
-      setVisibleFiles(currentFiles);
-    } else {
-      setVisibleFiles(currentFiles);
-      setFiles(currentFiles);
-    }
-  };
-
   const updateTagState = (key, tagset) => {
-    console.log(key, tagset);
-    const fileIndex = visibleFiles.files.findIndex((file) => file.Key === key);
+    const fileIndex = files.files.findIndex((file) => file.Key === key);
     const updatedFile = {
-      ...visibleFiles.files[fileIndex],
+      ...files.files[fileIndex],
       TagSet: tagset
     };
-    const filesCopy = [...visibleFiles.files];
+    const filesCopy = [...files.files];
     filesCopy[fileIndex] = updatedFile;
-    setVisibleFiles({
-      folders: visibleFiles.folders,
+    setFiles({
+      folders: files.folders,
       files: filesCopy
     });
-  };
-
-  const transition = () => {
-    visibleFiles ? setFiles(visibleFiles) : setVisibleFiles(null);
   };
 
   const getFilterFiles = () => {
     const sourceObject = srcArray.reduce((acc, prev) => {
       return Object.assign(acc, prev);
     }, []);
-    if (visibleFiles) {
-      return visibleFiles.files.map((file) => {
+    if (files) {
+      return files.files.map((file) => {
         let isHidden = false;
         if (chosenTag === '') {
           if (tagSearchText === '') {
@@ -302,50 +287,40 @@ const BucketViewer = (props) => {
           <FolderMenu
             bucket={bucket}
             isLoading={filesLoading}
-            folders={files.folders}
+            folders={files ? files.folders : []}
             updateList={updateList}
             pathInfo={pathInfo}
             customClickEvent={updatePath}
-            search={{ text: fileSearchText, setSearchText: setFileSearchText }}
+            search={{
+              text: fileSearchText,
+              setSearchText: setFileSearchText
+            }}
           />
           <div style={{ width: '100%' }}>
             <Transition
               visible={!filesLoading}
-              onStart={() => transition()}
-              onComplete={() => transitions.reverse()}
-              onShow={() =>
-                !filesLoading &&
-                files !== visibleFiles &&
-                setFiles(visibleFiles)
-              }
-              animation={transitions[0]}
-              duration={250}
-            >
-              <span>
-                {files.folders.length === 0 &&
-                files.files.length === 0 &&
-                filesLoading ? (
-                  <Dimmer active>
-                    <Loader indeterminate>Preparing Files</Loader>
-                  </Dimmer>
-                ) : (
+              unmountOnHide={true}
+              duration={{ show: 230, hide: 160 }}
+              children={
+                <span>
                   <FileContainer
                     card
                     updateList={updateList}
                     isLoading={filesLoading}
                     bucket={bucket}
                     updateSrcArray={(key, src) => {
-                      srcArray.push({ [key]: src });
+                      srcArray.push({ [key]: src, key });
                     }}
+                    pathInfo={pathInfo}
                     files={getFilterFiles() || srcArray}
                     updateTagState={updateTagState}
                     schemaInfo={schemaInfo}
                     settings={settings}
                     pathChange={updatePath}
                   />
-                )}
-              </span>
-            </Transition>
+                </span>
+              }
+            ></Transition>
           </div>
         </div>
       </div>
@@ -353,3 +328,21 @@ const BucketViewer = (props) => {
   }
 };
 export default BucketViewer;
+/*
+
+
+
+ <Transition
+                // mountOnShow={false}
+                visible={!filesLoading}
+                // onStart={() => transition()}
+                // onComplete={() => transitions.reverse()}
+                // onShow={() =>
+                //   !filesLoading &&
+                //   files !== visibleFiles &&
+                //   setFiles(visibleFiles)
+                // }
+                animation={transitions[0]}
+                duration={250}
+              >
+*/

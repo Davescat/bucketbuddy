@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, FormInput } from 'semantic-ui-react';
-import './foldermenu.scss';
+import './folder-menu.scss';
 
 const FolderMenu = (props) => {
   const [visibleFolders, setvisibleFolders] = useState(props.folders);
@@ -14,7 +14,13 @@ const FolderMenu = (props) => {
     if (visibleFolders !== props.folders && props.search.text === '') {
       setvisibleFolders(props.folders);
     }
-  });
+  }, [
+    currentPath,
+    props.pathInfo,
+    props.folders,
+    props.search,
+    visibleFolders
+  ]);
 
   const handleFileClick = (key) => {
     const newPathInfo = {

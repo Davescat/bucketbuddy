@@ -1,13 +1,12 @@
-import { Organizations } from 'aws-sdk';
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card } from 'semantic-ui-react';
-import FileDetailsModal from '../../modals/file-details-modal';
+import FileDetailsModal from '../FileDetailsModule';
 import useWindowDimensions from '../../utils/window-utils';
 import File from '../File';
-import './filecontainer.scss';
+import './file-container.scss';
 
 const FileContainer = (props) => {
-  const { bucket, files } = props;
+  const { bucket, files, pathInfo } = props;
   const [modalOpen, setModalOpen] = useState(false);
   const [modalFile, setModalFile] = useState(null);
   const { width } = useWindowDimensions();
@@ -19,9 +18,19 @@ const FileContainer = (props) => {
     largerScreen: 1560,
     widescreen: 1920
   };
+
+  const unmounted = useRef(false);
+  useEffect(() => {
+    return () => {
+      unmounted.current = true;
+    };
+  }, []);
+
   const openModal = (file) => {
-    setModalFile(file);
-    setModalOpen(true);
+    if (!unmounted.current) {
+      setModalFile(file);
+      setModalOpen(true);
+    }
   };
 
   const items = () => {
@@ -46,15 +55,20 @@ const FileContainer = (props) => {
   };
 
   return [
-    <Card.Group itemsPerRow={items()} className="file-container" doubling>
+    <Card.Group
+      itemsPerRow={items()}
+      className="file-container"
+      doubling
+      key={1}
+    >
       {files &&
         files.length > 0 &&
-        files.map((x, i) => (
+        files.map((file, i) => (
           <File
             bucket={bucket}
             openModal={openModal}
-            key={`${i}${x.filename}`}
-            file={x}
+            key={`${i}${file.filename}`}
+            file={file}
             updateSrcArray={props.updateSrcArray}
             updateTagState={props.updateTagState}
             schemaInfo={props.schemaInfo}
@@ -66,6 +80,8 @@ const FileContainer = (props) => {
     </Card.Group>,
     files && files.length > 0 && (
       <FileDetailsModal
+        key={2}
+        pathInfo={pathInfo}
         updateList={props.updateList}
         bucket={bucket}
         modalOpen={modalOpen}

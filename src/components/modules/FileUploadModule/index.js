@@ -1,21 +1,24 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Button, Modal, Form, Input, Segment } from 'semantic-ui-react';
+import { Modal, Form, Segment, Input } from 'semantic-ui-react';
 import { uploadObject } from '../../utils/amazon-s3-utils';
 
-const FileUploadModal = (props) => {
+const FileUploadModule = (props) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [tagInput, setTagInput] = useState(props.schemaInfo);
   const fileInput = useRef(null);
 
-  const isFormFilled = () =>
-    tagInput.tagset.map((x) => x['value']).includes('');
+  const isFormFilled = () => {
+    return tagInput.tagset.length > 0
+      ? !tagInput.tagset.map((x) => x['value']).includes('')
+      : true;
+  };
 
-  /**
-   *
-   * @param {Event} event
-   */
   const upload = () => {
-    if (fileInput && fileInput.current.inputRef.current.files.length === 1) {
+    if (
+      fileInput &&
+      fileInput.current !== null &&
+      fileInput.current.inputRef.current.files.length === 1
+    ) {
       let file = fileInput.current.inputRef.current.files[0];
       const tags =
         tagInput.tagset.length > 0 &&
@@ -39,7 +42,7 @@ const FileUploadModal = (props) => {
 
   useEffect(() => {
     setTagInput(props.schemaInfo);
-  }, [modalOpen]);
+  }, [modalOpen, props.schemaInfo]);
 
   const handleFieldChange = (event, { name, value }) => {
     const schemaValues = tagInput.tagset;
@@ -58,13 +61,10 @@ const FileUploadModal = (props) => {
       <Modal.Header>Select an Image to Upload</Modal.Header>
       <Modal.Content>
         <Segment>
-          <Form onSubmit={upload}>
-            <Form.Input
-              ref={fileInput}
-              label="File"
-              id="fileupload"
-              type="file"
-            />
+          <Form>
+            <Form.Field>
+              <Input ref={fileInput} label="File" id="fileupload" type="file" />
+            </Form.Field>
             {props.schemaInfo.available &&
               tagInput.tagset.map((schemaValue, idx) => {
                 const key = 'key',
@@ -75,6 +75,7 @@ const FileUploadModal = (props) => {
                     label={schemaValue[key]}
                     name={value}
                     id={'' + idx}
+                    key={idx}
                     type={schemaValue[type]}
                     required
                     placeholder="Enter field input here"
@@ -84,10 +85,13 @@ const FileUploadModal = (props) => {
                 );
               })}
             <Form.Button
-              disabled={isFormFilled()}
+              onClick={() => upload()}
+              id="uploadButton"
+              disabled={!isFormFilled()}
               type="submit"
-              content={'Upload'}
-            />
+            >
+              Upload
+            </Form.Button>
           </Form>
         </Segment>
       </Modal.Content>
@@ -95,4 +99,4 @@ const FileUploadModal = (props) => {
   );
 };
 
-export default FileUploadModal;
+export default FileUploadModule;

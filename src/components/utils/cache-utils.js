@@ -130,11 +130,11 @@ export const cacheSrc = async (bucket, key, openedCache) => {
     const {
       statusCode: status,
       statusMessage: statusText,
-      headers: headers
+      headers
     } = response.$response.httpResponse;
     const params = {
-      status: status,
-      statusText: statusText,
+      status,
+      statusText,
       headers: new Headers(headers)
     };
     const ext = extensionCapture.exec(key)[1].toLowerCase();

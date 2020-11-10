@@ -7,8 +7,11 @@ import {
   Input,
   Dropdown
 } from 'semantic-ui-react';
-import './bucketpath.scss';
+import './bucket-path.scss';
 
+/**
+ * This component controls the flow of the app and keeps track of where we are within the S3 bucket.
+ */
 const BucketPath = (props) => {
   const [schemaInfo, setSchemaInfo] = useState(props.schemaInfo);
   const [dropdownValue, setDropdownValue] = useState('');
@@ -18,7 +21,7 @@ const BucketPath = (props) => {
       setDropdownValue('');
       setSchemaInfo(props.schemaInfo);
     }
-  });
+  }, [props.schemaInfo, schemaInfo]);
 
   const changePath = (event, attributes) => {
     let newPathInfo =

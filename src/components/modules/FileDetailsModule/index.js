@@ -1,7 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { deleteObject, getObjectURL } from '../../utils/amazon-s3-utils';
-import { schemaFileName } from '../../modules/BucketViewer';
-import EditObjectTagsModal from '../edit-tags-modal';
+import { schemaFileName } from '../BucketViewer';
+import EditObjectTagsModule from '../EditObjectTagsModule';
 import { withRouter } from 'react-router-dom';
 import {
   Modal,
@@ -11,7 +11,6 @@ import {
   ListContent,
   Button,
   Label,
-  Icon,
   Message,
   Confirm,
   Grid,
@@ -21,7 +20,7 @@ import {
 } from 'semantic-ui-react';
 import './file-details-modal.scss';
 
-const FileDetailsModal = (props) => {
+const FileDetailsModule = (props) => {
   const { bucket, schemaInfo, updateTagState } = props;
   const [showConfirm, setShowConfirm] = useState(false);
   const [conformsToSchema, setConformsToSchema] = useState(true);
@@ -53,7 +52,7 @@ const FileDetailsModal = (props) => {
     } else if (props.file !== file) {
       setFile(props.file);
     }
-  });
+  }, [file, props.file, downloadLink, bucket, schemaInfo]);
 
   /**
    * Returns the keys of a tagset.
@@ -79,19 +78,16 @@ const FileDetailsModal = (props) => {
   const getImage = () => {
     if (fileTest.test(file.filename)) {
       return (
-        <div class="ui medium middle aligned image">
-          <img crossOrigin="anonymous" src={file.src} />
+        <div className="ui medium middle aligned image">
+          <img crossOrigin="anonymous" src={file.src} alt="File Thumbnail" />
         </div>
       );
-    } else {
-      return <Icon name="file" className="card-file-icon" />;
     }
   };
 
   const combineTags = () => {
-    const tagset = [];
     //The reason for creating and turning the set back into the array was to
-    // quickly get rid of repeating values as a set only contains unique values.
+    //quickly get rid of repeating values as a set only contains unique values.
     const totalKeys = [
       ...new Set([...getKeys(schemaInfo.tagset), ...getKeys(file.TagSet)])
     ];
@@ -110,7 +106,6 @@ const FileDetailsModal = (props) => {
       }, []);
     }
   };
-
   return (
     <Modal
       open={props.modalOpen}
@@ -148,7 +143,7 @@ const FileDetailsModal = (props) => {
                   <GridColumn>
                     <List className="file-details" divided>
                       <Label attached="top">File Data</Label>
-                      <List.Item>
+                      <List.Item key={file.Key + '1'}>
                         <ListContent>
                           <ListHeader>Path</ListHeader>
                           <ListDescription>{file.Key}</ListDescription>
@@ -156,14 +151,14 @@ const FileDetailsModal = (props) => {
                       </List.Item>
                       {file.TagSet &&
                         file.TagSet.map((set, i) => (
-                          <List.Item>
+                          <List.Item key={i}>
                             <ListContent>
                               <ListHeader>{set.key}</ListHeader>
                               <ListDescription>{set.value}</ListDescription>
                             </ListContent>
                           </List.Item>
                         ))}
-                      <List.Item>
+                      <List.Item key={file.Key + '2'}>
                         <ListContent>
                           <ListHeader>LastModified</ListHeader>
                           <ListDescription>
@@ -171,22 +166,22 @@ const FileDetailsModal = (props) => {
                           </ListDescription>
                         </ListContent>
                       </List.Item>
-                      <List.Item>
+                      <List.Item key={file.Key + '3'}>
                         <ListContent>
                           <ListHeader>Size</ListHeader>
                           <ListDescription>{file.Size}</ListDescription>
                         </ListContent>
                       </List.Item>
-                      <List.Item>
+                      <List.Item key={file.Key + '4'}>
                         <ListContent>
                           <ListHeader>Storage Class</ListHeader>
                           <ListDescription>{file.StorageClass}</ListDescription>
                         </ListContent>
                       </List.Item>
-                      <List.Item>
+                      <List.Item key={file.Key + '5'}>
                         <ListContent>
                           {file.TagSet && file.filename !== schemaFileName && (
-                            <EditObjectTagsModal
+                            <EditObjectTagsModule
                               bucket={bucket}
                               keyValue={file.Key}
                               tagset={combineTags()}
@@ -204,7 +199,8 @@ const FileDetailsModal = (props) => {
                               download=""
                               href={downloadLink}
                               target="_blank"
-                              class="ui button"
+                              className="ui button"
+                              rel="noopener noreferrer"
                               role="button"
                             >
                               Download
@@ -234,7 +230,7 @@ const FileDetailsModal = (props) => {
                         <Label attached="top">Schema Tags</Label>
                         {schemaInfo.tagset &&
                           schemaInfo.tagset.map((set, i) => (
-                            <List.Item>
+                            <List.Item key={file.Key + i}>
                               <ListContent>
                                 <ListHeader>{set.key}</ListHeader>
                                 <ListDescription>{set.value}</ListDescription>
@@ -253,4 +249,4 @@ const FileDetailsModal = (props) => {
     </Modal>
   );
 };
-export default withRouter(FileDetailsModal);
+export default withRouter(FileDetailsModule);

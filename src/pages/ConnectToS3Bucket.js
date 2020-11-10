@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
-import ConnectToS3BucketForm from '../components/connect-to-s3-bucket';
+import ConnectToS3BucketForm from '../components/modules/ConnectToS3BucketForm';
 
 class ConnectToS3Bucket extends Component {
   render() {

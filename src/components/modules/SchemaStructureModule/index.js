@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Dimmer, Loader } from 'semantic-ui-react';
 import AWS from 'aws-sdk';
-import SchemaForm from '../../schema-form';
+import SchemaForm from '../SchemaForm';
 
-const SchemaStructureModal = (props) => {
+const SchemaStructureModule = (props) => {
   const bucketBuddySchemaFileName = 'bucket-buddy-schema.json';
 
   const [schemaPath, setSchemaPath] = useState(props.pathInfo.path);
   const [dataLoaded, setDataLoaded] = useState(false);
-  const [isCreateSchema, setIsCreateSchema] = useState(true);
   const [jsonSchemaValues, setJsonSchemaValues] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   const setToCreateSchema = () => {
     setDataLoaded(true);
-    setIsCreateSchema(true);
   };
 
   const createSchemaFile = (schemaValues) => {
@@ -65,7 +63,14 @@ const SchemaStructureModal = (props) => {
         setToCreateSchema();
       }
     }
-  });
+  }, [
+    schemaPath,
+    props.pathInfo.path,
+    props.schemaInfo.available,
+    props.schemaInfo.tagset,
+    modalOpen,
+    dataLoaded
+  ]);
 
   return (
     <Modal
@@ -100,4 +105,4 @@ const SchemaStructureModal = (props) => {
     </Modal>
   );
 };
-export default SchemaStructureModal;
+export default SchemaStructureModule;

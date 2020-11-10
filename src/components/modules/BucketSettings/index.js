@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Dropdown, Confirm, Radio } from 'semantic-ui-react';
-import FileUploadModal from '../../modals/file-upload-modal';
-import FolderUploadModal from '../../modals/folder-upload-modal';
-import SchemaStructureModal from '../../modals/schema-structure-modal';
-import { deleteObject, deleteFolder } from '../../utils/amazon-s3-utils';
-import './bucketsettings.scss';
+import FileUploadModule from '../FileUploadModule';
+import FolderUploadModule from '../FolderUploadModule';
+import SchemaStructureModule from '../SchemaStructureModule';
+import { deleteFolder } from '../../utils/amazon-s3-utils';
+import './bucket-settings.scss';
 
 /**
  * This component controls how much info you want to load in from the api
@@ -22,13 +22,13 @@ const BucketSettings = ({
 
   const deleteCurrentFolder = () => {
     if (pathInfo.depth >= 1) {
-      let pathValues = pathInfo.path.split('/');
       deleteFolder(bucket, pathInfo.path).then(() => {
-        pathChange({
-          path: `${pathInfo.path.split('/', pathInfo.depth - 1)}/`,
+        const newPath = {
+          path: `${pathInfo.path.split('/', pathInfo.depth - 1)}`,
           depth: pathInfo.depth - 1
-        });
-        updateList();
+        };
+        pathChange(newPath);
+        updateList(newPath);
       });
     }
   };
@@ -44,16 +44,16 @@ const BucketSettings = ({
   return (
     <div className="bucket-bar">
       <span className="bucket-buttons">
-        <Dropdown button text="Actions">
+        <Dropdown lazyLoad={true} id="actionDropdown" button text="Actions">
           <Dropdown.Menu>
-            <FileUploadModal
+            <FileUploadModule
               updateList={updateList}
               bucket={bucket}
               schemaInfo={schemaInfo}
               pathInfo={pathInfo}
               trigger={<Dropdown.Item text="Upload File" />}
             />
-            <FolderUploadModal
+            <FolderUploadModule
               updateList={updateList}
               bucket={bucket}
               pathInfo={pathInfo}
@@ -77,7 +77,7 @@ const BucketSettings = ({
               ''
             )}
             <Dropdown.Divider />
-            <SchemaStructureModal
+            <SchemaStructureModule
               updateList={updateList}
               schemaInfo={schemaInfo}
               bucket={bucket}

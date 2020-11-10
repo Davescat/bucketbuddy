@@ -3,38 +3,47 @@ import { Card, Image, Placeholder, Icon } from 'semantic-ui-react';
 import { getImageSrc } from '../../utils/amazon-s3-utils';
 import './file.scss';
 
-const File = (props) => {
+const File = ({ file, bucket, updateSrcArray, settings, openModal }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [src, setSrc] = useState(props.file.src);
+  const [src, setSrc] = useState(file.src);
 
   const fileTest = /\.(jpe?g|png|gif|bmp)$/i;
   useEffect(() => {
-    if (fileTest.test(props.file.filename)) {
-      if (props.file.src) {
+    if (fileTest.test(file.filename)) {
+      if (file.src) {
         setImageLoaded(true);
-        setSrc(props.file.src);
+        setSrc(file.src);
       } else {
         getImageSrc(
-          props.bucket,
-          props.file.Key,
+          bucket,
+          file.Key,
           (data) => {
-            props.updateSrcArray(props.file.Key, data);
+            updateSrcArray(file.Key, data);
             setSrc(data);
             setImageLoaded(true);
           },
-          props.settings.cacheImages
+          settings.cacheImages
         );
       }
     } else {
       setImageLoaded(true);
     }
-  }, []);
+  }, [
+    fileTest,
+    bucket,
+    file.Key,
+    file.filename,
+    file.src,
+    settings.cacheImages,
+    updateSrcArray
+  ]);
+
   /**
    * Gets the appropriate tags for whatever type of file requested
    */
   const getImage = () => {
     if (imageLoaded) {
-      if (fileTest.test(props.file.filename)) {
+      if (fileTest.test(file.filename)) {
         return <Image src={src} wrapped className="card-file-image" />;
       } else {
         return (
@@ -55,20 +64,20 @@ const File = (props) => {
   return (
     <Card
       raised
-      className={`file-card ${props.file.hidden ? 'hidden' : ''}`}
+      className={`file-card ${file.hidden ? 'hidden' : ''}`}
       onClick={() =>
-        props.openModal({
-          ...props.file,
+        openModal({
+          ...file,
           src: src
         })
       }
     >
       {getImage()}
       <Card.Content>
-        <Card.Header>{props.file.filename}</Card.Header>
+        <Card.Header>{file.filename}</Card.Header>
         <Card.Meta>
           <span>Last modified:</span>
-          <span>{new Date(props.file.LastModified).toDateString()}</span>
+          <span>{new Date(file.LastModified).toDateString()}</span>
         </Card.Meta>
       </Card.Content>
     </Card>

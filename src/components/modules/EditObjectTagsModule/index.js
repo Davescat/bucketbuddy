@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { Modal } from 'semantic-ui-react';
 import { putObjectTags } from '../../utils/amazon-s3-utils';
-import SchemaForm from '../../schema-form';
+import SchemaForm from '../SchemaForm';
 
-const EditObjectTagsModal = (props) => {
-  const bucketBuddySchemaFileName = 'bucket-buddy-schema.json';
-
+const EditObjectTagsModule = (props) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   const updateObjectTags = (tagset) => {
@@ -56,4 +54,4 @@ const EditObjectTagsModal = (props) => {
     </Modal>
   );
 };
-export default EditObjectTagsModal;
+export default EditObjectTagsModule;
