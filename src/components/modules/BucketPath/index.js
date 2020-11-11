@@ -31,7 +31,9 @@ const BucketPath = (props) => {
             depth: 0
           }
         : {
-            path: `${props.pathInfo.path.split('/', attributes.depth)}/`,
+            path: `${props.pathInfo.path
+              .split('/', attributes.depth)
+              .join('/')}/`,
             depth: attributes.depth
           };
     props.pathChange(newPathInfo);
