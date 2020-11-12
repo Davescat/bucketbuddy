@@ -111,7 +111,12 @@ const BucketViewer = (props) => {
           urlPathInfo.indexOf('bucket-viewer') + 2
         );
         setPathInfo({
-          path: urlInfo.length > 1 ? `${urlInfo.join('/')}/` : `${urlInfo[0]}/`,
+          path:
+            urlInfo.length > 1
+              ? `${urlInfo
+                  .map((string) => decodeURIComponent(string))
+                  .join('/')}/`
+              : `${urlInfo[0]}/`,
           depth: urlInfo.length
         });
       }

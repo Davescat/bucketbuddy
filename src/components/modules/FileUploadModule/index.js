@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Modal, Form, Segment, Input } from 'semantic-ui-react';
 import { uploadObject } from '../../utils/amazon-s3-utils';
+import { selectBoolean } from '../../utils/tag-types';
 
 const FileUploadModule = (props) => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -44,9 +45,13 @@ const FileUploadModule = (props) => {
     setTagInput(props.schemaInfo);
   }, [modalOpen, props.schemaInfo]);
 
-  const handleFieldChange = (event, { name, value }) => {
+  const handleFieldChange = (event, { name, value }, row = -1) => {
     const schemaValues = tagInput.tagset;
-    schemaValues[parseInt(event.target.id)][name] = value;
+    if (row !== -1) {
+      schemaValues[parseInt(row)][name] = value;
+    } else {
+      schemaValues[parseInt(event.target.id)][name] = value;
+    }
     setTagInput({ available: true, tagset: schemaValues });
   };
 
@@ -70,7 +75,24 @@ const FileUploadModule = (props) => {
                 const key = 'key',
                   value = 'value',
                   type = 'type';
-                return (
+                return schemaValue[type] === 'flag' ? (
+                  <Form.Select
+                    width={6}
+                    fluid
+                    id={'' + idx}
+                    name={value}
+                    options={selectBoolean}
+                    label="Field Input"
+                    defaultValue={
+                      typeof schemaValue[value] === 'boolean'
+                        ? schemaValue[value]
+                        : selectBoolean[0].value
+                    }
+                    onChange={(event, data) =>
+                      handleFieldChange(event, data, idx)
+                    }
+                  />
+                ) : (
                   <Form.Input
                     label={schemaValue[key]}
                     name={value}

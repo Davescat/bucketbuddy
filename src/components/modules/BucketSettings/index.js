@@ -24,7 +24,7 @@ const BucketSettings = ({
     if (pathInfo.depth >= 1) {
       deleteFolder(bucket, pathInfo.path).then(() => {
         const newPath = {
-          path: `${pathInfo.path.split('/', pathInfo.depth - 1)}`,
+          path: `${pathInfo.path.split('/', pathInfo.depth - 1).join('/')}/`,
           depth: pathInfo.depth - 1
         };
         pathChange(newPath);
