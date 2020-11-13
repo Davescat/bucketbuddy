@@ -1,0 +1,59 @@
+@import '../../../App.scss';
+
+.file-card {
+  width: min-content;
+  width: -moz-min-content; /* Firefox */
+  width: -webkit-min-content; /* Chrome */
+  @media (min-width: 575.98px) {
+    height: 30vh;
+  }
+  // Medium devices (tablets, less than 992px)
+  @media (min-width: 991.98px) {
+    height: 30vh;
+  }
+
+  // Large devices (desktops, less than 1200px)
+  @media (min-width: 1199.98px) {
+    height: 35vh;
+  }
+  // min-width: 200px !important;
+  min-height: 250px !important;
+  cursor: pointer;
+  .content {
+    .header {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      word-wrap: break-word;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+    }
+  }
+
+  .card-file-image {
+    object-fit: contain;
+    max-height: 300px !important;
+  }
+  .image {
+    height: 70%;
+    width: 100% !important;
+    img {
+      object-fit: cover;
+      height: 100% !important;
+    }
+  }
+  .card-file-icon {
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    padding: 2em;
+    color: #919191;
+    height: 50%;
+    font-size: 3em;
+  }
+}
+.hidden {
+  display: none !important;
+}
