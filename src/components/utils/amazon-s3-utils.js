@@ -479,4 +479,74 @@ export const putObjectTags = async (
     }
   }
 };
+
+/**
+ * Lists objects inside of an S3 bucket with the path supplied
+ *
+ * @param {{bucketName,accessKeyId,secretAccessKey,region}} bucketInfo Bucket information containing bucket name, access key, secret access key, and region.
+ * @param {String} path prefix to keys returned
+ *
+ * @returns {Promise<AWS.S3.ListObjectsV2Output, AWS.AWSError>}
+ */
+export const listAllObjects = (
+  { name, accessKeyId, secretAccessKey, region },
+  path
+) => {
+  const s3 = new AWS.S3({
+    accessKeyId,
+    secretAccessKey,
+    region,
+    signatureVersion: 'v4'
+  });
+  try {
+    const recursive = async (s3, name, array = [], path = '', token = null) => {
+      const data = await search(s3, name, path, token);
+      if (data.NextContinuationToken) {
+        array.push(...data.Contents);
+        return await recursive(
+          s3,
+          name,
+          array,
+          path,
+          data.NextContinuationToken
+        );
+      } else {
+        array.push(...data.Contents);
+        return array;
+      }
+    };
+    return recursive(s3, name);
+  } catch (error) {
+    if (!error.code) {
+      throw new GenericS3Error();
+    } else {
+      if (error.code === 'Forbidden') {
+        throw new ForbiddenError();
+      }
+      if (error.code === 'NetworkError') {
+        throw NetworkError();
+      } else {
+        throw new GenericS3Error();
+      }
+    }
+  }
+};
+
+/**
+ *
+ * @param {AWS.S3} s3Instance
+ * @param {*} path
+ * @param {*} token
+ */
+const search = (s3Instance, name, path, token = null) => {
+  return s3Instance
+    .listObjectsV2({
+      Bucket: name,
+      Prefix: path,
+      MaxKeys: 20,
+      ContinuationToken: token
+    })
+    .promise();
+};
+
 export default testConnectionS3Bucket;

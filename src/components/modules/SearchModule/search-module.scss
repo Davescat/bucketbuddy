@@ -1,0 +1,19 @@
+.ui.modal {
+  height: 50vh !important;
+  .content {
+    height: 100% !important;
+
+    .segment {
+      display: flex;
+      flex-direction: column;
+      height: 100% !important;
+      .search-results {
+        height: 100% !important;
+        // > div {
+        //   height: 100% !important;
+        // }
+        overflow-y: auto;
+      }
+    }
+  }
+}

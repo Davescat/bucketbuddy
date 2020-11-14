@@ -5,6 +5,7 @@ import FolderUploadModule from '../FolderUploadModule';
 import SchemaStructureModule from '../SchemaStructureModule';
 import { deleteFolder } from '../../utils/amazon-s3-utils';
 import './bucket-settings.scss';
+import SearchModule from '../SearchModule';
 
 /**
  * This component controls how much info you want to load in from the api
@@ -46,6 +47,10 @@ const BucketSettings = ({
       <span className="bucket-buttons">
         <Dropdown lazyLoad={true} id="actionDropdown" button text="Actions">
           <Dropdown.Menu>
+            <SearchModule
+              bucket={bucket}
+              trigger={<Dropdown.Item text="Super search" />}
+            />
             <FileUploadModule
               updateList={updateList}
               bucket={bucket}
