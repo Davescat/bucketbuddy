@@ -2,13 +2,13 @@
 
 ## The problem
 
-Need a tool to edit S3 objects? [Amazon's S3](https://aws.amazon.com/s3/) is great and a very versatile storage service, however it is harder for non-developers to use to manage their objects (such as image files like JPG, PNG, etc.). It can be difficult to navigate an S3 bucket when there are no thumbnails for the images present and no predefined values for tags to be used for objects.
+Need a tool to edit S3 objects and manage their tags? Working on a machine learning project and you are thinking of using S3 for storage and want a easy way to add annotation to your objects in your bucket? [Amazon's S3](https://aws.amazon.com/s3/) is great and a very versatile storage service, however it is harder for non-developers to use to manage their objects (such as image files like JPG, PNG, etc.). It can be difficult to navigate an S3 bucket when there are no thumbnails for the images present and no predefined values for tags to be used for objects.
 
 ## Our solution
 
 ![Image of Bucket Buddy main screen](./public/bucket-buddy-main-screen.jpg)
 
-Bucket Buddy is a simple React application used to be a tool for users to better manage their S3 bucket objects.
+Bucket Buddy is a simple and lightweight React application used to be a tool for users to better manage their S3 bucket objects.
 
 This application can be used to:
 
@@ -17,6 +17,8 @@ This application can be used to:
 - See the thumbnails of image files
 - Edit and add tags to an object
 - Create a schema which will be used to add predefined tags to objects
+- Search for objects by tags and filename
+- And more as seen below :)
 
 ## Requirements before installing
 
@@ -153,7 +155,7 @@ Downloading images everytime you wish to view the bucket can be very time consum
 
 # Special thanks
 
-This project developed by the team at [Rasion d'Art](https://www.raisondart.org/) a non-profit organization and is made available for anyone who will find use in making managing their S3 bucket easier. The team's mission was not to just make a tool helpful for themselves but others too.
+This project developed by the team at [Rasion d'Art](https://www.raisondart.org/) a non-profit organization and is made available for anyone who will find use in making managing their S3 bucket easier. The team's mission was not to just make a tool helpful for themselves but for others too.
 
 Special thanks to the team:
 
@@ -167,4 +169,4 @@ We hope this project helps you do something great!
 
 ## Having issues?
 
-We would love to know if you are having any issues using the app or have any suggestions. Please enter a ticket [here](https://github.com/js-montreal/bucketbuddy/issues) with details about the issue.
+We would love to know if you are having any issues using the app or have any suggestions. Please enter a ticket [here](https://github.com/Davescat/bucketbuddy/issues) with details about the issue.
