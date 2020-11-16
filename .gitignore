@@ -102,3 +102,7 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Semantic/fomantic
+/build
+/src/semantic/dist
