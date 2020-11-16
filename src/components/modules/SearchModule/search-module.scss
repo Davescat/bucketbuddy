@@ -1,5 +1,16 @@
-.ui.modal {
-  height: 50vh !important;
+.ui.modal.search-modal {
+  height: 70vh !important;
+  .search-input {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    .input {
+      flex-basis: 100%;
+    }
+    button {
+      margin-right: 10px;
+    }
+  }
   .content {
     height: 100% !important;
 

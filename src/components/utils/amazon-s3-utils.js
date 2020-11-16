@@ -543,7 +543,7 @@ const search = (s3Instance, name, path, token = null) => {
     .listObjectsV2({
       Bucket: name,
       Prefix: path,
-      MaxKeys: 20,
+      MaxKeys: 500,
       ContinuationToken: token
     })
     .promise();

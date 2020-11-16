@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Menu, FormInput } from 'semantic-ui-react';
 import './folder-menu.scss';
 
@@ -22,13 +22,16 @@ const FolderMenu = (props) => {
     visibleFolders
   ]);
 
-  const handleFileClick = (key) => {
-    const newPathInfo = {
-      path: key,
-      depth: key.split('/').length - 1
-    };
-    props.customClickEvent(newPathInfo);
-  };
+  const handleFileClick = useCallback(
+    (filename) => {
+      const newPathInfo = {
+        path: `${props.pathInfo.path}${filename}`,
+        depth: props.pathInfo.depth + 1
+      };
+      props.customClickEvent(newPathInfo);
+    },
+    [props]
+  );
 
   const handleFieldChange = (event, { value }) => {
     props.search.setSearchText(value);
@@ -49,11 +52,8 @@ const FolderMenu = (props) => {
         />
       </Menu.Item>
       {visibleFolders.map((x, i) => (
-        <Menu.Item
-          onClick={() => handleFileClick(x.Key)}
-          key={`${i}${x.filename}`}
-        >
-          {x.filename}
+        <Menu.Item onClick={() => handleFileClick(x)} key={`${i}${x}`}>
+          {x}
         </Menu.Item>
       ))}
     </Menu>

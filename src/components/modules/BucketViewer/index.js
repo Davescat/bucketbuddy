@@ -3,14 +3,15 @@ import BucketPath from '../BucketPath';
 import BucketSettings from '../BucketSettings';
 import FileContainer from '../FileContainer';
 import { Dimmer, Loader, Transition } from 'semantic-ui-react';
+import FolderMenu from '../FolderMenu';
+import NavMenu from '../NavMenu';
+import SearchModule from '../SearchModule';
+import './bucket-viewer.scss';
 import {
   listObjects,
   getFolderSchema,
   getObjectTags
 } from '../../utils/amazon-s3-utils';
-import FolderMenu from '../FolderMenu';
-import NavMenu from '../NavMenu';
-import './bucket-viewer.scss';
 
 export const schemaFileName = 'bucket-buddy-schema.json';
 
@@ -18,7 +19,7 @@ const BucketViewer = (props) => {
   const [bucket] = useState(props.location.state.bucket);
   const [loading, setLoading] = useState(true);
   const [pathInfo, setPathInfo] = useState(null);
-  // const [files, setFiles] = useState({ folders: [], files: [] });
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [files, setFiles] = useState({ folders: [], files: [] });
   const [srcArray, setSrcArray] = useState([]);
   const [fileSearchText, setFileSearchText] = useState('');
@@ -61,22 +62,26 @@ const BucketViewer = (props) => {
        * @param {AWS.S3.ListObjectsV2Output} response
        */
       const filterList = async (response, path) => {
-        const filetest = new RegExp(`^${path}([\\w!\\-\\.\\*'\\(\\), ]+[/]?)$`);
+        const filetest = new RegExp(
+          `^${path}([\\w!\\-\\.\\*'\\(\\), ]+[/]?)([\\w!\\-\\.\\*'\\(\\), ]+/)?`
+        );
         let newFiles = [];
-        const newFolders = [];
+        let newFolders = new Set([]);
         response.Contents.forEach((file) => {
           const filename = filetest.exec(file.Key);
           if (filename && filename[1]) {
             file.filename = filename[1];
-            if (filename[1][filename[1].length - 1] === '/') {
-              newFolders.push(file);
+            if (filename[2]) {
+              newFolders.add(filename[1]);
+            } else if (filename[1][filename[1].length - 1] === '/') {
+              newFolders.add(filename[1]);
             } else {
               newFiles.push(file);
             }
           }
         });
+        newFolders = [...newFolders].sort();
         sortObjectsAlphabetically(newFiles);
-        sortObjectsAlphabetically(newFolders);
 
         newFiles = await getAllTags(newFiles);
         return {
@@ -271,12 +276,7 @@ const BucketViewer = (props) => {
             schemaInfo={schemaInfo}
             pathChange={updatePath}
             updateList={updateList}
-            search={{
-              text: tagSearchText,
-              setSearchText: setTagSearchText,
-              chosenTag: chosenTag,
-              setChosenTag: setChosenTag
-            }}
+            searchModal={setSearchModalOpen}
           />
           <BucketSettings
             bucket={bucket}
@@ -286,6 +286,19 @@ const BucketViewer = (props) => {
             updateList={updateList}
             setSettings={setSettings}
             pathChange={updatePath}
+            searchModal={setSearchModalOpen}
+            search={{
+              text: tagSearchText,
+              setSearchText: setTagSearchText,
+              chosenTag: chosenTag,
+              setChosenTag: setChosenTag
+            }}
+          />
+          <SearchModule
+            bucket={bucket}
+            pathChange={updatePath}
+            pathInfo={pathInfo}
+            modalControl={{ searchModalOpen, setSearchModalOpen }}
           />
         </div>
         <div className="files-folders">
@@ -333,21 +346,3 @@ const BucketViewer = (props) => {
   }
 };
 export default BucketViewer;
-/*
-
-
-
- <Transition
-                // mountOnShow={false}
-                visible={!filesLoading}
-                // onStart={() => transition()}
-                // onComplete={() => transitions.reverse()}
-                // onShow={() =>
-                //   !filesLoading &&
-                //   files !== visibleFiles &&
-                //   setFiles(visibleFiles)
-                // }
-                animation={transitions[0]}
-                duration={250}
-              >
-*/

@@ -1,13 +1,15 @@
 .bucket-path {
   display: flex;
+  width: 100%;
+  flex-direction: column;
   background-color: #f7f7f7a9;
-  padding-right: 20px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  justify-content: space-between;
+  justify-content: center;
   border-bottom: 1px solid rgba(204, 204, 204, 0.541);
-  div {
-    display: flex;
+  .segment {
+    padding: 10px;
+  }
+  div.breadcrumb {
+    padding-bottom: 4px;
     margin: 0 !important;
   }
 }

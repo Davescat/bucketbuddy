@@ -44,7 +44,15 @@ const File = ({ file, bucket, updateSrcArray, settings, openModal }) => {
   const getImage = () => {
     if (imageLoaded) {
       if (fileTest.test(file.filename)) {
-        return <Image src={src} wrapped className="card-file-image" />;
+        return (
+          <Image
+            src={src}
+            as="img"
+            loading="lazy"
+            wrapped
+            className="card-file-image"
+          />
+        );
       } else {
         return (
           <div className="ui image ">
