@@ -24,7 +24,7 @@ const BucketSettings = ({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dropdownValue, setDropdownValue] = useState('');
   const [currentPathInfo, setCurrentPathInfo] = useState(pathInfo);
-  const drop = useRef(null);
+  const dropdown = useRef(null);
 
   useEffect(() => {
     setCurrentPathInfo(pathInfo);
@@ -54,10 +54,10 @@ const BucketSettings = ({
   };
 
   useEffect(() => {
-    if (drop) {
-      drop.current.openOnSpace = () => null;
+    if (dropdown) {
+      dropdown.current.openOnSpace = () => null;
     }
-  }, [drop]);
+  }, [dropdown]);
 
   const handleTagChange = (event, { value }) => {
     search.setChosenTag(value);
@@ -77,11 +77,15 @@ const BucketSettings = ({
     setDropdownOpen(false);
   };
 
+  const closeConfirmDelete = () => {
+    setShowConfirm(false);
+  };
+
   return (
     <div className="bucket-bar">
       <span className="bucket-buttons">
         <Dropdown
-          ref={drop}
+          ref={dropdown}
           onClick={() => setDropdownOpen(true)}
           onClose={() => setDropdownOpen(false)}
           open={dropdownOpen}
@@ -123,7 +127,7 @@ const BucketSettings = ({
                   open={showConfirm}
                   cancelButton="Cancel"
                   confirmButton="Delete"
-                  onCancel={() => setShowConfirm(false)}
+                  onCancel={closeConfirmDelete}
                   onConfirm={deleteCurrentFolder}
                 />
               </>

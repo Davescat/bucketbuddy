@@ -22,20 +22,19 @@ const SearchModule = ({
   const [searchInput, setSearchInput] = useState({ text: '', loading: false });
   const [allFiles, setAllFiles] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(true);
-  const [fuse, setFuse] = useState(
-    new Fuse([], { includeScore: true, keys: ['key'] })
-  );
+  const [fuse, setFuse] = useState(null);
   const [results, setResults] = useState([]);
   const icon = useRef(null);
 
   useEffect(() => {
     if (searchModalOpen && searchInput.loading) {
       const delayDebounceFn = setTimeout(() => {
-        if (allFiles && fuse) {
+        if (fuse) {
           if (searchInput.text === '') {
             setResults([]);
             setSearchInput({ ...searchInput, loading: false });
           } else {
+            console.log(searchInput, fuse.search(searchInput.text));
             setResults(fuse.search(searchInput.text));
             setSearchInput({ ...searchInput, loading: false });
           }
@@ -66,7 +65,8 @@ const SearchModule = ({
               key: file.Key,
               date: file.LastModified.toDateString(),
               type: giveIcon(file.Key)
-            }))
+            })),
+            { includeScore: true, keys: ['key'] }
           )
         );
         setAllFiles(list);
@@ -83,15 +83,15 @@ const SearchModule = ({
   }, [searchModalOpen, bucket, isRefreshing]);
 
   const goToFile = ({ key }) => {
-    const deets = key.split('/');
+    const filePath = key.split('/');
     const newPath = {
       path:
         key[key.length - 1] === '/'
           ? key
-          : `${deets.slice(0, deets.length - 1).join('/')}${
-              deets.length === 1 ? '' : '/'
+          : `${filePath.slice(0, filePath.length - 1).join('/')}${
+              filePath.length === 1 ? '' : '/'
             }`,
-      depth: deets.length - 1
+      depth: filePath.length - 1
     };
     setSearchModalOpen(false);
     pathChange(newPath);

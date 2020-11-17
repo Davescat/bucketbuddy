@@ -62,13 +62,13 @@ const BucketViewer = (props) => {
        * @param {AWS.S3.ListObjectsV2Output} response
        */
       const filterList = async (response, path) => {
-        const filetest = new RegExp(
+        const fileTest = new RegExp(
           `^${path}([\\w!\\-\\.\\*'\\(\\), ]+[/]?)([\\w!\\-\\.\\*'\\(\\), ]+/)?`
         );
         let newFiles = [];
         let newFolders = new Set([]);
         response.Contents.forEach((file) => {
-          const filename = filetest.exec(file.Key);
+          const filename = fileTest.exec(file.Key);
           if (filename && filename[1]) {
             file.filename = filename[1];
             if (filename[2]) {

@@ -500,18 +500,18 @@ export const listAllObjects = (
   });
   try {
     const recursive = async (s3, name, array = [], path = '', token = null) => {
-      const data = await search(s3, name, path, token);
-      if (data.NextContinuationToken) {
-        array.push(...data.Contents);
+      const fileList = await search(s3, name, path, token);
+      if (fileList.NextContinuationToken) {
+        array.push(...fileList.Contents);
         return await recursive(
           s3,
           name,
           array,
           path,
-          data.NextContinuationToken
+          fileList.NextContinuationToken
         );
       } else {
-        array.push(...data.Contents);
+        array.push(...fileList.Contents);
         return array;
       }
     };
@@ -533,17 +533,14 @@ export const listAllObjects = (
 };
 
 /**
- *
- * @param {AWS.S3} s3Instance
- * @param {*} path
- * @param {*} token
+ * Will call listObjects and return a promise, similar to listObjects function above but mainly used for recursive searching.
  */
 const search = (s3Instance, name, path, token = null) => {
   return s3Instance
     .listObjectsV2({
       Bucket: name,
       Prefix: path,
-      MaxKeys: 500,
+      MaxKeys: 750,
       ContinuationToken: token
     })
     .promise();
