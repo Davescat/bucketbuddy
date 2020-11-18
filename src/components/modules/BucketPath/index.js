@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Breadcrumb,
   BreadcrumbDivider,
   BreadcrumbSection,
   Segment,
-  Input,
-  Dropdown
+  Button
 } from 'semantic-ui-react';
 import './bucket-path.scss';
 
@@ -13,16 +12,6 @@ import './bucket-path.scss';
  * This component controls the flow of the app and keeps track of where we are within the S3 bucket.
  */
 const BucketPath = (props) => {
-  const [schemaInfo, setSchemaInfo] = useState(props.schemaInfo);
-  const [dropdownValue, setDropdownValue] = useState('');
-
-  useEffect(() => {
-    if (props.schemaInfo !== schemaInfo) {
-      setDropdownValue('');
-      setSchemaInfo(props.schemaInfo);
-    }
-  }, [props.schemaInfo, schemaInfo]);
-
   const changePath = (event, attributes) => {
     let newPathInfo =
       attributes.depth === 0
@@ -39,19 +28,18 @@ const BucketPath = (props) => {
     props.pathChange(newPathInfo);
   };
 
-  const handleFieldChange = (event, { value }) => {
-    props.search.setSearchText(value);
-  };
-  const handleTagChange = (event, { value }) => {
-    props.search.setChosenTag(value);
-    setDropdownValue(value);
-  };
-
   return (
     <div className="bucket-path">
       <Segment basic>
-        <Breadcrumb>
-          Current Directory:&nbsp;
+        <Button
+          circular
+          basic
+          icon={'search'}
+          onClick={() => props.searchModal(true)}
+          size={'small'}
+        />
+        <Breadcrumb size="large">
+          Current Folder:&nbsp;
           {props.pathInfo.depth === 0 && (
             <BreadcrumbSection active>{props.bucket.name}</BreadcrumbSection>
           )}
@@ -99,29 +87,6 @@ const BucketPath = (props) => {
             })}
         </Breadcrumb>
       </Segment>
-      <Input
-        label={
-          schemaInfo.available ? (
-            <Dropdown
-              options={schemaInfo.tagset.map((tag) => ({
-                text: tag.key,
-                value: tag.key
-              }))}
-              onChange={handleTagChange}
-              selectOnBlur={false}
-              value={dropdownValue}
-              placeholder="Filename"
-              clearable
-            />
-          ) : (
-            'Filename'
-          )
-        }
-        value={props.search.text}
-        labelPosition="right"
-        onChange={handleFieldChange}
-        placeholder="Tag Search"
-      />
     </div>
   );
 };

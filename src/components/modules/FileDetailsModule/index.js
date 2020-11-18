@@ -69,6 +69,7 @@ const FileDetailsModule = (props) => {
 
   const deleteFile = () => {
     deleteObject(bucket, file.Key).then(() => {
+      setShowConfirm(false);
       setFile(null);
       props.handleClose();
       props.updateList();

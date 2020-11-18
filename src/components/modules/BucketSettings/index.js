@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Dropdown, Confirm, Radio } from 'semantic-ui-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Dropdown, Confirm, Radio, Input } from 'semantic-ui-react';
 import FileUploadModule from '../FileUploadModule';
 import FolderUploadModule from '../FolderUploadModule';
 import SchemaStructureModule from '../SchemaStructureModule';
@@ -16,16 +16,36 @@ const BucketSettings = ({
   updateList,
   bucket,
   pathInfo,
-  schemaInfo
+  search,
+  schemaInfo,
+  searchModal
 }) => {
   const [showConfirm, setShowConfirm] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dropdownValue, setDropdownValue] = useState('');
+  const [currentPathInfo, setCurrentPathInfo] = useState(pathInfo);
+  const dropdown = useRef(null);
+
+  useEffect(() => {
+    setCurrentPathInfo(pathInfo);
+  }, [pathInfo]);
+
+  useEffect(() => {
+    if (currentPathInfo.path !== pathInfo.path) {
+      setDropdownValue('');
+      search.setSearchText('');
+    }
+  }, [schemaInfo, search, pathInfo, currentPathInfo]);
 
   const deleteCurrentFolder = () => {
     if (pathInfo.depth >= 1) {
       deleteFolder(bucket, pathInfo.path).then(() => {
+        const newdepth = pathInfo.depth - 1;
         const newPath = {
-          path: `${pathInfo.path.split('/', pathInfo.depth - 1).join('/')}/`,
-          depth: pathInfo.depth - 1
+          path: `${pathInfo.path.split('/', newdepth).join('/')}${
+            newdepth === 0 ? '' : '/'
+          }`,
+          depth: newdepth
         };
         pathChange(newPath);
         updateList(newPath);
@@ -33,8 +53,28 @@ const BucketSettings = ({
     }
   };
 
+  useEffect(() => {
+    if (dropdown) {
+      dropdown.current.openOnSpace = () => null;
+    }
+  }, [dropdown]);
+
+  const handleTagChange = (event, { value }) => {
+    search.setChosenTag(value);
+    setDropdownValue(value);
+  };
+
+  const handleFieldChange = (event, { value }) => {
+    search.setSearchText(value);
+  };
+
   const showConfirmDelete = () => {
+    closeDropdown();
     setShowConfirm(true);
+  };
+
+  const closeDropdown = () => {
+    setDropdownOpen(false);
   };
 
   const closeConfirmDelete = () => {
@@ -44,20 +84,38 @@ const BucketSettings = ({
   return (
     <div className="bucket-bar">
       <span className="bucket-buttons">
-        <Dropdown lazyLoad={true} id="actionDropdown" button text="Actions">
+        <Dropdown
+          ref={dropdown}
+          onClick={() => setDropdownOpen(true)}
+          onClose={() => setDropdownOpen(false)}
+          open={dropdownOpen}
+          button
+          text="Actions"
+        >
           <Dropdown.Menu>
+            <Dropdown.Item
+              onClick={() => {
+                closeDropdown();
+                searchModal(true);
+              }}
+              text="Bucket Search"
+            />
             <FileUploadModule
               updateList={updateList}
               bucket={bucket}
               schemaInfo={schemaInfo}
               pathInfo={pathInfo}
-              trigger={<Dropdown.Item text="Upload File" />}
+              trigger={
+                <Dropdown.Item onClick={closeDropdown} text="Upload File" />
+              }
             />
             <FolderUploadModule
               updateList={updateList}
               bucket={bucket}
               pathInfo={pathInfo}
-              trigger={<Dropdown.Item text="New Folder" />}
+              trigger={
+                <Dropdown.Item onClick={closeDropdown} text="New Folder" />
+              }
             />
             {pathInfo.depth >= 1 ? (
               <>
@@ -82,7 +140,9 @@ const BucketSettings = ({
               schemaInfo={schemaInfo}
               bucket={bucket}
               pathInfo={pathInfo}
-              trigger={<Dropdown.Item text="Folder Schema" />}
+              trigger={
+                <Dropdown.Item onClick={closeDropdown} text="Folder Schema" />
+              }
             />
           </Dropdown.Menu>
         </Dropdown>
@@ -99,7 +159,31 @@ const BucketSettings = ({
           }
         />
       </span>
-      <span className="bucket-buttons-right"></span>
+      <span className="bucket-buttons-right">
+        <Input
+          label={
+            schemaInfo.available ? (
+              <Dropdown
+                options={schemaInfo.tagset.map((tag) => ({
+                  text: tag.key,
+                  value: tag.key
+                }))}
+                onChange={handleTagChange}
+                selectOnBlur={false}
+                value={dropdownValue}
+                placeholder="Filename"
+                clearable
+              />
+            ) : (
+              'Filename'
+            )
+          }
+          value={search.text}
+          labelPosition="right"
+          onChange={handleFieldChange}
+          placeholder="Tag Search"
+        />
+      </span>
     </div>
   );
 };

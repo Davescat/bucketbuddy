@@ -1,0 +1,27 @@
+.ui.modal.search-modal {
+  height: 70vh !important;
+  .search-input {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    .input {
+      flex-basis: 100%;
+    }
+    button {
+      margin-right: 10px;
+    }
+  }
+  .content {
+    height: 100% !important;
+
+    .segment {
+      display: flex;
+      flex-direction: column;
+      height: 100% !important;
+      .search-results {
+        height: 100% !important;
+        overflow-y: auto;
+      }
+    }
+  }
+}
