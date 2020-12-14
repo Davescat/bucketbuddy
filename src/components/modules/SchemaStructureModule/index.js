@@ -9,7 +9,6 @@ const SchemaStructureModule = (props) => {
   const [schemaPath, setSchemaPath] = useState(props.pathInfo.path);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [jsonSchemaValues, setJsonSchemaValues] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
 
   const setToCreateSchema = () => {
     setDataLoaded(true);
@@ -36,7 +35,7 @@ const SchemaStructureModule = (props) => {
       .promise()
       .then(
         (data) => {
-          setModalOpen(false);
+          props.control.close();
           props.updateList();
           window.location.reload();
         },
@@ -55,7 +54,7 @@ const SchemaStructureModule = (props) => {
       setSchemaPath(props.pathInfo.path);
       setJsonSchemaValues(null);
     }
-    if (modalOpen && !dataLoaded) {
+    if (props.control.status && !dataLoaded) {
       if (props.schemaInfo.available) {
         setJsonSchemaValues(props.schemaInfo.tagset);
         setDataLoaded(true);
@@ -68,15 +67,14 @@ const SchemaStructureModule = (props) => {
     props.pathInfo.path,
     props.schemaInfo.available,
     props.schemaInfo.tagset,
-    modalOpen,
+    props.control.status,
     dataLoaded
   ]);
 
   return (
     <Modal
-      onOpen={() => setModalOpen(true)}
-      onClose={() => setModalOpen(false)}
-      open={modalOpen}
+      onClose={() => props.control.close()}
+      open={props.control.status}
       trigger={props.trigger}
       closeIcon
     >

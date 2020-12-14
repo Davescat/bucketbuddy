@@ -4,7 +4,6 @@ import { uploadObject } from '../../utils/amazon-s3-utils';
 import { selectBoolean } from '../../utils/tag-types';
 
 const FileUploadModule = (props) => {
-  const [modalOpen, setModalOpen] = useState(false);
   const [tagInput, setTagInput] = useState(props.schemaInfo);
   const fileInput = useRef(null);
 
@@ -34,7 +33,7 @@ const FileUploadModule = (props) => {
         });
       uploadObject(props.bucket, props.pathInfo.path, file, tags).then(
         (response) => {
-          setModalOpen(false);
+          props.control.close();
           props.updateList();
         }
       );
@@ -43,7 +42,7 @@ const FileUploadModule = (props) => {
 
   useEffect(() => {
     setTagInput(props.schemaInfo);
-  }, [modalOpen, props.schemaInfo]);
+  }, [props.control.status, props.schemaInfo]);
 
   const handleFieldChange = (event, { name, value }, row = -1) => {
     const schemaValues = tagInput.tagset;
@@ -57,9 +56,8 @@ const FileUploadModule = (props) => {
 
   return (
     <Modal
-      onOpen={() => setModalOpen(true)}
-      onClose={() => setModalOpen(false)}
-      open={modalOpen}
+      onClose={() => props.control.close()}
+      open={props.control.status}
       trigger={props.trigger}
       closeIcon
     >
@@ -77,12 +75,13 @@ const FileUploadModule = (props) => {
                   type = 'type';
                 return schemaValue[type] === 'flag' ? (
                   <Form.Select
+                    key={schemaValue[key]}
                     width={6}
                     fluid
                     id={'' + idx}
                     name={value}
                     options={selectBoolean}
-                    label="Field Input"
+                    label={schemaValue[key]}
                     defaultValue={
                       typeof schemaValue[value] === 'boolean'
                         ? schemaValue[value]
@@ -94,10 +93,10 @@ const FileUploadModule = (props) => {
                   />
                 ) : (
                   <Form.Input
+                    key={schemaValue[key]}
                     label={schemaValue[key]}
                     name={value}
                     id={'' + idx}
-                    key={idx}
                     type={schemaValue[type]}
                     required
                     placeholder="Enter field input here"
