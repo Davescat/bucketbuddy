@@ -21,14 +21,14 @@ const SchemaForm = (props) => {
   const duplicateError =
     'You have duplicate field names. Please verify you have no field names that are the same!';
 
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [state, setState] = useState({
     schemaValues:
       props.schemaValues && props.schemaValues.length > 0
         ? props.schemaValues
         : [{ tags: { key: '', value: '', type: '' } }]
   });
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   const checkIfDuplicateKeys = (schemaValues) => {
     for (let i = 0; i < schemaValues.length; i++) {
@@ -120,7 +120,7 @@ const SchemaForm = (props) => {
               type = 'type';
             const dividingLine = arr.findIndex((set) => set.showNeeded);
             return (
-              <>
+              <span key={idx + 'formline'}>
                 {idx === dividingLine && (
                   <Divider horizontal>Needed to conform with Schema</Divider>
                 )}
@@ -130,7 +130,6 @@ const SchemaForm = (props) => {
                     className="button-fit-content"
                     name="cancel"
                   />
-
                   {props.editFieldName ? (
                     <Form.Input
                       width={6}
@@ -179,9 +178,8 @@ const SchemaForm = (props) => {
                       type={schemaValue[type]}
                     />
                   )}
-                  {(schemaValue[type] ||
-                    !schemaValue[type] ||
-                    props.title === 'Create Schema') && (
+
+                  {props.title === 'Create Schema' && (
                     <Form.Select
                       width={3}
                       fluid
@@ -200,19 +198,19 @@ const SchemaForm = (props) => {
                     />
                   )}
                 </Form.Group>
-              </>
+              </span>
             );
           })}
           <div>
             <Button type="submit" primary>
               Submit
             </Button>
-            {props.editFieldName ? (
-              <Button onClick={addNewSchemaValue} secondary>
-                Add field
-              </Button>
-            ) : (
-              ''
+            {props.editFieldName && (
+              <Button
+                onClick={addNewSchemaValue}
+                secondary
+                children="Add field"
+              />
             )}
           </div>
         </Form>

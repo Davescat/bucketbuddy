@@ -3,7 +3,6 @@ import AWS from 'aws-sdk';
 import { Modal, Form, Segment } from 'semantic-ui-react';
 
 const FolderUploadModule = (props) => {
-  const [modalOpen, setModalOpen] = useState(false);
   const [textInput, setTextInput] = useState('');
 
   const upload = () => {
@@ -33,7 +32,7 @@ const FolderUploadModule = (props) => {
             .then(
               (data) => {
                 updateList();
-                setModalOpen(false);
+                props.control.close();
               },
               (err) => {
                 return alert(
@@ -51,9 +50,8 @@ const FolderUploadModule = (props) => {
 
   return (
     <Modal
-      onOpen={() => setModalOpen(true)}
-      onClose={() => setModalOpen(false)}
-      open={modalOpen}
+      onClose={() => props.control.close()}
+      open={props.control.status}
       trigger={props.trigger}
       closeIcon
     >

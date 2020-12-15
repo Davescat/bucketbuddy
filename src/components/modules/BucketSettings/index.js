@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dropdown, Confirm, Radio, Input } from 'semantic-ui-react';
 import FileUploadModule from '../FileUploadModule';
 import FolderUploadModule from '../FolderUploadModule';
@@ -21,10 +21,13 @@ const BucketSettings = ({
   searchModal
 }) => {
   const [showConfirm, setShowConfirm] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dropdownValue, setDropdownValue] = useState('');
   const [currentPathInfo, setCurrentPathInfo] = useState(pathInfo);
-  const dropdown = useRef(null);
+  const [modalsControl, setModalsControl] = useState({
+    folderUpload: false,
+    fileUpload: false,
+    schemaModal: false
+  });
 
   useEffect(() => {
     setCurrentPathInfo(pathInfo);
@@ -53,12 +56,6 @@ const BucketSettings = ({
     }
   };
 
-  useEffect(() => {
-    if (dropdown) {
-      dropdown.current.openOnSpace = () => null;
-    }
-  }, [dropdown]);
-
   const handleTagChange = (event, { value }) => {
     search.setChosenTag(value);
     setDropdownValue(value);
@@ -69,80 +66,44 @@ const BucketSettings = ({
   };
 
   const showConfirmDelete = () => {
-    closeDropdown();
     setShowConfirm(true);
-  };
-
-  const closeDropdown = () => {
-    setDropdownOpen(false);
   };
 
   const closeConfirmDelete = () => {
     setShowConfirm(false);
   };
 
+  const openModal = (name) => {
+    setModalsControl({ ...modalsControl, [name]: true });
+  };
+  const closeModal = (name) => {
+    setModalsControl({ ...modalsControl, [name]: false });
+  };
+
   return (
     <div className="bucket-bar">
       <span className="bucket-buttons">
-        <Dropdown
-          ref={dropdown}
-          onClick={() => setDropdownOpen(true)}
-          onClose={() => setDropdownOpen(false)}
-          open={dropdownOpen}
-          button
-          text="Actions"
-        >
+        <Dropdown button text="Actions">
           <Dropdown.Menu>
             <Dropdown.Item
-              onClick={() => {
-                closeDropdown();
-                searchModal(true);
-              }}
+              onClick={() => searchModal(true)}
               text="Bucket Search"
             />
-            <FileUploadModule
-              updateList={updateList}
-              bucket={bucket}
-              schemaInfo={schemaInfo}
-              pathInfo={pathInfo}
-              trigger={
-                <Dropdown.Item onClick={closeDropdown} text="Upload File" />
-              }
+            <Dropdown.Item
+              onClick={() => openModal('fileUpload')}
+              text="Upload File"
             />
-            <FolderUploadModule
-              updateList={updateList}
-              bucket={bucket}
-              pathInfo={pathInfo}
-              trigger={
-                <Dropdown.Item onClick={closeDropdown} text="New Folder" />
-              }
+            <Dropdown.Item
+              onClick={() => openModal('folderUpload')}
+              text="New Folder"
             />
-            {pathInfo.depth >= 1 ? (
-              <>
-                <Dropdown.Item
-                  text="Delete Folder"
-                  onClick={showConfirmDelete}
-                />
-                <Confirm
-                  open={showConfirm}
-                  cancelButton="Cancel"
-                  confirmButton="Delete"
-                  onCancel={closeConfirmDelete}
-                  onConfirm={deleteCurrentFolder}
-                />
-              </>
-            ) : (
-              ''
+            {pathInfo.depth >= 1 && (
+              <Dropdown.Item text="Delete Folder" onClick={showConfirmDelete} />
             )}
             <Dropdown.Divider />
-            <SchemaStructureModule
-              updateList={updateList}
-              schemaInfo={schemaInfo}
-              bucket={bucket}
-              pathInfo={pathInfo}
-              trigger={
-                <Dropdown.Item onClick={closeDropdown} text="Folder Schema" />
-              }
+            <Dropdown.Item
+              onClick={() => openModal('schemaModal')}
+              text="Folder Schema"
             />
           </Dropdown.Menu>
         </Dropdown>
@@ -159,6 +120,44 @@ const BucketSettings = ({
           }
         />
       </span>
+      <>
+        <FileUploadModule
+          updateList={updateList}
+          bucket={bucket}
+          schemaInfo={schemaInfo}
+          pathInfo={pathInfo}
+          control={{
+            close: () => closeModal('fileUpload'),
+            status: modalsControl.fileUpload
+          }}
+        />
+        <FolderUploadModule
+          updateList={updateList}
+          bucket={bucket}
+          pathInfo={pathInfo}
+          control={{
+            close: () => closeModal('folderUpload'),
+            status: modalsControl.folderUpload
+          }}
+        />
+        <SchemaStructureModule
+          updateList={updateList}
+          schemaInfo={schemaInfo}
+          bucket={bucket}
+          pathInfo={pathInfo}
+          control={{
+            close: () => closeModal('schemaModal'),
+            status: modalsControl.schemaModal
+          }}
+        />
+      </>
+      <Confirm
+        open={showConfirm}
+        cancelButton="Cancel"
+        confirmButton="Delete"
+        onCancel={closeConfirmDelete}
+        onConfirm={deleteCurrentFolder}
+      />
       <span className="bucket-buttons-right">
         <Input
           label={
