@@ -18,11 +18,13 @@ const BucketSettings = ({
   pathInfo,
   search,
   schemaInfo,
-  searchModal
+  searchModal,
+  searchTags
 }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [dropdownValue, setDropdownValue] = useState('');
   const [currentPathInfo, setCurrentPathInfo] = useState(pathInfo);
+  const [searchableTags, setSearchableTags] = useState([]);
   const [modalsControl, setModalsControl] = useState({
     folderUpload: false,
     fileUpload: false,
@@ -32,6 +34,19 @@ const BucketSettings = ({
   useEffect(() => {
     setCurrentPathInfo(pathInfo);
   }, [pathInfo]);
+
+  useEffect(() => {
+    searchableTags.splice(0, searchableTags.length);
+    const sct = schemaInfo.tagset.map((tag) => tag.key);
+    const set = [...searchTags];
+    const newtags = new Set([...sct, ...set]);
+    setSearchableTags(
+      [...newtags].map((tags) => ({
+        text: tags,
+        value: tags
+      }))
+    );
+  }, [searchTags, schemaInfo]);
 
   useEffect(() => {
     if (currentPathInfo.path !== pathInfo.path) {
@@ -161,12 +176,9 @@ const BucketSettings = ({
       <span className="bucket-buttons-right">
         <Input
           label={
-            schemaInfo.available ? (
+            schemaInfo.available || searchTags?.size > 0 ? (
               <Dropdown
-                options={schemaInfo.tagset.map((tag) => ({
-                  text: tag.key,
-                  value: tag.key
-                }))}
+                options={searchableTags}
                 onChange={handleTagChange}
                 selectOnBlur={false}
                 value={dropdownValue}

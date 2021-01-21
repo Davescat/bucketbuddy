@@ -20,6 +20,8 @@ const BucketViewer = (props) => {
   const [loading, setLoading] = useState(true);
   const [pathInfo, setPathInfo] = useState(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
+  //refresh
+  const [searchTags, setSearchTags] = useState(new Set([]));
   const [files, setFiles] = useState({ folders: [], files: [] });
   const [srcArray, setSrcArray] = useState([]);
   const [fileSearchText, setFileSearchText] = useState('');
@@ -36,6 +38,7 @@ const BucketViewer = (props) => {
 
   useEffect(() => {
     if (filesLoading && pathInfo) {
+      searchTags.clear();
       /**
        * Takes a list of files and attaches requested S3 tags to each file
        *
@@ -44,13 +47,16 @@ const BucketViewer = (props) => {
       const getAllTags = (files) => {
         return Promise.all(
           files.map(async function (file) {
-            return await getObjectTags(bucket, file.Key).then((TagSet) => ({
-              ...file,
-              TagSet: TagSet.TagSet.map(({ Key, Value }) => ({
-                key: Key,
-                value: Value
-              }))
-            }));
+            return await getObjectTags(bucket, file.Key).then((TagSet) => {
+              TagSet.TagSet.forEach(({ Key }) => searchTags.add(Key));
+              return {
+                ...file,
+                TagSet: TagSet.TagSet.map(({ Key, Value }) => ({
+                  key: Key,
+                  value: Value
+                }))
+              };
+            });
           })
         );
       };
@@ -282,6 +288,7 @@ const BucketViewer = (props) => {
             bucket={bucket}
             pathInfo={pathInfo}
             settings={settings}
+            searchTags={searchTags}
             schemaInfo={schemaInfo}
             updateList={updateList}
             setSettings={setSettings}
