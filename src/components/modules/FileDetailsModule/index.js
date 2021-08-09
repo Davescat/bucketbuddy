@@ -31,9 +31,7 @@ const FileDetailsModule = (props) => {
 
   useEffect(() => {
     if (file && file === props.file) {
-      if (downloadLink === '') {
-        getObjectURL(bucket, file.Key).then(setDownloadLink);
-      }
+      getObjectURL(bucket, file.Key).then(setDownloadLink);
       if (file.TagSet && file.TagSet.length > 0) {
         const schemaKeys = getKeys(schemaInfo.tagset);
         const fileKeys = getKeys(file.TagSet);
