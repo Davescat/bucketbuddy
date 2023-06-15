@@ -12,7 +12,7 @@ import {
   Segment
 } from 'semantic-ui-react';
 import { schemaTagTypes, selectBoolean } from '../../utils/tag-types';
-import './schema-form.scss';
+import './schema-form.css';
 
 const SchemaForm = (props) => {
   const issueSubmittingError =

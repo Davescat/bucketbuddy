@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { withRouter, useHistory } from 'react-router-dom';
 import testConnectionS3Bucket from '../../utils/amazon-s3-utils';
 import { Button, Form, Message, Dimmer, Loader } from 'semantic-ui-react';
-import './connect-to-s3-bucket.scss';
+import './connect-to-s3-bucket.css';
 
 const regions = [
   { key: 'us-east-2', text: 'US East (Ohio)', value: 'us-east-2' },

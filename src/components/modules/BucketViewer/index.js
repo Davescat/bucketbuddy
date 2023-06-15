@@ -10,7 +10,7 @@ import {
 } from '../../utils/amazon-s3-utils';
 import FolderMenu from '../FolderMenu';
 import NavMenu from '../NavMenu';
-import './bucket-viewer.scss';
+import './bucket-viewer.css';
 
 export const schemaFileName = 'bucket-buddy-schema.json';
 

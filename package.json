@@ -3,21 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.5.0",
-    "@testing-library/user-event": "^7.2.1",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "aws-sdk": "^2.710.0",
-    "husky": "^4.2.5",
-    "lint-staged": "^10.2.11",
-    "node-sass": "^4.14.1",
-    "pica": "^6.1.1",
     "prettier": "^2.0.5",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "3.4.1",
+    "react-scripts": "5.0.1",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^0.88.2"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.5.0",
+    "@testing-library/user-event": "^7.2.1",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.11"
   },
   "husky": {
     "hooks": {
@@ -25,7 +26,7 @@
     }
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+    "src/**/*.{js,json,css,md}": [
       "prettier --write"
     ]
   },

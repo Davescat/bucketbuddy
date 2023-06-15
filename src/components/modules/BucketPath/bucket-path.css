@@ -1,13 +1,13 @@
 .bucket-path {
   display: flex;
-  background-color: #f7f7f7a9;
+  background-color: rgba(247, 247, 247, 0.662745098);
   padding-right: 20px;
   padding-top: 4px;
   padding-bottom: 4px;
   justify-content: space-between;
   border-bottom: 1px solid rgba(204, 204, 204, 0.541);
-  div {
-    display: flex;
-    margin: 0 !important;
-  }
+}
+.bucket-path div {
+  display: flex;
+  margin: 0 !important;
 }
