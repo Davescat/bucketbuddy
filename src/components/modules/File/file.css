@@ -1,0 +1,61 @@
+.modal > .content > .segment {
+  background-color: rgba(247, 247, 247, 0.662745098) !important;
+}
+
+.file-card {
+  width: min-content;
+  width: -moz-min-content; /* Firefox */
+  width: -webkit-min-content; /* Chrome */
+  min-height: 250px !important;
+  cursor: pointer;
+}
+@media (min-width: 575.98px) {
+  .file-card {
+    height: 30vh;
+  }
+}
+@media (min-width: 991.98px) {
+  .file-card {
+    height: 30vh;
+  }
+}
+@media (min-width: 1199.98px) {
+  .file-card {
+    height: 35vh;
+  }
+}
+.file-card .content .header {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  word-wrap: break-word;
+}
+.file-card .content .meta {
+  display: flex;
+  flex-wrap: wrap;
+}
+.file-card .card-file-image {
+  object-fit: contain;
+  max-height: 300px !important;
+}
+.file-card .image {
+  height: 70%;
+  width: 100% !important;
+}
+.file-card .image img {
+  object-fit: cover;
+  height: 100% !important;
+}
+.file-card .card-file-icon {
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  padding: 2em;
+  color: #919191;
+  height: 50%;
+  font-size: 3em;
+}
+
+.hidden {
+  display: none !important;
+}

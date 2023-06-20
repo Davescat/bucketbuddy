@@ -2,8 +2,8 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import App from './App';
 
-test('renders learn react link', () => {
+test('renders the page header', () => {
   const { getByText } = render(<App />);
-  const linkElement = getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  const header = getByText('Connect to S3 Bucket');
+  expect(header).toBeInTheDocument();
 });

@@ -1,0 +1,29 @@
+.details-modal .content.image {
+  background-color: rgba(247, 247, 247, 0.662745098) !important;
+}
+.details-modal .content.image .image {
+  vertical-align: middle;
+  display: flex;
+}
+.details-modal .content.image .image img {
+  object-fit: contain !important;
+}
+.details-modal .file-segment {
+  padding-top: 0 !important;
+}
+.details-modal .description {
+  width: inherit !important;
+}
+.details-modal .file-details .item {
+  margin-bottom: 8px;
+}
+.details-modal .file-details .card-file-icon {
+  display: flex;
+  align-self: center;
+  text-align: center;
+  padding: 2em;
+  color: #919191;
+  height: 100%;
+  vertical-align: middle;
+  font-size: 3em;
+}

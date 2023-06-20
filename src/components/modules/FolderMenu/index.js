@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, FormInput } from 'semantic-ui-react';
-import './folder-menu.scss';
+import './folder-menu.css';
 
 const FolderMenu = (props) => {
   const [visibleFolders, setvisibleFolders] = useState(props.folders);

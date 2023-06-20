@@ -18,7 +18,7 @@ import {
   GridColumn,
   Segment
 } from 'semantic-ui-react';
-import './file-details-modal.scss';
+import './file-details-modal.css';
 
 const FileDetailsModule = (props) => {
   const { bucket, schemaInfo, updateTagState } = props;

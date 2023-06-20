@@ -4,7 +4,7 @@ import FileUploadModule from '../FileUploadModule';
 import FolderUploadModule from '../FolderUploadModule';
 import SchemaStructureModule from '../SchemaStructureModule';
 import { deleteFolder } from '../../utils/amazon-s3-utils';
-import './bucket-settings.scss';
+import './bucket-settings.css';
 
 /**
  * This component controls how much info you want to load in from the api

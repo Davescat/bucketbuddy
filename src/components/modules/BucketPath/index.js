@@ -7,7 +7,7 @@ import {
   Input,
   Dropdown
 } from 'semantic-ui-react';
-import './bucket-path.scss';
+import './bucket-path.css';
 
 /**
  * This component controls the flow of the app and keeps track of where we are within the S3 bucket.

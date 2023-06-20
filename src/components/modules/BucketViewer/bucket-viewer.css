@@ -1,0 +1,16 @@
+.bucket-viewer {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.bucket-viewer .files-folders {
+  display: flex;
+  flex: 1;
+}
+.bucket-viewer .bucket-info {
+  display: flex;
+  flex-direction: column;
+}
+.bucket-viewer .menu {
+  margin-bottom: 0 !important;
+}

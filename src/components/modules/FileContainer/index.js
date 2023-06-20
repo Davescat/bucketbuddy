@@ -3,7 +3,7 @@ import { Card } from 'semantic-ui-react';
 import FileDetailsModal from '../FileDetailsModule';
 import useWindowDimensions from '../../utils/window-utils';
 import File from '../File';
-import './file-container.scss';
+import './file-container.css';
 
 const FileContainer = (props) => {
   const { bucket, files, pathInfo } = props;
